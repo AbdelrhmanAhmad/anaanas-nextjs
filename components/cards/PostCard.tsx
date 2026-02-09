@@ -3,10 +3,11 @@
 import type { PostRecord } from '@/lib/api/posts'
 import { timeSince } from '@/utils/date'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
+import { sendAnalyticsEvent } from '@/lib/analytics/socket'
 import {
   Card,
   CardBody,
@@ -216,6 +217,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const userName = user?.name || t('post.user', locale)
   const createdAt = post?.created_at || post?.createdAt
   const createdAtDate = createdAt ? new Date(createdAt) : null
+  const isOwner =
+    status === 'authenticated' &&
+    Number((session as any)?.user?.id) > 0 &&
+    Number((session as any)?.user?.id) === Number((post as any)?.user_id)
   const initialPostLikesCount = post?.likes_count ?? post?.likesCount ?? 0
   const initialPostLikedByMe = Boolean((post as any)?.liked_by_me)
   const commentsCount = post?.comments_count ?? post?.commentsCount ?? 0
@@ -237,6 +242,43 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
   const isDetailsPage = Boolean(pathname?.includes('/post/'))
   const postDetailsHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}` : `/post/${post?.id}`
+
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const impressionSentRef = useRef(false)
+
+  useEffect(() => {
+    // Track impressions only in feeds (not details page) and only once
+    if (isDetailsPage) return
+    const pid = post?.id
+    if (!pid) return
+    if (impressionSentRef.current) return
+
+    const el = cardRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+          impressionSentRef.current = true
+          observer.disconnect()
+          void sendAnalyticsEvent({
+            post_id: String(pid),
+            event: 'post_impression',
+            meta: {
+              ratio: entry.intersectionRatio,
+              path: typeof window !== 'undefined' ? window.location.pathname : null,
+            },
+          })
+        }
+      },
+      { threshold: [0, 0.25, 0.55, 0.75, 1] }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isDetailsPage, post?.id])
   const postEditHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}/edit` : `/post/${post?.id}/edit`
 
   const currentUserId = (session as any)?.user?.id
@@ -749,7 +791,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   }
 
   return (
-    <Card>
+    <Card ref={cardRef as any}>
       <CardHeader className="border-0 pb-0">
         <div className="d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center">
@@ -925,6 +967,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           contactLabel={contactLabel}
           userMobile={user?.mobile}
           locale={locale}
+          isOwner={isOwner}
         />
 
 

@@ -1,12 +1,14 @@
-import TopHeader from '@/components/layout/TopHeader'
 import AuthProtectionWrapper from '@/components/wrappers/AuthProtectionWrapper'
 import type { ChildrenType } from '@/types/component'
 
 const SocialLayout = ({ children }: ChildrenType) => {
   return (
     <>  
-      <TopHeader />
-      {children}
+        <AuthProtectionWrapper>
+        {children}
+    </AuthProtectionWrapper>
+
+ 
     </>
   )
 }

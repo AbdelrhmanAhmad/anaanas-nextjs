@@ -3,6 +3,7 @@ import { Card, Col, Container, Row, Table } from 'react-bootstrap'
 import PostCard from '@/components/cards/PostCard'
 import { callLaravel } from '@/lib/laravelClient'
 import PostImagesGallery from './PostImagesGallery'
+import PostViewTracker from './PostViewTracker'
 
 export const metadata: Metadata = { title: 'Post Details' }
 
@@ -63,6 +64,7 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
 
   return (
     <main>
+      <PostViewTracker postId={id} postUserId={post?.user_id} />
       <Container>
         <Row>
           <Col lg={8} className="mx-auto">

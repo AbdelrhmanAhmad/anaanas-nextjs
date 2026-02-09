@@ -91,6 +91,43 @@ type TranslationKey =
   | 'post.loadMoreReplies'
   | 'post.unlike'
   | 'post.likeComment'
+  | 'post.statistics'
+  | 'stats.title'
+  | 'stats.subtitle'
+  | 'stats.backToPost'
+  | 'stats.from'
+  | 'stats.to'
+  | 'stats.apply'
+  | 'stats.loading'
+  | 'stats.preset.7d'
+  | 'stats.preset.30d'
+  | 'stats.preset.90d'
+  | 'stats.kpi.impressions'
+  | 'stats.kpi.uniqueImpressions'
+  | 'stats.kpi.views'
+  | 'stats.kpi.interactions'
+  | 'stats.kpi.calls'
+  | 'stats.kpi.shares'
+  | 'stats.kpi.chats'
+  | 'stats.tabs.overview'
+  | 'stats.tabs.interactions'
+  | 'stats.tabs.audience'
+  | 'stats.charts.viewsVsUnique'
+  | 'stats.charts.breakdown'
+  | 'stats.charts.interactionsOverTime'
+  | 'stats.hint.uniqueDefinition'
+  | 'stats.top.userAgents'
+  | 'stats.ua'
+  | 'stats.count'
+  | 'stats.noData'
+  | 'stats.event.impressions'
+  | 'stats.event.views'
+  | 'stats.event.calls'
+  | 'stats.event.shares'
+  | 'stats.event.chats'
+  | 'stats.event.likes'
+  | 'stats.event.unlikes'
+  | 'stats.event.comments'
   | 'dialog.loginRequired.title'
   | 'dialog.loginRequired.message'
   | 'dialog.loginRequired.loginButton'
@@ -108,6 +145,108 @@ type TranslationKey =
   | 'filter.apply'
   | 'filter.noAttributesAvailable'
   | 'filter.selectField'
+  | 'auction.searchPlaceholder'
+  | 'auction.postAd'
+  | 'auction.boost'
+  | 'auction.chip.updates'
+  | 'auction.chip.lives'
+  | 'auction.chip.hotDeals'
+  | 'auction.chip.auctions'
+  | 'auction.tab.realEstate'
+  | 'auction.tab.furniture'
+  | 'auction.tab.electronics'
+  | 'auction.tab.auctions'
+  | 'auction.trending.title'
+  | 'auction.trending.hint'
+  | 'auction.trending.cars'
+  | 'auction.trending.villa'
+  | 'auction.trending.brand'
+  | 'auction.trending.boost'
+  | 'auction.trending.metaNew'
+  | 'auction.trending.metaHot'
+  | 'auction.trending.metaNow'
+  | 'auction.trending.metaPromo'
+  | 'auction.live.title'
+  | 'auction.live.hint'
+  | 'auction.live.endsIn'
+  | 'auction.live.bids'
+  | 'auction.live.currentPrice'
+  | 'auction.live.secure'
+  | 'auction.live.bidNow'
+  | 'auction.live.showcase'
+  | 'auction.live.tires'
+  | 'auction.live.shoes'
+  | 'auction.live.tools'
+  | 'auction.panel.title'
+  | 'auction.panel.hint'
+  | 'auction.panel.chooseCategory'
+  | 'auction.panel.typeCategory'
+  | 'auction.panel.go'
+  | 'auction.panel.uploadMedia'
+  | 'auction.panel.dragDrop'
+  | 'auction.panel.upload'
+  | 'auction.step.start'
+  | 'auction.step.next'
+  | 'auction.step.done'
+  | 'auction.step1.title'
+  | 'auction.step1.desc'
+  | 'auction.step2.title'
+  | 'auction.step2.desc'
+  | 'auction.step3.title'
+  | 'auction.step3.desc'
+  | 'auction.step4.title'
+  | 'auction.step4.desc'
+  | 'auction.publish'
+  | 'auctionPosts.brandGuide'
+  | 'auctionPosts.heroTitle'
+  | 'auctionPosts.heroSubtitle'
+  | 'auctionPosts.trendingTitle'
+  | 'auctionPosts.livePackageTitle'
+  | 'auctionPosts.postAdTitle'
+  | 'auctionPosts.postAdDesc'
+  | 'auctionPosts.tag.popular'
+  | 'auctionPosts.tag.live'
+  | 'auctionPosts.tag.brand'
+  | 'auctionPosts.cta.bid'
+  | 'auctionPosts.cta.boostAd'
+  | 'auctionPosts.live.card1.title'
+  | 'auctionPosts.live.card2.title'
+  | 'auctionPosts.live.card1.topTitle'
+  | 'auctionPosts.live.card1.topSub'
+  | 'auctionPosts.live.card1.desc'
+  | 'auctionPosts.live.card2.topTitle'
+  | 'auctionPosts.live.card2.topSub'
+  | 'auctionPosts.live.card2.desc'
+  | 'auctionPosts.live.card3.title'
+  | 'auctionPosts.live.card3.desc'
+  | 'auctionPosts.small.new'
+  | 'auctionPosts.small.likes'
+  | 'auctionPosts.small.boost'
+  | 'auctionPosts.small.view'
+  | 'auctionPosts.small.recommended'
+  | 'auctionPosts.small.sponsored'
+  | 'auctionPosts.small.live'
+  | 'auctionPosts.small.captions'
+  | 'auctionPosts.trending.pill'
+  | 'auctionPosts.trending.badgeAd'
+  | 'auctionPosts.trending.like'
+  | 'auctionPosts.trending.live'
+  | 'auctionPosts.trending.card2.line1'
+  | 'auctionPosts.trending.card2.line2'
+  | 'auctionPosts.trending.card3.line1'
+  | 'auctionPosts.trending.card3.line2'
+  | 'auctionPosts.live.pill.community'
+  | 'auctionPosts.live.priceNote.bid'
+  | 'auctionPosts.live.priceNote.shares'
+  | 'auctionPosts.live.unit.rma'
+  | 'auctionPosts.live.footerNote.a'
+  | 'auctionPosts.live.footerNote.b'
+  | 'auctionPosts.live.footerNote.c'
+  | 'auctionPosts.live.bio'
+  | 'auctionPosts.live.col1.k'
+  | 'auctionPosts.live.col1.v'
+  | 'auctionPosts.live.col2.k'
+  | 'auctionPosts.live.col2.v'
 
 const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
   ar: {
@@ -201,6 +340,43 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.loadMoreReplies': 'تحميل المزيد من الردود',
     'post.unlike': 'إلغاء الإعجاب',
     'post.likeComment': 'إعجاب',
+    'post.statistics': 'إحصائيات الإعلان',
+    'stats.title': 'إحصائيات الإعلان',
+    'stats.subtitle': 'تحليل أداء الإعلان',
+    'stats.backToPost': 'العودة للإعلان',
+    'stats.from': 'من',
+    'stats.to': 'إلى',
+    'stats.apply': 'تطبيق',
+    'stats.loading': 'جاري التحميل...',
+    'stats.preset.7d': 'آخر 7 أيام',
+    'stats.preset.30d': 'آخر 30 يوم',
+    'stats.preset.90d': 'آخر 90 يوم',
+    'stats.kpi.impressions': 'الظهور',
+    'stats.kpi.uniqueImpressions': 'الظهور الفريد',
+    'stats.kpi.views': 'مشاهدات التفاصيل',
+    'stats.kpi.interactions': 'التفاعلات',
+    'stats.kpi.calls': 'اتصالات',
+    'stats.kpi.shares': 'مشاركات',
+    'stats.kpi.chats': 'دردشات',
+    'stats.tabs.overview': 'نظرة عامة',
+    'stats.tabs.interactions': 'التفاعلات',
+    'stats.tabs.audience': 'الجمهور',
+    'stats.charts.viewsVsUnique': 'الظهور مقابل الظهور الفريد',
+    'stats.charts.breakdown': 'توزيع الأحداث',
+    'stats.charts.interactionsOverTime': 'التفاعلات عبر الزمن',
+    'stats.hint.uniqueDefinition': 'الفريد = مستخدم/‏IP مختلف',
+    'stats.top.userAgents': 'أكثر الأجهزة/المتصفحات',
+    'stats.ua': 'User-Agent',
+    'stats.count': 'العدد',
+    'stats.noData': 'لا توجد بيانات',
+    'stats.event.impressions': 'الظهور',
+    'stats.event.views': 'مشاهدات التفاصيل',
+    'stats.event.calls': 'اتصالات',
+    'stats.event.shares': 'مشاركات',
+    'stats.event.chats': 'دردشات',
+    'stats.event.likes': 'إعجابات',
+    'stats.event.unlikes': 'إلغاء إعجاب',
+    'stats.event.comments': 'تعليقات',
     'dialog.loginRequired.title': 'تسجيل الدخول مطلوب',
     'dialog.loginRequired.message': 'يجب عليك تسجيل الدخول أولاً للوصول إلى هذه الميزة',
     'dialog.loginRequired.loginButton': 'تسجيل الدخول',
@@ -218,6 +394,108 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'تطبيق',
     'filter.noAttributesAvailable': 'لا توجد خصائص متاحة لهذه الفئة.',
     'filter.selectField': 'اختر',
+    'auction.searchPlaceholder': 'ابحث عن أي شيء...',
+    'auction.postAd': 'أضف إعلان',
+    'auction.boost': 'تعزيز',
+    'auction.chip.updates': 'تحديثات',
+    'auction.chip.lives': 'مباشر',
+    'auction.chip.hotDeals': 'عروض ساخنة',
+    'auction.chip.auctions': 'مزادات',
+    'auction.tab.realEstate': 'عقارات',
+    'auction.tab.furniture': 'أثاث',
+    'auction.tab.electronics': 'إلكترونيات',
+    'auction.tab.auctions': 'مزادات',
+    'auction.trending.title': 'إعلانات رائجة',
+    'auction.trending.hint': 'الأكثر مشاهدة اليوم',
+    'auction.trending.cars': 'سيارات',
+    'auction.trending.villa': 'فيلا مفروشة',
+    'auction.trending.brand': 'ماركات',
+    'auction.trending.boost': 'إعلان مميز',
+    'auction.trending.metaNew': 'جديد • 03',
+    'auction.trending.metaHot': 'ساخن • 00',
+    'auction.trending.metaNow': 'الآن • 18',
+    'auction.trending.metaPromo': 'ترويج',
+    'auction.live.title': 'مزادات مباشرة',
+    'auction.live.hint': 'زايد الآن ونافس الآخرين',
+    'auction.live.endsIn': 'ينتهي خلال',
+    'auction.live.bids': 'مزايدات',
+    'auction.live.currentPrice': 'السعر الحالي',
+    'auction.live.secure': 'دفع آمن',
+    'auction.live.bidNow': 'زايد الآن',
+    'auction.live.showcase': 'عرض شامل',
+    'auction.live.tires': 'إطارات',
+    'auction.live.shoes': 'أحذية',
+    'auction.live.tools': 'أدوات',
+    'auction.panel.title': 'لوحة سريعة',
+    'auction.panel.hint': 'أنشئ إعلانك في خطوات بسيطة',
+    'auction.panel.chooseCategory': 'اختر القسم',
+    'auction.panel.typeCategory': 'اكتب اسم القسم...',
+    'auction.panel.go': 'ابدأ',
+    'auction.panel.uploadMedia': 'رفع الصور',
+    'auction.panel.dragDrop': 'اسحب وأفلت أو اضغط للرفع',
+    'auction.panel.upload': 'رفع',
+    'auction.step.start': 'ابدأ',
+    'auction.step.next': 'التالي',
+    'auction.step.done': 'تم',
+    'auction.step1.title': 'اختيار القسم',
+    'auction.step1.desc': 'اختر القسم المناسب لظهور أفضل',
+    'auction.step2.title': 'السعر والموقع',
+    'auction.step2.desc': 'حدد السعر والمدينة بسهولة',
+    'auction.step3.title': 'باقة مميزة',
+    'auction.step3.desc': 'تعزيز الظهور وزيادة التفاعل',
+    'auction.step4.title': 'نشر الإعلان',
+    'auction.step4.desc': 'راجع التفاصيل وانشر خلال ثوانٍ',
+    'auction.publish': 'نشر الإعلان',
+    'auctionPosts.brandGuide': 'دليل هوية العلامة',
+    'auctionPosts.heroTitle': 'ANANAS',
+    'auctionPosts.heroSubtitle': 'Brand Style Guide',
+    'auctionPosts.trendingTitle': 'إعلانات رائجة',
+    'auctionPosts.trending.pill': 'أناناس',
+    'auctionPosts.trending.badgeAd': 'إعلان',
+    'auctionPosts.trending.like': 'إعجاب',
+    'auctionPosts.trending.live': 'مباشر',
+    'auctionPosts.trending.card2.line1': 'Rirkuit',
+    'auctionPosts.trending.card2.line2': 'DNQic9 9od',
+    'auctionPosts.trending.card3.line1': 'Dw9aor',
+    'auctionPosts.trending.card3.line2': 'DNQN09 9od',
+    'auctionPosts.livePackageTitle': 'حزمة مزادات مباشرة',
+    'auctionPosts.postAdTitle': 'أضف إعلان',
+    'auctionPosts.postAdDesc': 'مرح لكن احترافي. شخصيات ودودة بطابع تقني عصري. مناسب للشرق الأوسط، جاهز للتميّز.',
+    'auctionPosts.tag.popular': 'شائع',
+    'auctionPosts.tag.live': 'مباشر',
+    'auctionPosts.tag.brand': 'برانـد',
+    'auctionPosts.cta.bid': 'زايد',
+    'auctionPosts.cta.boostAd': 'تعزيز الإعلان',
+    'auctionPosts.live.card1.title': 'Vies Title',
+    'auctionPosts.live.card1.topTitle': 'Upload',
+    'auctionPosts.live.card1.topSub': '5 rotate',
+    'auctionPosts.live.card1.desc': 'محتوى مناسب للبداية',
+    'auctionPosts.live.card2.title': 'Tiree Title',
+    'auctionPosts.live.card2.topTitle': 'Boost Ad',
+    'auctionPosts.live.card2.topSub': '33:00',
+    'auctionPosts.live.card2.desc': 'محتوى متنوع وإعلان مميز',
+    'auctionPosts.live.card3.title': 'Live a Title',
+    'auctionPosts.live.card3.desc': 'محتوى مباشر لمزيد من التفاعل',
+    'auctionPosts.small.new': 'جديد',
+    'auctionPosts.small.likes': 'الإعجابات',
+    'auctionPosts.small.boost': 'Boost Ad',
+    'auctionPosts.small.view': 'عرض',
+    'auctionPosts.small.recommended': 'موصى به',
+    'auctionPosts.small.sponsored': 'ممول',
+    'auctionPosts.small.live': 'مباشر',
+    'auctionPosts.small.captions': 'عناوين',
+    'auctionPosts.live.pill.community': 'مجتمع',
+    'auctionPosts.live.priceNote.bid': 'مزايدة',
+    'auctionPosts.live.priceNote.shares': 'مشاهدات / مشاركات',
+    'auctionPosts.live.unit.rma': 'rma',
+    'auctionPosts.live.footerNote.a': '$40  $40',
+    'auctionPosts.live.footerNote.b': '$40  $40',
+    'auctionPosts.live.footerNote.c': '$40  $40',
+    'auctionPosts.live.bio': 'نبذة',
+    'auctionPosts.live.col1.k': 'feictuh',
+    'auctionPosts.live.col1.v': '$0.35',
+    'auctionPosts.live.col2.k': 'rotordemse',
+    'auctionPosts.live.col2.v': 'sflove',
   },
   en: {
     'home.noSections': 'No sections available at the moment',
@@ -310,6 +588,43 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.loadMoreReplies': 'Load more replies',
     'post.unlike': 'Unlike',
     'post.likeComment': 'Like',
+    'post.statistics': 'Ad Statistics',
+    'stats.title': 'Ad Statistics',
+    'stats.subtitle': 'Analyze ad performance',
+    'stats.backToPost': 'Back to ad',
+    'stats.from': 'From',
+    'stats.to': 'To',
+    'stats.apply': 'Apply',
+    'stats.loading': 'Loading...',
+    'stats.preset.7d': 'Last 7 days',
+    'stats.preset.30d': 'Last 30 days',
+    'stats.preset.90d': 'Last 90 days',
+    'stats.kpi.impressions': 'Impressions',
+    'stats.kpi.uniqueImpressions': 'Unique impressions',
+    'stats.kpi.views': 'Detail views',
+    'stats.kpi.interactions': 'Interactions',
+    'stats.kpi.calls': 'Calls',
+    'stats.kpi.shares': 'Shares',
+    'stats.kpi.chats': 'Chats',
+    'stats.tabs.overview': 'Overview',
+    'stats.tabs.interactions': 'Interactions',
+    'stats.tabs.audience': 'Audience',
+    'stats.charts.viewsVsUnique': 'Impressions vs Unique',
+    'stats.charts.breakdown': 'Events breakdown',
+    'stats.charts.interactionsOverTime': 'Interactions over time',
+    'stats.hint.uniqueDefinition': 'Unique = distinct user / IP',
+    'stats.top.userAgents': 'Top devices/browsers',
+    'stats.ua': 'User-Agent',
+    'stats.count': 'Count',
+    'stats.noData': 'No data',
+    'stats.event.impressions': 'Impressions',
+    'stats.event.views': 'Detail views',
+    'stats.event.calls': 'Calls',
+    'stats.event.shares': 'Shares',
+    'stats.event.chats': 'Chats',
+    'stats.event.likes': 'Likes',
+    'stats.event.unlikes': 'Unlikes',
+    'stats.event.comments': 'Comments',
     'dialog.loginRequired.title': 'Login Required',
     'dialog.loginRequired.message': 'You must sign in first to access this feature',
     'dialog.loginRequired.loginButton': 'Sign In',
@@ -327,6 +642,108 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'Apply',
     'filter.noAttributesAvailable': 'No attributes available for this category.',
     'filter.selectField': 'Select',
+    'auction.searchPlaceholder': 'Search for anything...',
+    'auction.postAd': 'Post Ad',
+    'auction.boost': 'Boost',
+    'auction.chip.updates': 'Updates',
+    'auction.chip.lives': 'Lives',
+    'auction.chip.hotDeals': 'Hot Deals',
+    'auction.chip.auctions': 'Auctions',
+    'auction.tab.realEstate': 'Real Estate',
+    'auction.tab.furniture': 'Furniture',
+    'auction.tab.electronics': 'Electronics',
+    'auction.tab.auctions': 'Auctions',
+    'auction.trending.title': 'Trending Ads',
+    'auction.trending.hint': 'Top picks today',
+    'auction.trending.cars': 'Cars',
+    'auction.trending.villa': 'Fitted Villa',
+    'auction.trending.brand': 'Brands',
+    'auction.trending.boost': 'Boost Ad',
+    'auction.trending.metaNew': 'New • 03',
+    'auction.trending.metaHot': 'Hot • 00',
+    'auction.trending.metaNow': 'Now • 18',
+    'auction.trending.metaPromo': 'Promo',
+    'auction.live.title': 'Live Auctions',
+    'auction.live.hint': 'Bid in real time',
+    'auction.live.endsIn': 'Ends in',
+    'auction.live.bids': 'bids',
+    'auction.live.currentPrice': 'Current price',
+    'auction.live.secure': 'Secure payments',
+    'auction.live.bidNow': 'Bid Now',
+    'auction.live.showcase': 'All Showcase',
+    'auction.live.tires': 'Tires',
+    'auction.live.shoes': 'Shoes',
+    'auction.live.tools': 'DIY Tools',
+    'auction.panel.title': 'Quick Panel',
+    'auction.panel.hint': 'Create your ad in a few steps',
+    'auction.panel.chooseCategory': 'Choose Category',
+    'auction.panel.typeCategory': 'Type a category...',
+    'auction.panel.go': 'Go',
+    'auction.panel.uploadMedia': 'Upload Media',
+    'auction.panel.dragDrop': 'Drag & drop or click to upload',
+    'auction.panel.upload': 'Upload',
+    'auction.step.start': 'Start',
+    'auction.step.next': 'Next',
+    'auction.step.done': 'Done',
+    'auction.step1.title': 'Choose Category',
+    'auction.step1.desc': 'Pick the right category for better reach',
+    'auction.step2.title': 'Set Price & Location',
+    'auction.step2.desc': 'Price range & your city',
+    'auction.step3.title': 'Premium Subscription',
+    'auction.step3.desc': 'Boost visibility and get more bids',
+    'auction.step4.title': 'Publish Ad',
+    'auction.step4.desc': 'Review and publish in seconds',
+    'auction.publish': 'Publish Ad',
+    'auctionPosts.brandGuide': 'BRAND STYLE GUIDE',
+    'auctionPosts.heroTitle': 'ANANAS',
+    'auctionPosts.heroSubtitle': 'Brand Style Guide',
+    'auctionPosts.trendingTitle': 'Trending Ads',
+    'auctionPosts.trending.pill': 'ANANAS',
+    'auctionPosts.trending.badgeAd': 'Ad',
+    'auctionPosts.trending.like': 'LIKE',
+    'auctionPosts.trending.live': 'LIVE',
+    'auctionPosts.trending.card2.line1': 'Rirkuit',
+    'auctionPosts.trending.card2.line2': 'DNQic9 9od',
+    'auctionPosts.trending.card3.line1': 'Dw9aor',
+    'auctionPosts.trending.card3.line2': 'DNQN09 9od',
+    'auctionPosts.livePackageTitle': 'Live Package',
+    'auctionPosts.postAdTitle': 'Post Ad',
+    'auctionPosts.postAdDesc': 'Fun but professional. Friendly mascots with a startup-tech vibe. Middle East friendly, unique, unicorn-ready.',
+    'auctionPosts.tag.popular': 'Popular',
+    'auctionPosts.tag.live': 'Live',
+    'auctionPosts.tag.brand': 'Brand',
+    'auctionPosts.cta.bid': 'Bid',
+    'auctionPosts.cta.boostAd': 'Boost Ad',
+    'auctionPosts.live.card1.title': 'Vies Title',
+    'auctionPosts.live.card1.topTitle': 'Upload',
+    'auctionPosts.live.card1.topSub': '5 rotate',
+    'auctionPosts.live.card1.desc': 'Fast starter content',
+    'auctionPosts.live.card2.title': 'Tiree Title',
+    'auctionPosts.live.card2.topTitle': 'Boost Ad',
+    'auctionPosts.live.card2.topSub': '33:00',
+    'auctionPosts.live.card2.desc': 'Premium placement boost',
+    'auctionPosts.live.card3.title': 'Live a Title',
+    'auctionPosts.live.card3.desc': 'Real-time bidding feed',
+    'auctionPosts.small.new': 'New',
+    'auctionPosts.small.likes': 'Likes',
+    'auctionPosts.small.boost': 'Boost Ad',
+    'auctionPosts.small.view': 'View',
+    'auctionPosts.small.recommended': 'Recommended',
+    'auctionPosts.small.sponsored': 'Sponsored',
+    'auctionPosts.small.live': 'Live',
+    'auctionPosts.small.captions': 'Captions',
+    'auctionPosts.live.pill.community': 'COMMUNITY',
+    'auctionPosts.live.priceNote.bid': 'Money Bid',
+    'auctionPosts.live.priceNote.shares': 'Mnow / Shs',
+    'auctionPosts.live.unit.rma': 'rma',
+    'auctionPosts.live.footerNote.a': '$40  $40',
+    'auctionPosts.live.footerNote.b': '$40  $40',
+    'auctionPosts.live.footerNote.c': '$40  $40',
+    'auctionPosts.live.bio': 'Bio',
+    'auctionPosts.live.col1.k': 'feictuh',
+    'auctionPosts.live.col1.v': '$0.35',
+    'auctionPosts.live.col2.k': 'rotordemse',
+    'auctionPosts.live.col2.v': 'sflove',
   },
 }
 

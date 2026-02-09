@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+  <rect width="1200" height="420" fill="#ffffff"/>
+  <rect x="0" y="0" width="1200" height="420" fill="#177dc1" opacity="0.08"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#177dc1"/>
+  <rect x="0" y="414" width="1200" height="6" fill="#e0903d"/>
+  <circle cx="1080" cy="110" r="92" fill="#edc66e" opacity="0.18"/>
+  <circle cx="170" cy="300" r="120" fill="#e0903d" opacity="0.10"/>
+
+  <!-- simple car outline -->
+  <g transform="translate(120,150)" fill="none" stroke="#177dc1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <path d="M140 130h610c40 0 70 20 90 52l26 46H70l22-66c12-35 38-32 48-32z"/>
+    <path d="M250 98h270c30 0 60 10 78 32l26 34H190l22-34c10-18 22-32 38-32z"/>
+    <circle cx="240" cy="228" r="44" fill="#ffffff" stroke="#e0903d"/>
+    <circle cx="720" cy="228" r="44" fill="#ffffff" stroke="#e0903d"/>
+    <path d="M120 228h-60m980 0h-64"/>
+  </g>
+</svg>
+

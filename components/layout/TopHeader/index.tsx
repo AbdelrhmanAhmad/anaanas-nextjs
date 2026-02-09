@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { BsChatLeftTextFill, BsGearFill } from 'react-icons/bs'
+import { BsChatLeftTextFill, BsGearFill, BsShop } from 'react-icons/bs'
 
 import LogoBox from '@/components/LogoBox'
 import CollapseMenu from './CollapseMenu'
@@ -44,6 +44,18 @@ const TopHeader = () => {
           <li className="nav-item ms-2">
             <Link className="nav-link bg-light icon-md btn btn-light p-0" href={`/${locale}/settings/account`}>
               <BsGearFill size={15} />
+            </Link>
+          </li>
+
+
+          {/* متجري    */}
+          <li className="nav-item ms-2">
+            <Link
+              className="nav-link bg-light icon-md btn btn-light p-0"
+              href={`/${locale}/my-store`}
+              title={locale === 'ar' ? 'متجري' : 'My store'}
+            >
+              <BsShop size={15} />
             </Link>
           </li>
 

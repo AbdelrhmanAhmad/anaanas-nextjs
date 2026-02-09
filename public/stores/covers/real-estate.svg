@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+  <rect width="1200" height="420" fill="#ffffff"/>
+  <rect x="0" y="0" width="1200" height="420" fill="#177dc1" opacity="0.06"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#177dc1"/>
+  <rect x="0" y="414" width="1200" height="6" fill="#edc66e"/>
+  <circle cx="1020" cy="120" r="110" fill="#e0903d" opacity="0.10"/>
+  <circle cx="210" cy="310" r="140" fill="#edc66e" opacity="0.14"/>
+
+  <!-- simple building -->
+  <g transform="translate(170,90)" fill="none" stroke="#177dc1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <path d="M120 280V90l170-60 170 60v190H120z"/>
+    <path d="M290 30v340"/>
+    <path d="M180 140h70m60 0h70M180 190h70m60 0h70M180 240h70m60 0h70"/>
+    <path d="M250 370v-70h80v70"/>
+    <path d="M120 280h340"/>
+  </g>
+</svg>
+

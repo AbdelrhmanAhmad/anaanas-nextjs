@@ -150,6 +150,11 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
             <p className="small m-0">{session?.user?.email || session?.user?.mobile || ''}</p>
           </div>
         </div>
+
+
+
+
+
         {/* <DropdownItem
           className="btn btn-primary-soft btn-sm my-2 text-center"
           href="/profile/feed"
