@@ -2,7 +2,7 @@ import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
     /* config options here */
-    allowedDevOrigins: ['jo.localhost'],
+    allowedDevOrigins: ['demo.anaanas.com'],
     // Transpile next-auth to avoid chunk generation issues
     transpilePackages: ['next-auth'],
     // Webpack configuration to fix next-auth issues

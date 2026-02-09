@@ -11,7 +11,6 @@ type AnalyticsMessage = {
 let socket: WebSocket | null = null
 let socketState: 'idle' | 'connecting' | 'open' | 'closed' = 'idle'
 let queue: string[] = []
-let flushTimer: any = null
 
 function getWsUrl() {
   if (typeof window === 'undefined') return null
