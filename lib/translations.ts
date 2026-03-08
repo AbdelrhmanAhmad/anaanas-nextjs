@@ -11,6 +11,62 @@ type TranslationKey =
   | 'home.privacyTerms'
   | 'home.todaysNews'
   | 'home.viewAllLatestNews'
+  | 'home.marketPulse'
+  | 'home.cars'
+  | 'home.realEstate'
+  | 'home.electronics'
+  | 'home.jobs'
+  | 'home.topPerformingAds'
+  | 'home.ad.zamzam'
+  | 'home.ad.movingHouse'
+  | 'home.ad.othman'
+  | 'home.ad.electronics'
+  | 'home.ad.elite'
+  | 'home.ad.tech'
+  | 'home.smartOpportunity'
+  | 'home.highRoi'
+  | 'home.detectedInAmman'
+  | 'home.activateOpportunity'
+  | 'home.ananasVsOthers'
+  | 'home.listings'
+  | 'home.marketplace'
+  | 'home.classifieds'
+  | 'home.aiEngine'
+  | 'home.futureRoadmap'
+  | 'home.comingSoon'
+  | 'home.roadmap.pro'
+  | 'home.roadmap.gold'
+  | 'home.roadmap.family'
+  | 'home.aiInfra.title'
+  | 'home.aiInfra.headerPill'
+  | 'home.aiInfra.feature1.title'
+  | 'home.aiInfra.feature1.desc'
+  | 'home.aiInfra.feature2.title'
+  | 'home.aiInfra.feature2.desc'
+  | 'home.aiInfra.feature3.title'
+  | 'home.aiInfra.feature3.desc'
+  | 'home.aiInfra.feature4.title'
+  | 'home.aiInfra.feature4.desc'
+  | 'home.aiInfra.cars'
+  | 'home.aiInfra.realEstate'
+  | 'home.aiInfra.jobs'
+  | 'home.aiInfra.electronics'
+  | 'home.aiInfra.trending'
+  | 'home.quickLinks'
+  | 'home.quick.auction.title'
+  | 'home.quick.auction.hint'
+  | 'home.quick.auctionPosts.title'
+  | 'home.quick.auctionPosts.hint'
+  | 'home.elite.title'
+  | 'home.elite.b1'
+  | 'home.elite.b2'
+  | 'home.elite.b3'
+  | 'home.elite.cta'
+  | 'home.elite.coming'
+  | 'home.pro.title'
+  | 'home.pro.b1'
+  | 'home.pro.b2'
+  | 'home.pro.b3'
   | 'sidebar.noSections'
   | 'sidebar.viewProfile'
   | 'sidebar.aboutUs'
@@ -92,6 +148,50 @@ type TranslationKey =
   | 'post.unlike'
   | 'post.likeComment'
   | 'post.statistics'
+  | 'post.detailsTitle'
+  | 'post.noAttributes'
+  | 'post.attribute'
+  | 'post.value'
+  | 'profile.user'
+  | 'profile.editProfile'
+  | 'profile.shareProfile'
+  | 'profile.savePdf'
+  | 'profile.lockProfile'
+  | 'profile.settings'
+  | 'profile.aboutTitle'
+  | 'profile.aboutEmpty'
+  | 'profile.about.born'
+  | 'profile.about.email'
+  | 'profile.about.mobile'
+  | 'profile.about.username'
+  | 'profile.about.joined'
+  | 'profile.tabs.feed'
+  | 'profile.tabs.about'
+  | 'profile.tabs.activity'
+  | 'profile.tabs.statistics'
+  | 'profile.noPosts'
+  | 'profile.postsError'
+  | 'profile.noImages'
+  | 'profile.imagesError'
+  | 'profile.photos'
+  | 'profile.photosLoading'
+  | 'profile.stats.title'
+  | 'profile.stats.subtitle'
+  | 'profile.stats.totalPosts'
+  | 'profile.stats.activePosts'
+  | 'profile.stats.deletedPosts'
+  | 'profile.stats.comments'
+  | 'profile.stats.interactions'
+  | 'profile.stats.breakdownTitle'
+  | 'profile.stats.emptyBreakdown'
+  | 'profile.stats.dailyTitle'
+  | 'profile.stats.metricTitle'
+  | 'profile.stats.chartLine'
+  | 'profile.stats.chartBar'
+  | 'profile.stats.interactionsDaily'
+  | 'profile.stats.loadError'
+  | 'profile.stats.statusBreakdown'
+  | 'profile.stats.statusUnknown'
   | 'stats.title'
   | 'stats.subtitle'
   | 'stats.backToPost'
@@ -145,6 +245,13 @@ type TranslationKey =
   | 'filter.apply'
   | 'filter.noAttributesAvailable'
   | 'filter.selectField'
+  | 'createPost.smartTitle'
+  | 'createPost.launch'
+  | 'createPost.placeholder'
+  | 'createPost.chipDemand'
+  | 'createPost.chipRoi'
+  | 'createPost.chipTarget'
+  | 'createPost.chipBudget'
   | 'auction.searchPlaceholder'
   | 'auction.postAd'
   | 'auction.boost'
@@ -260,6 +367,62 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.privacyTerms': 'الخصوصية والشروط',
     'home.todaysNews': 'أخبار اليوم',
     'home.viewAllLatestNews': 'عرض جميع الأخبار',
+    'home.marketPulse': 'نبض السوق',
+    'home.cars': 'سيارات',
+    'home.realEstate': 'عقارات',
+    'home.electronics': 'إلكترونيات',
+    'home.jobs': 'وظائف',
+    'home.topPerformingAds': 'أفضل الإعلانات اليوم',
+    'home.ad.zamzam': 'زمزم زمان',
+    'home.ad.movingHouse': 'شركة نقل أثاث',
+    'home.ad.othman': 'عثمان للعقارات',
+    'home.ad.electronics': 'إيتنـزا للإلكترونيات',
+    'home.ad.elite': 'إليت ريز إلكترونكس',
+    'home.ad.tech': 'تقنيات ذكية',
+    'home.smartOpportunity': 'تنبيهات فرص ذكية',
+    'home.highRoi': '3 مجالات عالية العائد',
+    'home.detectedInAmman': 'تم رصدها في عمّان',
+    'home.activateOpportunity': 'فعّل الفرصة',
+    'home.ananasVsOthers': 'أناناس مقابل الآخرين',
+    'home.listings': 'قوائم',
+    'home.marketplace': 'سوق',
+    'home.classifieds': 'إعلانات مبوبة',
+    'home.aiEngine': 'محرك إعلانات ذكي',
+    'home.futureRoadmap': 'خارطة المستقبل',
+    'home.comingSoon': 'قريباً',
+    'home.roadmap.pro': 'Ananas Pro – أدوات ذكاء متقدمة',
+    'home.roadmap.gold': 'Ananas Gold – ترويج VIP',
+    'home.roadmap.family': 'Ananas Family – مزايا عائلية',
+    'home.aiInfra.title': 'البنية التحتية للذكاء الاصطناعي',
+    'home.aiInfra.headerPill': 'Tapiz: 2 gigs',
+    'home.aiInfra.feature1.title': 'محرك التنبؤ',
+    'home.aiInfra.feature1.desc': 'يتوقع طلب 7 أيام',
+    'home.aiInfra.feature2.title': 'سمارت بوست 3.0',
+    'home.aiInfra.feature2.desc': 'تعزيز الظهور تلقائياً',
+    'home.aiInfra.feature3.title': 'محرك المزادات',
+    'home.aiInfra.feature3.desc': 'مزايدة آنية',
+    'home.aiInfra.feature4.title': 'DNA الجمهور',
+    'home.aiInfra.feature4.desc': 'تجميع السلوك',
+    'home.aiInfra.cars': 'سيارات',
+    'home.aiInfra.realEstate': 'عقارات',
+    'home.aiInfra.jobs': 'وظائف',
+    'home.aiInfra.electronics': 'إلكترونيات',
+    'home.aiInfra.trending': 'رائج',
+    'home.quickLinks': 'روابط سريعة',
+    'home.quick.auction.title': 'تجربة المزادات',
+    'home.quick.auction.hint': 'واجهة تفاعلية بتصميم حديث',
+    'home.quick.auctionPosts.title': 'تجربة إعلانات المزاد',
+    'home.quick.auctionPosts.hint': 'عرض بطاقات وإضافات جميلة',
+    'home.elite.title': 'Elite – وصول ذكي يتجاوز 1 مليون',
+    'home.elite.b1': 'ترتيب محسّن بالذكاء',
+    'home.elite.b2': 'أولوية للمزادات المبكرة',
+    'home.elite.b3': 'حماية نزاهة المزاد',
+    'home.elite.cta': 'الترقية إلى Elite',
+    'home.elite.coming': 'قريباً',
+    'home.pro.title': 'Ananas Pro',
+    'home.pro.b1': 'أدوات ذكاء متقدمة',
+    'home.pro.b2': 'تعزيز VIP للظهور',
+    'home.pro.b3': 'إدارة حسابات متعددة',
     'sidebar.noSections': 'لا توجد أقسام متاحة حاليًا',
     'sidebar.viewProfile': 'عرض الملف الشخصي',
     'sidebar.aboutUs': 'من نحن',
@@ -341,6 +504,50 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.unlike': 'إلغاء الإعجاب',
     'post.likeComment': 'إعجاب',
     'post.statistics': 'إحصائيات الإعلان',
+    'post.detailsTitle': 'تفاصيل الإعلان',
+    'post.noAttributes': 'لا توجد خصائص متاحة لهذا الإعلان.',
+    'post.attribute': 'الخاصية',
+    'post.value': 'القيمة',
+    'profile.user': 'مستخدم',
+    'profile.editProfile': 'تعديل الملف الشخصي',
+    'profile.shareProfile': 'مشاركة الملف الشخصي في رسالة',
+    'profile.savePdf': 'حفظ الملف الشخصي بصيغة PDF',
+    'profile.lockProfile': 'قفل الملف الشخصي',
+    'profile.settings': 'إعدادات الملف الشخصي',
+    'profile.aboutTitle': 'نبذة',
+    'profile.aboutEmpty': 'أضف نبذة عنك ليراه الآخرون.',
+    'profile.about.born': 'تاريخ الميلاد',
+    'profile.about.email': 'البريد الإلكتروني',
+    'profile.about.mobile': 'رقم الهاتف',
+    'profile.about.username': 'اسم المستخدم',
+    'profile.about.joined': 'تاريخ الانضمام',
+    'profile.tabs.feed': 'المنشورات',
+    'profile.tabs.about': 'نبذة',
+    'profile.tabs.activity': 'النشاط',
+    'profile.tabs.statistics': 'الإحصائيات',
+    'profile.noPosts': 'لا توجد منشورات بعد',
+    'profile.postsError': 'فشل في تحميل منشوراتك',
+    'profile.noImages': 'لا توجد صور بعد',
+    'profile.imagesError': 'فشل في تحميل الصور',
+    'profile.photos': 'الصور',
+    'profile.photosLoading': 'جاري تحميل الصور...',
+    'profile.stats.title': 'إحصائيات الملف الشخصي',
+    'profile.stats.subtitle': 'ملخص شامل لأداء منشوراتك وتفاعلاتك',
+    'profile.stats.totalPosts': 'إجمالي المنشورات',
+    'profile.stats.activePosts': 'المنشورات النشطة',
+    'profile.stats.deletedPosts': 'المنشورات المحذوفة',
+    'profile.stats.comments': 'تعليقات على منشوراتي',
+    'profile.stats.interactions': 'إجمالي التفاعلات',
+    'profile.stats.breakdownTitle': 'تصنيف التفاعلات',
+    'profile.stats.emptyBreakdown': 'لا توجد تفاعلات في هذه الفترة.',
+    'profile.stats.dailyTitle': 'الأداء اليومي',
+    'profile.stats.metricTitle': 'المؤشر',
+    'profile.stats.chartLine': 'خطّي',
+    'profile.stats.chartBar': 'أعمدة',
+    'profile.stats.interactionsDaily': 'التفاعلات اليومية',
+    'profile.stats.loadError': 'فشل في تحميل الإحصائيات',
+    'profile.stats.statusBreakdown': 'تصنيف الحالات',
+    'profile.stats.statusUnknown': 'غير محدد',
     'stats.title': 'إحصائيات الإعلان',
     'stats.subtitle': 'تحليل أداء الإعلان',
     'stats.backToPost': 'العودة للإعلان',
@@ -394,6 +601,13 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'تطبيق',
     'filter.noAttributesAvailable': 'لا توجد خصائص متاحة لهذه الفئة.',
     'filter.selectField': 'اختر',
+    'createPost.smartTitle': 'أنشئ إعلانك الذكي',
+    'createPost.launch': 'انطلق بإعلانك الذكي',
+    'createPost.placeholder': 'ماذا تريد أن تبيع اليوم؟',
+    'createPost.chipDemand': '🔥 طلب مرتفع في عمّان',
+    'createPost.chipRoi': '📊 توقع عائد 82%',
+    'createPost.chipTarget': '🎯 الفئة العمرية 25–34',
+    'createPost.chipBudget': '💰 الميزانية المقترحة: $45',
     'auction.searchPlaceholder': 'ابحث عن أي شيء...',
     'auction.postAd': 'أضف إعلان',
     'auction.boost': 'تعزيز',
@@ -508,6 +722,62 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.privacyTerms': 'Privacy & Terms',
     'home.todaysNews': "Today's News",
     'home.viewAllLatestNews': 'View all latest news',
+    'home.marketPulse': 'Market Pulse',
+    'home.cars': 'Cars',
+    'home.realEstate': 'Real Estate',
+    'home.electronics': 'Electronics',
+    'home.jobs': 'Jobs',
+    'home.topPerformingAds': 'Top Performing Ads Today',
+    'home.ad.zamzam': 'Zamzam Zaman',
+    'home.ad.movingHouse': 'Moving House Company',
+    'home.ad.othman': 'Othman Real Estate',
+    'home.ad.electronics': 'Eitenzaz Electronics',
+    'home.ad.elite': 'EliteRez Electronics',
+    'home.ad.tech': 'Tech Vibes',
+    'home.smartOpportunity': 'Smart Opportunity Alerts',
+    'home.highRoi': '3 High ROI Niches',
+    'home.detectedInAmman': 'Detected in Amman',
+    'home.activateOpportunity': 'Activate Opportunity',
+    'home.ananasVsOthers': 'ANANAS vs. Others',
+    'home.listings': 'Listings',
+    'home.marketplace': 'Marketplace',
+    'home.classifieds': 'Classifieds',
+    'home.aiEngine': 'AI Advertising Engine',
+    'home.futureRoadmap': 'Future Roadmap',
+    'home.comingSoon': 'Coming soon',
+    'home.roadmap.pro': 'Ananas Pro – Advanced AI Tools',
+    'home.roadmap.gold': 'Ananas Gold – VIP Exposure Engine',
+    'home.roadmap.family': 'Ananas Family – Family Rewards',
+    'home.aiInfra.title': 'AI Infrastructure',
+    'home.aiInfra.headerPill': 'Tapiz: 2 gigs',
+    'home.aiInfra.feature1.title': 'AI Forecast Engine',
+    'home.aiInfra.feature1.desc': 'Predicts 7-day demand',
+    'home.aiInfra.feature2.title': 'Smart Boost 3.0',
+    'home.aiInfra.feature2.desc': 'Auto visibility scaling',
+    'home.aiInfra.feature3.title': 'Live Auction Engine',
+    'home.aiInfra.feature3.desc': 'Real-time bid placement',
+    'home.aiInfra.feature4.title': 'Audience DNA',
+    'home.aiInfra.feature4.desc': 'Behavior clustering',
+    'home.aiInfra.cars': 'Cars',
+    'home.aiInfra.realEstate': 'Real Estate',
+    'home.aiInfra.jobs': 'Jobs',
+    'home.aiInfra.electronics': 'Electronics',
+    'home.aiInfra.trending': 'Trending',
+    'home.quickLinks': 'Quick links',
+    'home.quick.auction.title': 'Auction experience',
+    'home.quick.auction.hint': 'Interactive, modern UI',
+    'home.quick.auctionPosts.title': 'Auction posts experience',
+    'home.quick.auctionPosts.hint': 'Cards, badges & highlights',
+    'home.elite.title': 'Elite – Reach 1M+ Smart',
+    'home.elite.b1': 'Enhanced ranking',
+    'home.elite.b2': 'Early auction access',
+    'home.elite.b3': 'Auction integrity',
+    'home.elite.cta': 'Upgrade to Elite',
+    'home.elite.coming': 'COMING SOON',
+    'home.pro.title': 'Ananas Pro',
+    'home.pro.b1': 'Advanced AI Tools',
+    'home.pro.b2': 'VIP Exposure Engine',
+    'home.pro.b3': 'Multi Account Business',
     'sidebar.noSections': 'No sections available at the moment',
     'sidebar.viewProfile': 'View Profile',
     'sidebar.aboutUs': 'About Us',
@@ -589,6 +859,50 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.unlike': 'Unlike',
     'post.likeComment': 'Like',
     'post.statistics': 'Ad Statistics',
+    'post.detailsTitle': 'Ad Details',
+    'post.noAttributes': 'No attributes are available for this ad.',
+    'post.attribute': 'Attribute',
+    'post.value': 'Value',
+    'profile.user': 'User',
+    'profile.editProfile': 'Edit profile',
+    'profile.shareProfile': 'Share profile in a message',
+    'profile.savePdf': 'Save your profile to PDF',
+    'profile.lockProfile': 'Lock profile',
+    'profile.settings': 'Profile settings',
+    'profile.aboutTitle': 'About',
+    'profile.aboutEmpty': 'Add a short bio so others can learn about you.',
+    'profile.about.born': 'Date of birth',
+    'profile.about.email': 'Email',
+    'profile.about.mobile': 'Phone number',
+    'profile.about.username': 'Username',
+    'profile.about.joined': 'Joined on',
+    'profile.tabs.feed': 'Feed',
+    'profile.tabs.about': 'About',
+    'profile.tabs.activity': 'Activity',
+    'profile.tabs.statistics': 'Statistics',
+    'profile.noPosts': 'No posts yet',
+    'profile.postsError': 'Failed to load your posts',
+    'profile.noImages': 'No images yet',
+    'profile.imagesError': 'Failed to load images',
+    'profile.photos': 'Photos',
+    'profile.photosLoading': 'Loading photos...',
+    'profile.stats.title': 'Profile Statistics',
+    'profile.stats.subtitle': 'A complete overview of your posts and interactions',
+    'profile.stats.totalPosts': 'Total posts',
+    'profile.stats.activePosts': 'Active posts',
+    'profile.stats.deletedPosts': 'Deleted posts',
+    'profile.stats.comments': 'Comments on my posts',
+    'profile.stats.interactions': 'Total interactions',
+    'profile.stats.breakdownTitle': 'Interactions breakdown',
+    'profile.stats.emptyBreakdown': 'No interactions in this period.',
+    'profile.stats.dailyTitle': 'Daily performance',
+    'profile.stats.metricTitle': 'Metric',
+    'profile.stats.chartLine': 'Line',
+    'profile.stats.chartBar': 'Bar',
+    'profile.stats.interactionsDaily': 'Daily interactions',
+    'profile.stats.loadError': 'Failed to load statistics',
+    'profile.stats.statusBreakdown': 'Status breakdown',
+    'profile.stats.statusUnknown': 'Unknown',
     'stats.title': 'Ad Statistics',
     'stats.subtitle': 'Analyze ad performance',
     'stats.backToPost': 'Back to ad',
@@ -642,6 +956,13 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'Apply',
     'filter.noAttributesAvailable': 'No attributes available for this category.',
     'filter.selectField': 'Select',
+    'createPost.smartTitle': 'Create Your Smart Ad',
+    'createPost.launch': 'Launch Smart Ad',
+    'createPost.placeholder': 'What are you selling today?',
+    'createPost.chipDemand': '🔥 High Demand in Amman',
+    'createPost.chipRoi': '📊 82% ROI Forecast',
+    'createPost.chipTarget': '🎯 Target Age 25–34',
+    'createPost.chipBudget': '💰 Suggested Budget: $45',
     'auction.searchPlaceholder': 'Search for anything...',
     'auction.postAd': 'Post Ad',
     'auction.boost': 'Boost',

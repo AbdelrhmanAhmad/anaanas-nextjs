@@ -1,0 +1,72 @@
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  border-radius: 18px;
+  background: #fff7ef;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.hero {
+  position: relative;
+  height: 120px;
+  background: #f7e7d0;
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.heroTitle {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  font-weight: 900;
+  font-size: 24px;
+  color: #111827;
+  text-shadow: 0 2px 6px rgba(255, 255, 255, 0.6);
+}
+
+.body {
+  padding: 12px 14px 14px;
+}
+
+.title {
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  color: rgba(15, 23, 42, 0.7);
+  font-size: 13px;
+}
+
+.cta {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #ffc83d, #ffb300);
+  color: #111827;
+  box-shadow: 0 10px 18px rgba(255, 170, 0, 0.22);
+}
+
+.coming {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.5);
+  font-weight: 800;
+}
+

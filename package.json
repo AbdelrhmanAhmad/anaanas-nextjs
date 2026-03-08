@@ -37,6 +37,7 @@
     "recharts": "^3.7.0",
     "simplebar-core": "^1.3.0",
     "simplebar-react": "^3.3.0",
+    "swiper": "^12.1.2",
     "tiny-slider": "^2.9.4",
     "yup": "^1.6.1",
     "zuck.js": "^2.1.0"

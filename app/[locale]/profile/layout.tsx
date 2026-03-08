@@ -1,8 +1,6 @@
 'use client'
 import GlightBox from '@/components/GlightBox'
-import { useFetchData } from '@/hooks/useFetchData'
 import type { ChildrenType } from '@/types/component'
-import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useParams } from 'next/navigation'
@@ -10,6 +8,9 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import ProfileImageEditor from './layout/components/ProfileImageEditor'
 import { getApiUrl } from '@/lib/api/config'
+import { t } from '@/lib/translations'
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@/lib/localization'
+import clsx from 'clsx'
 import {
   Button,
   Card,
@@ -30,158 +31,63 @@ import {
   BsBriefcase,
   BsCalendar2Plus,
   BsCalendarDate,
-  BsChatLeftText,
   BsEnvelope,
   BsFileEarmarkPdf,
   BsGear,
-  BsGeoAlt,
   BsHeart,
   BsLock,
   BsPatchCheckFill,
   BsPencilFill,
-  BsPersonX,
   BsThreeDots,
 } from 'react-icons/bs'
-import { FaPlus } from 'react-icons/fa6'
 
 import { PROFILE_MENU_ITEMS } from '@/assets/data/menu-items'
-import { getAllUsers } from '@/helpers/data'
-import { experienceData } from './data'
 
 import avatar7 from '@/assets/images/avatar/07.jpg'
 import background5 from '@/assets/images/bg/05.jpg'
 
-import album1 from '@/assets/images/albums/01.jpg'
-import album2 from '@/assets/images/albums/02.jpg'
-import album3 from '@/assets/images/albums/03.jpg'
-import album4 from '@/assets/images/albums/04.jpg'
-import album5 from '@/assets/images/albums/05.jpg'
-
-const Experience = () => {
-  return (
-    <Card>
-      <CardHeader className="d-flex justify-content-between border-0">
-        <h5 className="card-title">Experience</h5>
-        <Button variant="primary-soft" size="sm">
-          {' '}
-          <FaPlus />{' '}
-        </Button>
-      </CardHeader>
-      <CardBody className="position-relative pt-0">
-        {experienceData.map((experience, idx) => (
-          <div className="d-flex" key={idx}>
-            <div className="avatar me-3">
-              <span role="button">
-                {' '}
-                <Image className="avatar-img rounded-circle" src={experience.logo} alt="" />{' '}
-              </span>
-            </div>
-            <div>
-              <h6 className="card-title mb-0">
-                <Link href="#"> {experience.title} </Link>
-              </h6>
-              <p className="small">
-                {experience.description}{' '}
-                <Link className="btn btn-primary-soft btn-xs ms-2" href="#">
-                  Edit{' '}
-                </Link>
-              </p>
-            </div>
-          </div>
-        ))}
-      </CardBody>
-    </Card>
-  )
+const normalizeImageUrl = (url?: string) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') || url.startsWith('/')) {
+    return url
+  }
+  return getApiUrl(`/storage/${url.replace(/^\/+/, '')}`)
 }
 
-const Photos = () => {
+const Photos = ({
+  locale,
+  images,
+  loading,
+}: {
+  locale: SupportedLocale
+  images: Array<{ image_full_url?: string; image?: string; post?: { title?: string } }>
+  loading: boolean
+}) => {
   return (
     <Card>
       <CardHeader className="d-sm-flex justify-content-between border-0">
-        <CardTitle>Photos</CardTitle>
-        <Button variant="primary-soft" size="sm">
-          {' '}
-          See all photo
-        </Button>
+        <CardTitle>{t('profile.photos', locale)}</CardTitle>
       </CardHeader>
       <CardBody className="position-relative pt-0">
-        <Row className="g-2">
-          <Col xs={6}>
-            <GlightBox href={album1.src} data-gallery="image-popup">
-              <Image className="rounded img-fluid" src={album1} alt="album-image" />
-            </GlightBox>
-          </Col>
-          <Col xs={6}>
-            <GlightBox href={album2.src} data-gallery="image-popup">
-              <Image className="rounded img-fluid" src={album2} alt="album-image" />
-            </GlightBox>
-          </Col>
-          <Col xs={4}>
-            <GlightBox href={album3.src} data-gallery="image-popup">
-              <Image className="rounded img-fluid" src={album3} alt="album-image" />
-            </GlightBox>
-          </Col>
-          <Col xs={4}>
-            <GlightBox href={album4.src} data-gallery="image-popup">
-              <Image className="rounded img-fluid" src={album4} alt="album-image" />
-            </GlightBox>
-          </Col>
-          <Col xs={4}>
-            <GlightBox href={album5.src} data-gallery="image-popup">
-              <Image className="rounded img-fluid" src={album5} alt="album-image" />
-            </GlightBox>
-          </Col>
-        </Row>
-      </CardBody>
-    </Card>
-  )
-}
-
-const Friends = () => {
-  const allFriends = useFetchData(getAllUsers)
-
-  return (
-    <Card>
-      <CardHeader className="d-sm-flex justify-content-between align-items-center border-0">
-        <CardTitle>
-          Friends <span className="badge bg-danger bg-opacity-10 text-danger">230</span>
-        </CardTitle>
-        <Button variant="primary-soft" size="sm">
-          {' '}
-          See all friends
-        </Button>
-      </CardHeader>
-      <CardBody className="position-relative pt-0">
-        <Row className="g-3">
-          {allFriends?.slice(0, 4).map((friend, idx) => (
-            <Col xs={6} key={idx}>
-              <Card className="shadow-none text-center h-100">
-                <CardBody className="p-2 pb-0">
-                  <div className={clsx('avatar avatar-xl', { 'avatar-story': friend.isStory })}>
-                    <span role="button">
-                      <Image className="avatar-img rounded-circle" src={friend.avatar} alt="" />
-                    </span>
-                  </div>
-                  <h6 className="card-title mb-1 mt-3">
-                    {' '}
-                    <Link href="#"> {friend.name} </Link>
-                  </h6>
-                  <p className="mb-0 small lh-sm">{friend.mutualCount} mutual connections</p>
-                </CardBody>
-                <div className="card-footer p-2 border-0">
-                  <button className="btn btn-sm btn-primary me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Send message">
-                    {' '}
-                    <BsChatLeftText />{' '}
-                  </button>
-                  <button className="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove friend">
-                    {' '}
-                    <BsPersonX />{' '}
-                  </button>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        {loading ? (
+          <div className="text-muted small">{t('profile.photosLoading', locale)}</div>
+        ) : images.length === 0 ? (
+          <div className="text-muted small">{t('profile.noImages', locale)}</div>
+        ) : (
+          <Row className="g-2">
+            {images.slice(0, 6).map((img, idx) => {
+              const src = normalizeImageUrl(img.image_full_url || img.image)
+              if (!src) return null
+              return (
+                <Col xs={4} key={`${src}-${idx}`}>
+                  <GlightBox href={src} data-gallery="profile-photos">
+                    <Image className="rounded img-fluid" src={src} alt={img.post?.title || 'photo'} width={200} height={200} />
+                  </GlightBox>
+                </Col>
+              )
+            })}
+          </Row>
+        )}
       </CardBody>
     </Card>
   )
@@ -191,9 +97,12 @@ const ProfileLayout = ({ children }: ChildrenType) => {
   const pathName = usePathname()
   const { data: session } = useSession()
   const params = useParams<{ locale?: string }>()
-  const locale = params?.locale || 'ar'
+  const localeParam = Array.isArray(params?.locale) ? params.locale[0] : params?.locale
+  const locale = (localeParam && isSupportedLocale(localeParam)) ? localeParam : DEFAULT_LOCALE
   const [userData, setUserData] = useState<any>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [myImages, setMyImages] = useState<any[]>([])
+  const [myImagesLoading, setMyImagesLoading] = useState(false)
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -212,6 +121,29 @@ const ProfileLayout = ({ children }: ChildrenType) => {
     }
   }, [session, refreshKey])
 
+  useEffect(() => {
+    const fetchMyImages = async () => {
+      try {
+        setMyImagesLoading(true)
+        const res = await fetch('/api/posts/my-images?page=1&per_page=6')
+        const data = await res.json()
+        if (res.ok && Array.isArray(data?.data)) {
+          setMyImages(data.data)
+        } else {
+          setMyImages([])
+        }
+      } catch (error) {
+        console.error('Error fetching my images:', error)
+        setMyImages([])
+      } finally {
+        setMyImagesLoading(false)
+      }
+    }
+    if (session) {
+      fetchMyImages()
+    }
+  }, [session, refreshKey])
+
   const avatarUrl = userData?.avatar_url 
     ? userData.avatar_url
     : (userData?.avatar 
@@ -222,6 +154,60 @@ const ProfileLayout = ({ children }: ChildrenType) => {
     : (userData?.cover_image
       ? (userData.cover_image.startsWith('http') ? userData.cover_image : getApiUrl(`/storage/${userData.cover_image}`))
       : background5.src)
+
+  const formatDate = (value?: string) => {
+    if (!value) return ''
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return value
+    try {
+      return d.toLocaleDateString(locale === 'ar' ? 'ar' : 'en')
+    } catch {
+      return d.toISOString().slice(0, 10)
+    }
+  }
+
+  const aboutItems = [
+    {
+      key: 'born',
+      icon: <BsCalendarDate size={18} className="fa-fw pe-1" />,
+      value: userData?.date_of_birth ? formatDate(userData.date_of_birth) : '',
+    },
+    {
+      key: 'email',
+      icon: <BsEnvelope size={18} className="fa-fw pe-1" />,
+      value: userData?.email || (session?.user as any)?.email || '',
+    },
+    {
+      key: 'mobile',
+      icon: <BsHeart size={18} className="fa-fw pe-1" />,
+      value: userData?.mobile || '',
+    },
+    {
+      key: 'username',
+      icon: <BsBriefcase size={18} className="fa-fw pe-1" />,
+      value: userData?.username || '',
+    },
+    {
+      key: 'joined',
+      icon: <BsCalendar2Plus size={18} className="fa-fw pe-1" />,
+      value: userData?.created_at ? formatDate(userData.created_at) : '',
+    },
+  ].filter((item) => Boolean(item.value))
+
+  const labelForItem = (key?: string, fallback?: string) => {
+    switch (key) {
+      case 'profile-feed':
+        return t('profile.tabs.feed', locale)
+      case 'profile-about':
+        return t('profile.tabs.about', locale)
+      case 'profile-statistics':
+        return t('profile.tabs.statistics', locale)
+      case 'profile-activity':
+        return t('profile.tabs.activity', locale)
+      default:
+        return fallback || ''
+    }
+  }
 
   return (
     <>
@@ -257,14 +243,14 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                     </div>
                     <div className="ms-sm-4 mt-sm-3">
                       <h1 className="mb-0 h5">
-                        {userData?.name || session?.user?.name || 'مستخدم'} <BsPatchCheckFill className="text-success small" />
+                        {userData?.name || session?.user?.name || t('profile.user', locale)} <BsPatchCheckFill className="text-success small" />
                       </h1>
-                      <p>{userData?.bio || ''}</p>
+                      <p>{userData?.bio || t('profile.aboutEmpty', locale)}</p>
                     </div>
                     <div className="d-flex mt-3 justify-content-center ms-sm-auto">
                       <Button variant="danger-soft" className="me-2" type="button">
                         {' '}
-                        <BsPencilFill size={19} className="pe-1" /> Edit profile{' '}
+                        <BsPencilFill size={19} className="pe-1" /> {t('profile.editProfile', locale)}{' '}
                       </Button>
                       <Dropdown>
                         <DropdownToggle
@@ -284,21 +270,21 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                             <DropdownItem href="#">
                               {' '}
                               <BsBookmark size={22} className="fa-fw pe-2" />
-                              Share profile in a message
+                              {t('profile.shareProfile', locale)}
                             </DropdownItem>
                           </li>
                           <li>
                             <DropdownItem href="#">
                               {' '}
                               <BsFileEarmarkPdf size={22} className="fa-fw pe-2" />
-                              Save your profile to PDF
+                              {t('profile.savePdf', locale)}
                             </DropdownItem>
                           </li>
                           <li>
                             <DropdownItem href="#">
                               {' '}
                               <BsLock size={22} className="fa-fw pe-2" />
-                              Lock profile
+                              {t('profile.lockProfile', locale)}
                             </DropdownItem>
                           </li>
                           <li>
@@ -308,24 +294,13 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                             <DropdownItem href="#">
                               {' '}
                               <BsGear size={22} className="fa-fw pe-2" />
-                              Profile settings
+                              {t('profile.settings', locale)}
                             </DropdownItem>
                           </li>
                         </DropdownMenu>
                       </Dropdown>
                     </div>
                   </div>
-                  <ul className="list-inline mb-0 text-center text-sm-start mt-3 mt-sm-0">
-                    <li className="list-inline-item">
-                      <BsBriefcase className="me-1" /> Lead Developer
-                    </li>
-                    <li className="list-inline-item">
-                      <BsGeoAlt className="me-1" /> New Hampshire
-                    </li>
-                    <li className="list-inline-item">
-                      <BsCalendar2Plus className="me-1" /> Joined on Nov 26, 2019
-                    </li>
-                  </ul>
                 </CardBody>
                 <CardFooter className="card-footer mt-3 pt-2 pb-0">
                   <ul className="nav nav-bottom-line align-items-center justify-content-center justify-content-md-start mb-0 border-0">
@@ -334,7 +309,7 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                         {' '}
                         <Link className={clsx('nav-link', { active: pathName === item.url })} href={item.url ?? ''}>
                           {' '}
-                          {item.label} {item.badge && <span className="badge bg-success bg-opacity-10 text-success small"> {item.badge.text}</span>}{' '}
+                          {labelForItem(item.key, item.label)} {item.badge && <span className="badge bg-success bg-opacity-10 text-success small"> {item.badge.text}</span>}{' '}
                         </Link>{' '}
                       </li>
                     ))}
@@ -348,36 +323,29 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                 <Col md={6} lg={12}>
                   <Card>
                     <CardHeader className="border-0 pb-0">
-                      <CardTitle>About</CardTitle>
+                      <CardTitle>{t('profile.aboutTitle', locale)}</CardTitle>
                     </CardHeader>
                     <CardBody className="position-relative pt-0">
-                      <p>He moonlights difficult engrossed it, sportsmen. Interested has all Devonshire difficulty gay assistance joy.</p>
-                      <ul className="list-unstyled mt-3 mb-0">
-                        <li className="mb-2">
-                          {' '}
-                          <BsCalendarDate size={18} className="fa-fw pe-1" /> Born: <strong> October 20, 1990 </strong>{' '}
-                        </li>
-                        <li className="mb-2">
-                          {' '}
-                          <BsHeart size={18} className="fa-fw pe-1" /> Status: <strong> Single </strong>{' '}
-                        </li>
-                        <li>
-                          {' '}
-                          <BsEnvelope size={18} className="fa-fw pe-1" /> Email: <strong> stackbros07@gmail.com </strong>{' '}
-                        </li>
-                      </ul>
+                      <p>{userData?.bio || t('profile.aboutEmpty', locale)}</p>
+                      {aboutItems.length > 0 && (
+                        <ul className="list-unstyled mt-3 mb-0">
+                          {aboutItems.map((item) => (
+                            <li className="mb-2" key={item.key}>
+                              {' '}
+                              {item.icon} {t(`profile.about.${item.key}` as any, locale)}: <strong> {item.value} </strong>{' '}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </CardBody>
                   </Card>
                 </Col>
                 <Col md={6} lg={12}>
-                  <Experience />
+                  <Photos locale={locale} images={myImages} loading={myImagesLoading} />
                 </Col>
-                <Col md={6} lg={12}>
-                  <Photos />
-                </Col>
-                <Col md={6} lg={12}>
+                {/* <Col md={6} lg={12}>
                   <Friends />
-                </Col>
+                </Col> */}
               </Row>
             </Col>
           </Row>

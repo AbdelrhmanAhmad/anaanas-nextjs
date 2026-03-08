@@ -26,6 +26,8 @@ import LoginRequiredDialog from '@/components/dialogs/LoginRequiredDialog'
 import DropzoneFormInput from '../form/DropzoneFormInput'
 import { BsImages } from 'react-icons/bs'
 import { useParams } from 'next/navigation'
+import { t } from '@/lib/translations'
+import styles from './CreatePostCard.module.css'
 
 type CreatePostCardProps = {
   mode?: 'create' | 'edit'
@@ -118,6 +120,20 @@ const [step, setStep] = useState(1)
       }))
       .filter((x: any) => x.id != null && x.url)
   })
+
+  const smartCopy = useMemo(() => {
+    return {
+      title: t('createPost.smartTitle', locale as any),
+      launch: t('createPost.launch', locale as any),
+      placeholder: t('createPost.placeholder', locale as any),
+      chips: [
+        t('createPost.chipDemand', locale as any),
+        t('createPost.chipRoi', locale as any),
+        t('createPost.chipTarget', locale as any),
+        t('createPost.chipBudget', locale as any),
+      ],
+    }
+  }, [locale])
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
   
   // مرجع للمكون الرئيسي لعمل scroll to top
@@ -917,27 +933,30 @@ const [step, setStep] = useState(1)
   if (status === 'unauthenticated') {
     return (
       <>
-        <Card className="card-body cursor-pointer" onClick={() => setShowLoginAlert(true)}>
-          <div className="d-flex">
-            <div className="avatar avatar-xs me-2">
-              <span role="button">
-                {' '}
-                <Image className="avatar-img rounded-circle" src={avatar3} alt="avatar3" />{' '}
-              </span>
-            </div>
+        <Card className={`card-body ${styles.smartCard}`} onClick={() => setShowLoginAlert(true)}>
+          <div className={styles.smartHeader}>
+            <h5 className={styles.smartTitle}>{smartCopy.title}</h5>
+            <button type="button" className={styles.smartBtn}>
+              {smartCopy.launch}
+            </button>
+          </div>
 
-            <form className="w-100 position-relative z-1">
-              <div className=" cursor-pointer 
-              "  style={{position: 'absolute'  , zIndex: 1 ,  left: 0, right: 0,  top: 0, bottom: 0, }}  onClick={() => setShowLoginAlert(true)}>
-              </div>
-              <input onClick={() => setShowLoginAlert(true)}
-                className="form-control pe-4 " style={{position: 'relative' , zIndex: 0}}
-                disabled
-                data-autoresize
-                placeholder="ما الذي تريد الاعلان عنه ؟"
-                defaultValue={''}
-              />
-            </form>
+          <div className={styles.smartInputWrap}>
+            <input
+              onClick={() => setShowLoginAlert(true)}
+              className={`form-control ${styles.smartInput}`}
+              disabled
+              placeholder={smartCopy.placeholder}
+              defaultValue={''}
+            />
+          </div>
+
+          <div className={styles.smartChips}>
+            {smartCopy.chips.map((chip, idx) => (
+              <span key={idx} className={styles.smartChip}>
+                {chip}
+              </span>
+            ))}
           </div>
         </Card>
 
@@ -952,14 +971,22 @@ const [step, setStep] = useState(1)
 
   return (
     <>
-      <Card ref={cardRef} className="card-body">
-        <div className="d-flex ">
-          <div className="avatar avatar-xs me-2">
+      <Card ref={cardRef} className={`card-body ${styles.smartCard}`}>
+        <div className={styles.smartRow}>
+          <div className="avatar avatar-xs">
             <span role="button">
               {' '}
               <Image className="avatar-img rounded-circle" src={avatar3} alt="avatar3" />{' '}
             </span>
           </div>
+
+          <div className={styles.smartContent}>
+            <div className={styles.smartHeaderInline}>
+              <h5 className={styles.smartTitle}>{smartCopy.title}</h5>
+              <button type="button" className={styles.smartBtn} onClick={() => setStep(1)}>
+                {smartCopy.launch}
+              </button>
+            </div>
 
           {/* شريط التقدم للـ steps الرئيسية */}
           <div className="mb-3  d-none">
@@ -998,9 +1025,9 @@ const [step, setStep] = useState(1)
                       عنوان الإعلان <span className="text-danger">*</span>
                     </label>
                     <input
-                      className={`form-control ${errors.title ? 'is-invalid' : ''}`}
+                      className={`form-control ${styles.smartInput} ${errors.title ? 'is-invalid' : ''}`}
                       name="title"
-                      placeholder="ما الذي تريد الاعلان عنه ؟"
+                      placeholder={smartCopy.placeholder}
                       value={title || ''}
                       onChange={(e) => {
                         setTitle(e.target.value)
@@ -1010,6 +1037,13 @@ const [step, setStep] = useState(1)
                     {errors.title && (
                       <div className="text-danger small mt-1">{errors.title.message as string}</div>
                     )}
+                  </div>
+                  <div className={styles.smartChips}>
+                    {smartCopy.chips.map((chip, idx) => (
+                      <span key={idx} className={styles.smartChip}>
+                        {chip}
+                      </span>
+                    ))}
                   </div>
                   {
                     title &&
@@ -1676,8 +1710,7 @@ const [step, setStep] = useState(1)
 
 
           </form>
-
-
+        </div>
 
         </div>
 

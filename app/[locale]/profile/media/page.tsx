@@ -4,11 +4,13 @@ import { FaCameraRetro, FaPlus } from 'react-icons/fa'
 import type { Metadata } from 'next'
 
 import GlightBox from '@/components/GlightBox'
-import { fetchMyImages } from '@/lib/api/posts'
+import { callLaravel } from '@/lib/laravelClient'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { t } from '@/lib/translations'
+import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import {
   BsBookmark,
   BsBookmarkCheck,
@@ -41,15 +43,23 @@ const Media = async () => {
     redirect('/auth/sign-in')
   }
 
+  const headersList = await headers()
+  const headerLocale = headersList.get('x-locale') || 'ar'
+  const locale = isSupportedLocale(headerLocale) ? headerLocale : DEFAULT_LOCALE
+
   // Fetch user's post images
   let images: any[] = []
   let error: string | null = null
   
   try {
-    const response = await fetchMyImages({ page: 1, perPage: 20 })
+    const query = new URLSearchParams({
+      page: '1',
+      per_page: '20',
+    }).toString()
+    const response = await callLaravel(`/api/posts/my-images?${query}`, { method: 'GET' })
     images = Array.isArray(response?.data) ? response.data : []
   } catch (e) {
-    error = e instanceof Error ? e.message : 'Failed to load images'
+    error = e instanceof Error ? e.message : t('profile.imagesError', locale)
     console.error('Error fetching images:', e)
   }
 
@@ -57,7 +67,7 @@ const Media = async () => {
     return (
       <Card>
         <CardBody>
-          <div className="alert alert-danger">{error}</div>
+          <div className="alert alert-danger">{error || t('profile.imagesError', locale)}</div>
         </CardBody>
       </Card>
     )
@@ -68,7 +78,7 @@ const Media = async () => {
       <Card>
         <CardBody>
           <div className="text-center py-5">
-            <p className="text-muted mb-0">لا توجد صور بعد</p>
+            <p className="text-muted mb-0">{t('profile.noImages', locale)}</p>
           </div>
         </CardBody>
       </Card>
@@ -78,7 +88,7 @@ const Media = async () => {
   return (
     <Card>
       <CardHeader className="d-sm-flex align-items-center justify-content-between border-0 pb-0">
-        <h5 className="card-title">Photos</h5>
+        <h5 className="card-title">{t('profile.photos', locale)}</h5>
       </CardHeader>
       <CardBody>
         <Row className="g-3">

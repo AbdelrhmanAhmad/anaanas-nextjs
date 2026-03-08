@@ -4,6 +4,8 @@ import PostCard from '@/components/cards/PostCard'
 import { callLaravel } from '@/lib/laravelClient'
 import PostImagesGallery from './PostImagesGallery'
 import PostViewTracker from './PostViewTracker'
+import { t } from '@/lib/translations'
+import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 
 export const metadata: Metadata = { title: 'Post Details' }
 
@@ -62,6 +64,9 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
   // Use PostCard for interactions/comments, but avoid duplicating the gallery media here.
   const postForCard = { ...post, post_images: [] }
 
+  const safeLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE
+  const isRtl = safeLocale === 'ar'
+
   return (
     <main>
       <PostViewTracker postId={id} postUserId={post?.user_id} />
@@ -72,24 +77,24 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
             <PostCard post={postForCard}
               banner={
                 postImages && postImages.length > 0 ?  <Card className="card-body mb-3">
-                  <PostImagesGallery images={postImages} title={post?.title} />
-                </Card> :null
+                  <PostImagesGallery images={postImages} title={post?.title} isRtl={isRtl} />
+                </Card> : null
                  
               }
 
               attributesAndOptions={
                 <Card className="card-body mt-3">
-                  <h5 className="mb-3">تفاصيل الإعلان</h5>
+                  <h5 className="mb-3">{t('post.detailsTitle', safeLocale)}</h5>
 
                   {attributesAndOptions.length === 0 ? (
-                    <div className="text-muted">لا توجد خصائص متاحة لهذا الإعلان.</div>
+                    <div className="text-muted">{t('post.noAttributes', safeLocale)}</div>
                   ) : (
                     <div className="table-responsive">
                       <Table striped bordered hover size="sm" className="mb-0">
                         <thead>
                           <tr>
-                            <th style={{ width: '40%' }}>الخاصية</th>
-                            <th>القيمة</th>
+                            <th style={{ width: '40%' }}>{t('post.attribute', safeLocale)}</th>
+                            <th>{t('post.value', safeLocale)}</th>
                           </tr>
                         </thead>
                         <tbody>

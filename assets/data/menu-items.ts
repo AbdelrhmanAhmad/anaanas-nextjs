@@ -15,37 +15,9 @@ export const PROFILE_MENU_ITEMS: MenuItemType[] = [
     parentKey: 'pages-profile',
   },
   {
-    key: 'profile-connections',
-    label: 'Connections',
-    url: '/profile/connections',
-    badge: {
-      text: '300',
-      variant: 'success',
-    },
-    parentKey: 'pages-profile',
-  },
-  {
-    key: 'profile-media',
-    label: 'Media',
-    url: '/profile/media',
-    parentKey: 'pages-profile',
-  },
-  {
-    key: 'profile-videos',
-    label: 'Videos',
-    url: '/profile/videos',
-    parentKey: 'pages-profile',
-  },
-  {
-    key: 'profile-events',
-    label: 'Events',
-    url: '/profile/events',
-    parentKey: 'pages-profile',
-  },
-  {
-    key: 'profile-activity',
-    label: 'Activity',
-    url: '/profile/activity',
+    key: 'profile-statistics',
+    label: 'Statistics',
+    url: '/profile/statistics',
     parentKey: 'pages-profile',
   },
 ]

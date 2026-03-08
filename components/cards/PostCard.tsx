@@ -54,6 +54,14 @@ import postImg1 from '@/assets/images/post/3by2/01.jpg'
 import postImg2 from '@/assets/images/post/3by2/02.jpg'
 import VideoPlayer from './components/VideoPlayer'
 
+const normalizeImageUrl = (url?: string) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') || url.startsWith('/')) {
+    return url
+  }
+  return `/${url}`
+}
+
 type PostCardProps = {
   post: PostRecord
   // NOTE: for post details page, render these OUTSIDE PostCard (server components can't pass JSX to client).
@@ -226,7 +234,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const commentsCount = post?.comments_count ?? post?.commentsCount ?? 0
   const caption = post?.description ?? post?.caption ?? ''
   const title = post?.title ?? ''
-  const image = post?.post_images[0]?.image_full_url ?? post?.image
+  const image = normalizeImageUrl(post?.post_images[0]?.image_full_url ?? post?.image)
   const sectionName = (post as any)?.section?.name ?? ''
   const categoryName = (post as any)?.category?.name ?? ''
   const cityName = (post as any)?.city?.name ?? ''
@@ -903,10 +911,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
 
 
-        {image && (
-          <Link href={postDetailsHref} className="d-block">
-          <Image unoptimized width={1200} height={800} className="card-img" src={image} alt={title || 'Post'} />
-          </Link>
+        {image && !banner && (
+          <GlightBox href={image} data-gallery="post-images">
+            <Image unoptimized width={720} height={350} className="card-img" src={image} alt={title || 'Post'} />
+          </GlightBox>
         )}
 
 

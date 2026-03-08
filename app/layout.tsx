@@ -30,36 +30,6 @@ export const metadata: Metadata = {
   description: 'Bootstrap 5 based Social Media Network and Community Theme',
 }
 
-const splashScreenStyles = `
-#splash-screen {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  background: white;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  transform: translate(-50%, -50%);
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 1;
-  transition: all 15s linear;
-  overflow: hidden;
-}
-
-#splash-screen.remove {
-  animation: fadeout 0.7s forwards;
-  z-index: 0;
-}
-
-@keyframes fadeout {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-`
 
 const resolveLocaleFromHeaders = async (): Promise<SupportedLocale> => {
   const headersList = await headers()
@@ -82,12 +52,11 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   const localeClassName = direction === 'rtl' ? 'is-rtl' : 'is-ltr'
 
   return (
-    <html lang={locale} dir={direction} data-locale={locale}>
-      <head>
-        <style>{splashScreenStyles}</style>
+    <html lang={locale} dir={direction} data-locale={locale} suppressHydrationWarning>
+      <head suppressHydrationWarning>
         <link rel="stylesheet" href={localeStylesheet} />
       </head>
-      <body className={`${inter.className} ${localeClassName}`} data-locale={locale} data-dir={direction}>
+      <body className={`${inter.className} ${localeClassName}`} data-locale={locale} data-dir={direction} suppressHydrationWarning>
         <div id="splash-screen">
           <Image alt="Logo" width={355} height={83} src={logo} style={{ height: '10%', width: 'auto' }} priority />
         </div>

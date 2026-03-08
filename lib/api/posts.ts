@@ -334,7 +334,7 @@ export async function fetchMyPosts(params: { page?: number; perPage?: number; lo
   }
 
   const query = searchParams.toString()
-  const url = getApiUrl(`/api/posts/my-posts${query ? `?${query}` : ''}`)
+  const url = `/api/posts/my-posts${query ? `?${query}` : ''}`
 
   const res = await fetch(url, {
     cache: 'no-store',
@@ -368,7 +368,7 @@ export async function fetchMyImages(params: { page?: number; perPage?: number } 
   }
 
   const query = searchParams.toString()
-  const url = getApiUrl(`/api/posts/my-images${query ? `?${query}` : ''}`)
+  const url = `/api/posts/my-images${query ? `?${query}` : ''}`
 
   const res = await fetch(url, {
     cache: 'no-store',

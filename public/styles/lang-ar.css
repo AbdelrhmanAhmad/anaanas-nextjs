@@ -195,7 +195,7 @@ left: 0 !important;
 
 
 
-
+/* 
 .navbar.topNav {
   background: #177dc1;
   color: #FFF;
@@ -229,7 +229,7 @@ a.nav-link.bg-light.icon-md.btn.btn-light{
   color: #000 !important;
   text-align: right;
   direction: rtl;
-}
+} */
 
 
 .modal-header .btn-close {
@@ -240,3 +240,27 @@ a.nav-link.bg-light.icon-md.btn.btn-light{
   margin-right: auto;
 }
 
+
+
+@media (min-width: 1400px) {
+  .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
+      max-width: 1605px;
+  }
+}
+main {
+  background-color: #f3edef;
+
+}
+
+.card-img{
+  height: 350px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.card {
+  background: #fcf8f7;
+}
+body {
+  background: #f3edef;
+}

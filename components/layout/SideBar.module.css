@@ -1,0 +1,58 @@
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.menuItem {
+  position: relative;
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.menuLink:hover {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+  border-right: 5px solid #399f91;
+}
+
+.menuLinkActive {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+  border-right: 5px solid #399f91;
+}
+
+
+
+.menuIcon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #0f172a;
+}
+
+.menuEmoji {
+  font-size: 18px;
+}
+
+.menuText {
+  flex: 1;
+}
+
+/* .bg-transparent{
+  background: transparent !important;
+} */

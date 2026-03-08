@@ -7,7 +7,7 @@ import { useLayoutContext } from '@/context/useLayoutContext'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 
-import logo from '@/assets/images/logo.png'
+import logo from '@/assets/images/logo/logo_png1.png'
 
 const LogoBox = () => {
   const { theme } = useLayoutContext()

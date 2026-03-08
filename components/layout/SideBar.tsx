@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { Button, Card, CardBody, CardFooter, Modal, Spinner } from 'react-bootstrap'
-import { BsGlobe2, BsStars } from 'react-icons/bs'
+import { BsGlobe2, BsHouseDoorFill, BsStars } from 'react-icons/bs'
 import clsx from 'clsx'
+import styles from './SideBar.module.css'
 
 import { currentYear, developedBy, developedByLink } from '@/context/constants'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isSupportedLocale } from '@/lib/localization'
@@ -127,28 +128,58 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
     })
   }
 
+  const normalizedPath = pathname?.replace(/\/$/, '')
+  const homeHref = `/${currentLocale}`
+
+  const isHomeActive =
+    normalizedPath === homeHref || normalizedPath === `${homeHref}/home` || normalizedPath === `${homeHref}/` || normalizedPath === ''
+
   return (
     <>
-      <Card className="overflow-hidden h-100 pt-5">
+      <Card className="overflow-hidden h-100 pt-5 ">
         <CardBody className="pt-0">
-          <ul className="nav nav-link-secondary flex-column fw-bold gap-2">
+          <ul className={styles.menuList}>
+            <li className={styles.menuItem}>
+              <Link
+                className={clsx(styles.menuLink, { [styles.menuLinkActive]: isHomeActive })}
+                href={homeHref}
+              >
+                <span className={styles.menuIcon}>
+                  <BsHouseDoorFill />
+                </span>
+                <span className={styles.menuText}>
+                  {currentLocale === 'ar' ? 'الرئيسية' : 'Home'}
+                </span>
+              </Link>
+            </li>
             {sections.length === 0 ? (
-              <li className="nav-item text-muted small">{t('sidebar.noSections', currentLocale)}</li>
+              <li className="text-muted small">{t('sidebar.noSections', currentLocale)}</li>
             ) : (
               sections.map((section) => (
-                <li key={section.id} className="nav-item">
-                  <Link className="nav-link" href={`/${currentLocale}/${section.slug}`}>
-                    {section.icon && (
-                      <Image
-                        src={section.icon}
-                        unoptimized
-                        alt={section.name}
-                        height={20}
-                        width={20}
-                        className="me-2 h-20px fa-fw"
-                      />
-                    )}
-                    <span>{section.name}</span>
+                <li key={section.id} className={styles.menuItem}>
+                  <Link
+                    className={clsx(styles.menuLink, {
+                      [styles.menuLinkActive]:
+                        normalizedPath?.startsWith(`/${currentLocale}/${section.slug}`) ?? false,
+                    })}
+                    href={`/${currentLocale}/${section.slug}`}
+                  >
+                    <span className={styles.menuIcon}>
+                      {section.icon ? (
+                        <Image
+                          src={section.icon}
+                          unoptimized
+                          alt={section.name}
+                          height={20}
+                          width={20}
+                        />
+                      ) : (
+                        <span className={styles.menuEmoji} aria-hidden="true">
+                          🔹
+                        </span>
+                      )}
+                    </span>
+                    <span className={styles.menuText}>{section.name}</span>
                   </Link>
                 </li>
               ))
