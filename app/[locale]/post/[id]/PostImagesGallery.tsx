@@ -27,7 +27,6 @@ export default function PostImagesGallery({
   title?: string
   isRtl?: boolean
 }) {
-  if (!Array.isArray(images) || images.length === 0) return null
   const galleryId = useId().replace(/:/g, '-')
 
   useEffect(() => {
@@ -50,6 +49,8 @@ export default function PostImagesGallery({
       }
     }
   }, [galleryId])
+
+  if (!Array.isArray(images) || images.length === 0) return null
 
   if (images.length === 1) {
     const img = images[0]
