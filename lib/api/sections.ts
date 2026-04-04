@@ -5,6 +5,7 @@ export type Section = {
   slug: string
   name: string
   icon: string | null
+  image: string | null
 }
 
 type SectionsResponse = {

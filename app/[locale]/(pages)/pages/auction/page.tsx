@@ -4,7 +4,26 @@ import styles from './auction.module.css'
 import AuctionExperience from './components/AuctionExperience'
 import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@/lib/localization'
 
-export const metadata: Metadata = { title: 'Auctions' }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale: localeRaw } = await params
+  const locale: SupportedLocale = isSupportedLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE
+  const title = locale === 'ar' ? 'سوق المزادات | ANANAS' : 'Auction Marketplace | ANANAS'
+  const description =
+    locale === 'ar'
+      ? 'استعرض مزادات مباشرة، تابع العروض، وقدّم مزايدة لحظية على العناصر.'
+      : 'Browse live auctions, track bids, and place real-time offers on items.'
+  return {
+    title,
+    description,
+    alternates: { canonical: `/${locale}/pages/auction` },
+    openGraph: { title, description, type: 'website', url: `/${locale}/pages/auction` },
+    twitter: { card: 'summary_large_image', title, description },
+  }
+}
 
 const Auction = async ({
   params,

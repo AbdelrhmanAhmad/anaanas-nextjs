@@ -1,0 +1,87 @@
+.page {
+  min-height: 100vh;
+}
+
+.hero {
+  border-radius: 22px;
+  background: linear-gradient(135deg, #151515 0%, #232323 100%);
+  color: #fff;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+}
+
+.title {
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  font-weight: 800;
+  margin: 0;
+}
+
+.price {
+  font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+  font-weight: 900;
+  color: #fecb01;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.galleryMain {
+  grid-column: span 8;
+  min-height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f3edef;
+}
+
+.gallerySide {
+  grid-column: span 4;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.thumb {
+  min-height: 145px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f3edef;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.metricCard {
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+}
+
+.metricLabel {
+  font-size: 0.78rem;
+  color: rgba(21, 21, 21, 0.62);
+}
+
+.metricValue {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #151515;
+}
+
+@media (max-width: 991.98px) {
+  .galleryMain,
+  .gallerySide {
+    grid-column: span 12;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -530,6 +530,8 @@ type FeedsFilters = {
   cityId?: number
   priceMin?: number
   priceMax?: number
+  hasImages?: boolean
+  sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc'
   attributes?: Record<number, Array<number>>
   attributeRanges?: Record<number, { from?: string | number; to?: string | number }>
   page?: number
@@ -543,6 +545,9 @@ function buildFiltersSearchParams(filters?: FeedsFilters) {
   if (filters.cityId) sp.set('city_id', String(filters.cityId))
   if (filters.priceMin != null) sp.set('price_min', String(filters.priceMin))
   if (filters.priceMax != null) sp.set('price_max', String(filters.priceMax))
+  if (filters.hasImages === true) sp.set('has_images', '1')
+  if (filters.hasImages === false) sp.set('has_images', '0')
+  if (filters.sort) sp.set('sort', filters.sort)
 
   // Attributes (multi)
   for (const [attrIdRaw, optionIds] of Object.entries(filters.attributes ?? {})) {
@@ -598,6 +603,8 @@ const Feeds = async ({
     cityId: filters?.cityId,
     priceMin: filters?.priceMin,
     priceMax: filters?.priceMax,
+    hasImages: filters?.hasImages,
+    sort: filters?.sort,
     attributes: filters?.attributes,
     attributeRanges: filters?.attributeRanges,
     page,
@@ -627,6 +634,8 @@ const Feeds = async ({
     cityId: filters?.cityId ?? null,
     priceMin: filters?.priceMin ?? null,
     priceMax: filters?.priceMax ?? null,
+    hasImages: typeof filters?.hasImages === 'boolean' ? filters.hasImages : null,
+    sort: filters?.sort ?? 'newest',
     attributes: normalizedAttributes,
     ranges: normalizedRanges,
     page: page ?? 1,
@@ -646,6 +655,8 @@ const Feeds = async ({
             cityId: filters?.cityId,
             priceMin: filters?.priceMin,
             priceMax: filters?.priceMax,
+            hasImages: filters?.hasImages,
+            sort: filters?.sort,
             attributes: filters?.attributes,
             attributeRanges: filters?.attributeRanges,
           }}

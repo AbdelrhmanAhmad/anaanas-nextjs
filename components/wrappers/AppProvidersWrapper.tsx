@@ -10,6 +10,7 @@ import type {ChildrenType} from '@/types/component'
 import {ChatProvider} from '@/context/useChatContext'
 import {AppDataProvider} from '@/context/AppDataContext'
 import AutoLoginWrapper from './AutoLoginWrapper'
+import DirectionSync from '@/components/DirectionSync'
 
 const LayoutProvider = dynamic(() => import('@/context/useLayoutContext').then((mod) => mod.LayoutProvider), {ssr: false})
 
@@ -47,6 +48,7 @@ const AppProvidersWrapper = ({children}: ChildrenType) => {
 
     return (
         <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
+            <DirectionSync />
             <AutoLoginWrapper>
                 <AppDataProvider>
             <LayoutProvider>

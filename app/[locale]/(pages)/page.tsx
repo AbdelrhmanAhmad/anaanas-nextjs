@@ -18,8 +18,33 @@ import type { SupportedLocale } from '@/lib/localization'
 import { BsArrowUpRight, BsHammer, BsStars } from 'react-icons/bs'
 import linksStyles from './homeLinks.module.css'
 import sideStyles from './homeSideCards.module.css'
+import MarketPulseCard from './home/components/MarketPulseCard'
+import TrendingAdsCard from './home/components/TrendingAdsCard'
+import SmartOpportunityCard from './home/components/SmartOpportunityCard'
+import AnanasVsOthersCard from './home/components/AnanasVsOthersCard'
+import FutureRoadmapCard from './home/components/FutureRoadmapCard'
 
-export const metadata: Metadata = { title: 'Default Home' }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const uiLocale: SupportedLocale = isSupportedLocale(locale) ? locale : 'ar'
+  const title = uiLocale === 'ar' ? 'الرئيسية | ANANAS' : 'Home | ANANAS'
+  const description =
+    uiLocale === 'ar'
+      ? 'اكتشف أحدث المنشورات، الفرص الذكية، وتحليلات السوق في منصة ANANAS.'
+      : 'Discover latest posts, smart opportunities, and market insights on ANANAS.'
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/${uiLocale}` },
+    openGraph: { title, description, type: 'website', url: `/${uiLocale}` },
+    twitter: { card: 'summary_large_image', title, description },
+  }
+}
 
 const Home = async ({
   params,
@@ -41,7 +66,7 @@ const Home = async ({
         <HomeBanner locale={uiLocale} />
         {/* <Stories />   */}
         <CreatePostCard />
-        <AiInfrastructureCard locale={uiLocale} />
+        {/* <AiInfrastructureCard locale={uiLocale} /> */}
         <div className="vstack mt-5  gap-4">
           <Feeds
             filters={{
@@ -55,108 +80,13 @@ const Home = async ({
       <Col lg={3} md={3}>
         <div className="vstack gap-4">
           <div className={sideStyles.sideStack}>
-            <div className={sideStyles.sideCard}>
-              <h5 className={sideStyles.cardTitle}>{t('home.marketPulse', uiLocale)}</h5>
-              {[
-                { icon: '🚗', label: t('home.cars', uiLocale), value: '+18%' },
-                { icon: '🏠', label: t('home.realEstate', uiLocale), value: '+9%' },
-                { icon: '📱', label: t('home.electronics', uiLocale), value: '+14%' },
-                { icon: '💼', label: t('home.jobs', uiLocale), value: '+6%' },
-              ].map((item) => (
-                <div key={item.label} className={sideStyles.listRow}>
-                  <div className={sideStyles.listLeft}>
-                    <div className={sideStyles.listIcon}>{item.icon}</div>
-                    <div className={sideStyles.listText}>{item.label}</div>
-                  </div>
-                  <div className={sideStyles.listValue}>{item.value}</div>
-                </div>
-              ))}
-            </div>
+             
+            <MarketPulseCard locale={uiLocale} />
+            <TrendingAdsCard locale={uiLocale} />
 
-            <div className={sideStyles.sideCard}>
-              <h5 className={sideStyles.cardTitle}>{t('home.topPerformingAds', uiLocale)}</h5>
-              {[
-                {
-                  icon: '🍍',
-                  title: t('home.ad.zamzam', uiLocale),
-                  subtitle: t('home.ad.movingHouse', uiLocale),
-                  badge: '🔥',
-                },
-                {
-                  icon: '🏠',
-                  title: t('home.ad.othman', uiLocale),
-                  subtitle: t('home.ad.electronics', uiLocale),
-                  badge: '⭐',
-                },
-                {
-                  icon: '🛰️',
-                  title: t('home.ad.elite', uiLocale),
-                  subtitle: t('home.ad.tech', uiLocale),
-                  badge: '🚀',
-                },
-              ].map((item) => (
-                <div key={item.title} className={sideStyles.listRow}>
-                  <div className={sideStyles.listLeft}>
-                    <div className={sideStyles.listIcon}>{item.icon}</div>
-                    <div>
-                      <div className={sideStyles.listText}>{item.title}</div>
-                      <div className={sideStyles.smallMuted}>{item.subtitle}</div>
-                    </div>
-                  </div>
-                  <div>{item.badge}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className={sideStyles.sideCard}>
-              <h5 className={sideStyles.cardTitle}>{t('home.smartOpportunity', uiLocale)}</h5>
-              <div className={`${sideStyles.pill} ${sideStyles.pillGreen}`}>
-                {t('home.highRoi', uiLocale)}
-              </div>
-              <div className={sideStyles.smallMuted}>{t('home.detectedInAmman', uiLocale)}</div>
-              <div className="mt-2">
-                <button className={sideStyles.ctaBtn} type="button">
-                  {t('home.activateOpportunity', uiLocale)} 🚀
-                </button>
-              </div>
-            </div>
-
-            <div className={sideStyles.sideCard}>
-              <h5 className={sideStyles.cardTitle}>{t('home.ananasVsOthers', uiLocale)}</h5>
-              <div className={sideStyles.compareRow}>
-                <div>OLX = {t('home.listings', uiLocale)}</div>
-                <span className={sideStyles.badgeNo}>✕</span>
-              </div>
-              <div className={sideStyles.compareRow}>
-                <div>OpenSooq = {t('home.marketplace', uiLocale)}</div>
-                <span className={sideStyles.badgeNo}>✕</span>
-              </div>
-              <div className={sideStyles.compareRow}>
-                <div>Haraj = {t('home.classifieds', uiLocale)}</div>
-                <span className={sideStyles.badgeWarn}>!</span>
-              </div>
-              <div className={sideStyles.compareRow}>
-                <div>ANANAS = {t('home.aiEngine', uiLocale)}</div>
-                <span className={sideStyles.badgeOk}>✓</span>
-              </div>
-            </div>
-
-            <div className={sideStyles.sideCard}>
-              <h5 className={sideStyles.cardTitle}>
-                {t('home.futureRoadmap', uiLocale)}{' '}
-                <span className={sideStyles.sectionSub}>({t('home.comingSoon', uiLocale)})</span>
-              </h5>
-              {[
-                { icon: '🧠', text: t('home.roadmap.pro', uiLocale) },
-                { icon: '🏆', text: t('home.roadmap.gold', uiLocale) },
-                { icon: '🎁', text: t('home.roadmap.family', uiLocale) },
-              ].map((item) => (
-                <div key={item.text} className={sideStyles.roadmapRow}>
-                  <span>{item.icon}</span>
-                  <span className={sideStyles.listText}>{item.text}</span>
-                </div>
-              ))}
-            </div>
+            {/* <SmartOpportunityCard locale={uiLocale} /> */}
+            {/* <AnanasVsOthersCard locale={uiLocale} /> */}
+            <FutureRoadmapCard locale={uiLocale} />
           </div>
 
           <EliteCards locale={uiLocale} />

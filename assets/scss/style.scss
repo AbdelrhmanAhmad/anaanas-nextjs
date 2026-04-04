@@ -34,6 +34,7 @@
 @import "custom/badge";
 @import "custom/offcanvas";
 @import "custom/toasts";
+@import "custom/auth";
 
 // Splash screen (moved from inline style to avoid hydration mismatch)
 #splash-screen {

@@ -4,16 +4,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
-import { Button, Card, CardBody, CardFooter, Modal, Spinner } from 'react-bootstrap'
-import { BsGlobe2, BsHouseDoorFill, BsStars } from 'react-icons/bs'
+import { Button, Card, CardBody, CardFooter } from 'react-bootstrap'
+import { BsGlobe2, BsHouseDoorFill } from 'react-icons/bs'
 import clsx from 'clsx'
 import styles from './SideBar.module.css'
 
 import { currentYear, developedBy, developedByLink } from '@/context/constants'
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isSupportedLocale } from '@/lib/localization'
+import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 import type { Section } from '@/lib/api/sections'
 import { t } from '@/lib/translations'
+import LanguageSelectorModal from './LanguageSelectorModal'
 
 type SideBarProps = {
   sections: Section[]
@@ -77,20 +78,17 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
       title: string
       subtitle: string
       badge: string
-      gradient: string
     }
   > = {
     ar: {
       title: 'العربية',
       subtitle: 'تجربة عربية كاملة مع اتجاه RTL',
       badge: 'AR',
-      gradient: 'language-card--sunset',
     },
     en: {
       title: 'English',
       subtitle: 'A clean LTR experience for global users',
       badge: 'EN',
-      gradient: 'language-card--ocean',
     },
   }
 
@@ -121,7 +119,6 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
     setTargetLocale(nextLocale)
 
     const targetPath = buildLocalizedPath(nextLocale)
-    console.log(targetPath)
     startTransition(() => {
       // router.push(targetPath)
       location.href = targetPath
@@ -170,8 +167,8 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
                           src={section.icon}
                           unoptimized
                           alt={section.name}
-                          height={20}
-                          width={20}
+                          height={50}
+                          width={50}
                         />
                       ) : (
                         <span className={styles.menuEmoji} aria-hidden="true">
@@ -200,17 +197,17 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
       </Button>
 
       <ul className="nav small mt-4 justify-content-center lh-1">
-        <li className="nav-item">
+        {/* <li className="nav-item">
           <Link className="nav-link" href="/profile/about">
             {t('sidebar.aboutUs', currentLocale)}
           </Link>
-        </li>
-        <li className="nav-item">
+        </li> */}
+        {/* <li className="nav-item">
           <Link className="nav-link" href="/settings/account">
             {t('sidebar.settings', currentLocale)}
           </Link>
-        </li>
-        <li className="nav-item">
+        </li> */}
+        {/* <li className="nav-item">
           <Link className="nav-link" target="_blank" rel="noreferrer" href={developedByLink}>
             {t('sidebar.support', currentLocale)}
           </Link>
@@ -229,7 +226,8 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
           <Link className="nav-link" href="/privacy-terms">
             {t('sidebar.privacyTerms', currentLocale)}
           </Link>
-        </li>
+        </li> */}
+        
       </ul>
 
       <p className="small text-center mt-1">
@@ -240,67 +238,16 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
         </a>
       </p>
 
-      <Modal
+      <LanguageSelectorModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        centered
-        animation
-        dialogClassName="language-selector-modal"
-        contentClassName="language-selector-modal__content"
-        aria-labelledby="language-selector-title">
-        <Modal.Header closeButton className="border-0 pb-0">
-          <div className="w-100 text-center">
-            <div className="language-selector-modal__icon mx-auto mb-3">
-              <BsStars />
-            </div>
-            <Modal.Title id="language-selector-title" className="fw-bold">
-              {copy.modalTitle}
-            </Modal.Title>
-          </div>
-        </Modal.Header>
-        <Modal.Body className="pt-0">
-          <p className="text-muted text-center mb-4">{copy.modalSubtitle}</p>
-          <p className="text-uppercase text-center small text-primary fw-semibold mb-3 letter-spacing-wide">{copy.actionHint}</p>
-          <div className="language-options-grid">
-            {SUPPORTED_LOCALES.map((locale) => {
-              const card = localeCards[locale]
-              const isActive = locale === currentLocale
-              const showSpinner = isPending && targetLocale === locale
-
-              return (
-                <button
-                  key={locale}
-                  type="button"
-                  className={clsx('language-card', card.gradient, {
-                    'language-card--active': isActive,
-                  })}
-                  onClick={() => handleSwitchLocale(locale)}
-                  disabled={isActive || showSpinner}>
-                  <span className="language-card__badge">{card.badge}</span>
-                  <div>
-                    <span className="language-card__title ">{card.title}</span>
-                    <span className="language-card__subtitle mx-0 d-block">{card.subtitle}</span>
-                  </div>
-                  <div className="language-card__status">
-                    {showSpinner ? (
-                      <Spinner animation="border" size="sm" />
-                    ) : isActive ? (
-                      <span className="text-success fw-semibold">{copy.currentLabel}</span>
-                    ) : (
-                      <span className="text-white-50">{copy.inactiveHint}</span>
-                    )}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </Modal.Body>
-        {isPending && targetLocale ? (
-          <Modal.Footer className="border-0 d-flex flex-column text-center gap-2">
-            <small className="text-muted">{copy.confirmation}</small>
-          </Modal.Footer>
-        ) : null}
-      </Modal>
+        copy={copy}
+        currentLocale={currentLocale}
+        isPending={isPending}
+        targetLocale={targetLocale}
+        localeCards={localeCards}
+        onSwitchLocale={handleSwitchLocale}
+      />
     </>
   )
 }

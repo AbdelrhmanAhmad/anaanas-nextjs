@@ -32,17 +32,20 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
   const { showNotification } = useNotificationContext()
 
   const signUpSchema = yup.object({
-    name: yup.string().optional(),
+    name: yup.string().required(t('auth.nameRequired', locale)).max(255, t('auth.nameMaxLength', locale)),
     mobile: yup.string().optional(),
-    email: yup.string().email(t('auth.invalidEmail', locale)).optional(),
-    password: yup.string().required(t('auth.passwordRequired', locale)),
+    email: yup
+      .string()
+      .required(t('auth.emailRequired', locale))
+      .email(t('auth.invalidEmail', locale)),
+    password: yup.string().required(t('auth.passwordRequired', locale)).min(8, t('auth.passwordMinLength', locale)),
     confirmPassword: yup
       .string()
       .required(t('auth.confirmPasswordRequired', locale))
       .oneOf([yup.ref('password')], t('auth.passwordMismatch', locale)),
   })
   type SignUpValues = yup.InferType<typeof signUpSchema>
-  const { control, handleSubmit, watch, getValues } = useForm<SignUpValues>({
+  const { control, handleSubmit, watch, getValues, setError } = useForm<SignUpValues>({
     resolver: yupResolver(signUpSchema),
   })
 
@@ -54,12 +57,12 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
     setLoading(true)
     try {
       const body: Record<string, string> = {
+        name: values.name,
+        email: values.email,
         password: values.password,
         password_confirmation: values.confirmPassword,
       }
 
-      if (values.name) body.name = values.name
-      if (values.email) body.email = values.email
       if (values.mobile) body.mobile = values.mobile
 
       const res = await fetch(getApiUrl('/api/auth/register'), {
@@ -84,7 +87,7 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
         // Auto login after registration
         const loginResult = await signIn('credentials', {
           redirect: false,
-          email: values.email || undefined,
+          email: values.email,
           mobile: values.mobile || undefined,
           password: values.password,
         })
@@ -95,8 +98,24 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
           push(`/${locale}/auth/sign-in`)
         }
       } else {
+        // Handle validation errors from backend (422)
+        const errors = data.errors as Record<string, string[] | undefined>
+        let hasFieldErrors = false
+        if (errors && typeof errors === 'object') {
+          for (const [field, messages] of Object.entries(errors)) {
+            const msg = Array.isArray(messages) ? messages[0] : messages
+            if (msg && ['name', 'email', 'mobile', 'password', 'password_confirmation'].includes(field)) {
+              const formField = field === 'password_confirmation' ? 'confirmPassword' : field
+              setError(formField as keyof SignUpValues, { type: 'server', message: msg })
+              hasFieldErrors = true
+            }
+          }
+        }
+        const displayMessage = hasFieldErrors
+          ? (locale === 'ar' ? 'يرجى تصحيح الأخطاء في النموذج' : 'Please fix the errors in the form')
+          : (data.message || (locale === 'ar' ? 'حدث خطأ أثناء إنشاء الحساب' : 'An error occurred while creating the account'))
         showNotification({ 
-          message: data.message || (locale === 'ar' ? 'حدث خطأ أثناء إنشاء الحساب' : 'An error occurred while creating the account'), 
+          message: displayMessage, 
           variant: 'danger' 
         })
       }
@@ -113,9 +132,9 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
   })
 
   return (
-    <form className="mt-4" onSubmit={onSubmit}>
+    <form className="mt-4 auth-input-wrap" onSubmit={onSubmit}>
       <div className="mb-3 text-start">
-        <label htmlFor="name" className="form-label">{t('auth.nameOptional', locale)}</label>
+        <label htmlFor="name" className="form-label">{t('auth.name', locale)} <span className="text-danger">*</span></label>
         <TextFormInput name="name" control={control} 
         containerClassName="input-group-lg" placeholder={t('auth.enterName', locale)} />
       </div>
@@ -127,7 +146,7 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
       </div>
 
       <div className="mb-3 text-start">
-        <label htmlFor="email" className="form-label">{t('auth.emailOptional', locale)}</label>
+        <label htmlFor="email" className="form-label">{t('auth.email', locale)} <span className="text-danger">*</span></label>
         <TextFormInput name="email" type="email" control={control} 
         containerClassName="input-group-lg" placeholder={t('auth.enterEmail', locale)} />
       </div>
@@ -152,11 +171,11 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
         <FormCheck label={t('auth.rememberMe', locale)} id="termAndCondition" />
       </div>
       <div className="d-grid">
-        <Button variant="primary" size="lg" type="submit" disabled={loading}>
+        <Button className="btn-auth-primary" size="lg" type="submit" disabled={loading}>
           {loading ? t('auth.creating', locale) : t('auth.createAccount', locale)}
         </Button>
       </div>
-      <p className="mb-0 mt-3 text-center">
+      <p className="auth-form-copyright mb-0">
         ©{currentYear}{' '}
         <Link target="_blank" href={developedByLink}>
           {developedBy}.

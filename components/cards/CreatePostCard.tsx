@@ -951,13 +951,13 @@ const [step, setStep] = useState(1)
             />
           </div>
 
-          <div className={styles.smartChips}>
+          {/* <div className={styles.smartChips}>
             {smartCopy.chips.map((chip, idx) => (
               <span key={idx} className={styles.smartChip}>
                 {chip}
               </span>
             ))}
-          </div>
+          </div> */}
         </Card>
 
         <LoginRequiredDialog

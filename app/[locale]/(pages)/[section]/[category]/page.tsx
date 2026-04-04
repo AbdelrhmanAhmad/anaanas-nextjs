@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { Col, Row } from 'react-bootstrap'
 
 import CreatePostCard from '@/components/cards/CreatePostCard'
@@ -12,12 +13,73 @@ import { fetchFields } from '@/lib/api/fields'
 import { getCountryByCode } from '@/lib/api/countries'
 import { fetchCitiesByCountryId } from '@/lib/api/cities'
 
+type PageSearchParams = Record<string, string | string[] | undefined>
+
+function firstValue(v: string | string[] | undefined): string | undefined {
+  if (Array.isArray(v)) return v[0]
+  return v
+}
+
+function parseNumber(v: string | undefined): number | undefined {
+  if (!v) return undefined
+  const n = Number(v)
+  return Number.isFinite(n) ? n : undefined
+}
+
+function parseHasImages(v: string | undefined): boolean | undefined {
+  if (!v) return undefined
+  const normalized = v.trim().toLowerCase()
+  if (normalized === '1' || normalized === 'true' || normalized === 'yes') return true
+  if (normalized === '0' || normalized === 'false' || normalized === 'no') return false
+  return undefined
+}
+
+function parseSort(v: string | undefined): 'newest' | 'oldest' | 'price_asc' | 'price_desc' {
+  if (v === 'oldest' || v === 'price_asc' || v === 'price_desc') return v
+  return 'newest'
+}
+
+function buildFilterSummary(
+  locale: string,
+  hasImages: boolean | undefined,
+  sort: 'newest' | 'oldest' | 'price_asc' | 'price_desc',
+  cityId?: number,
+  priceMin?: number,
+  priceMax?: number,
+) {
+  const ar = locale === 'ar'
+  const parts: string[] = []
+  if (cityId) parts.push(ar ? 'مدينة محددة' : 'specific city')
+  if (priceMin != null || priceMax != null) parts.push(ar ? 'نطاق سعر' : 'price range')
+  if (hasImages === true) parts.push(ar ? 'بصور' : 'with images')
+  if (hasImages === false) parts.push(ar ? 'بدون صور' : 'without images')
+  if (sort !== 'newest') {
+    parts.push(
+      sort === 'oldest'
+        ? ar
+          ? 'الأقدم أولًا'
+          : 'oldest first'
+        : sort === 'price_asc'
+          ? ar
+            ? 'السعر تصاعدي'
+            : 'price low to high'
+          : ar
+            ? 'السعر تنازلي'
+            : 'price high to low',
+    )
+  }
+  return parts
+}
+
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; section: string; category: string }>
+  searchParams: Promise<PageSearchParams>
 }): Promise<Metadata> {
   const { locale, section: sectionSlug, category: categorySlug } = await params
+  const sp = await searchParams
   const section = await fetchSectionBySlug(sectionSlug, locale)
   const categories = section ? await fetchCategoriesBySectionId(section.id, locale) : []
   const category = categories.find((c) => c.slug === categorySlug) ?? null
@@ -30,14 +92,55 @@ export async function generateMetadata({
       ? `${categoryName} | ${sectionName}`
       : categoryName || sectionName || 'المنشورات'
 
+  const cityId = parseNumber(firstValue(sp.city_id))
+  const priceMin = parseNumber(firstValue(sp.price_min))
+  const priceMax = parseNumber(firstValue(sp.price_max))
+  const hasImages = parseHasImages(firstValue(sp.has_images))
+  const sort = parseSort(firstValue(sp.sort))
+  const page = parseNumber(firstValue(sp.page))
+  const parsedAttrs = parseAttrFilters(sp)
+
+  const filterSummary = buildFilterSummary(locale, hasImages, sort, cityId, priceMin, priceMax)
+  const hasSeoFilters =
+    filterSummary.length > 0 ||
+    Object.keys(parsedAttrs.options).length > 0 ||
+    Object.keys(parsedAttrs.ranges).length > 0 ||
+    (page != null && page > 1)
+
+  const basePath = `/${locale}/${sectionSlug}/${categorySlug}`
+  const descriptionBase =
+    sectionName && categoryName
+      ? locale === 'ar'
+        ? `تصفح أحدث المنشورات في ${categoryName} ضمن قسم ${sectionName}`
+        : `Browse latest posts in ${categoryName} under ${sectionName}`
+      : locale === 'ar'
+        ? 'تصفح أحدث المنشورات'
+        : 'Browse latest posts'
+  const description =
+    filterSummary.length > 0
+      ? `${descriptionBase} (${filterSummary.join(locale === 'ar' ? '، ' : ', ')})`
+      : descriptionBase
+
   return {
     title,
-    description:
-      sectionName && categoryName
-        ? `تصفح أحدث المنشورات في ${categoryName} ضمن قسم ${sectionName}`
-        : 'تصفح أحدث المنشورات',
+    description,
+    alternates: {
+      canonical: basePath,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale: locale === 'ar' ? 'ar_SA' : 'en_US',
+      url: basePath,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
     robots: {
-      index: true,
+      index: !hasSeoFilters,
       follow: true,
     },
   }
@@ -106,7 +209,7 @@ const Section = async ({
   searchParams,
 }: {
   params: Promise<{ locale: string; section: string; category: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<PageSearchParams>
 }) => {
   const { locale, section: sectionSlug, category: categorySlug } = await params
   const sp = await searchParams
@@ -114,6 +217,9 @@ const Section = async ({
   const section = await fetchSectionBySlug(sectionSlug, locale)
   const categories = section ? await fetchCategoriesBySectionId(section.id, locale) : []
   const category = categories.find((c) => c.slug === categorySlug) ?? null
+  if (!section || !category) {
+    notFound()
+  }
 
   const fields = section && category ? await fetchFields(section.id, category.id, locale) : []
 
@@ -132,48 +238,45 @@ const Section = async ({
     }
   }
 
-  const cityId = sp.city_id ? Number(Array.isArray(sp.city_id) ? sp.city_id[0] : sp.city_id) : undefined
-  const priceMin = sp.price_min ? Number(Array.isArray(sp.price_min) ? sp.price_min[0] : sp.price_min) : undefined
-  const priceMax = sp.price_max ? Number(Array.isArray(sp.price_max) ? sp.price_max[0] : sp.price_max) : undefined
-  const pageRaw = sp.page ? (Array.isArray(sp.page) ? sp.page[0] : sp.page) : undefined
-  const page = pageRaw ? Number(pageRaw) : undefined
+  const cityId = parseNumber(firstValue(sp.city_id))
+  const priceMin = parseNumber(firstValue(sp.price_min))
+  const priceMax = parseNumber(firstValue(sp.price_max))
+  const hasImages = parseHasImages(firstValue(sp.has_images))
+  const sort = parseSort(firstValue(sp.sort))
+  const page = parseNumber(firstValue(sp.page))
   const parsedAttrs = parseAttrFilters(sp)
 
   return (
-    <>
-          <Col md={8} lg={8} className="vstack gap-4">
-          <Row >
-
-      <Col xs={12} className="mb-3">
+    <Col md={8} lg={8} className="vstack gap-3">
+      <div className="mb-0">
         <MobileFiltersModal fields={fields} cities={cities} />
-      </Col>
-   
+      </div>
 
-      <Col md={8} lg={8} className="vstack gap-4">
-        <CreatePostCard />
-        <Feeds
-          filters={{
-            sectionSlug,
-            categorySlug,
-            cityId: Number.isFinite(cityId as any) ? (cityId as number) : undefined,
-            priceMin: Number.isFinite(priceMin as any) ? (priceMin as number) : undefined,
-            priceMax: Number.isFinite(priceMax as any) ? (priceMax as number) : undefined,
-            attributes: parsedAttrs.options,
-            attributeRanges: parsedAttrs.ranges,
-            page: Number.isFinite(page as any) && (page as number) > 0 ? (page as number) : undefined,
-            basePath: `/${locale}/${sectionSlug}/${categorySlug}`,
-          }}
-        />
-      </Col>
+      <Row className="g-4">
+        <Col md={12} lg={8} className="vstack gap-4">
+          <CreatePostCard />
+          <Feeds
+            filters={{
+              sectionSlug,
+              categorySlug,
+              cityId: Number.isFinite(cityId as any) ? (cityId as number) : undefined,
+              priceMin: Number.isFinite(priceMin as any) ? (priceMin as number) : undefined,
+              priceMax: Number.isFinite(priceMax as any) ? (priceMax as number) : undefined,
+              hasImages,
+              sort,
+              attributes: parsedAttrs.options,
+              attributeRanges: parsedAttrs.ranges,
+              page: Number.isFinite(page as any) && (page as number) > 0 ? (page as number) : undefined,
+              basePath: `/${locale}/${sectionSlug}/${categorySlug}`,
+            }}
+          />
+        </Col>
 
-      
-      <Col lg={4} className="mb-4 mb-lg-0 d-none d-lg-block">
-        <PostsFilterPanel fields={fields} cities={cities} />
-      </Col>
-
+        <Col lg={4} className="mb-4 mb-lg-0 d-none d-lg-block">
+          <PostsFilterPanel fields={fields} cities={cities} />
+        </Col>
       </Row>
-      </Col>
-    </>
+    </Col>
   )
 }
 

@@ -1,4 +1,9 @@
+/**
+ * Country filtering: middleware sets `x-country` from the host subdomain (e.g. jo.anaanas.com).
+ * `Feeds` reads that header and resolves `country_id` for `/api/posts` — same pattern as the home page.
+ */
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { Col } from 'react-bootstrap'
 
 import Hero from './Hero'
@@ -15,9 +20,28 @@ export async function generateMetadata({
   const section = await fetchSectionBySlug(sectionSlug, locale)
 
   const title = section?.name ? `${section.name} | المنشورات` : 'المنشورات'
+  const basePath = `/${locale}/${sectionSlug}`
+  const description = section?.name
+    ? `تصفح أحدث المنشورات في قسم ${section.name}`
+    : 'تصفح أحدث المنشورات'
   return {
     title,
-    description: section?.name ? `تصفح أحدث المنشورات في قسم ${section.name}` : 'تصفح أحدث المنشورات',
+    description,
+    alternates: {
+      canonical: basePath,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale: locale === 'ar' ? 'ar_SA' : 'en_US',
+      url: basePath,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   }
 }
 
@@ -30,6 +54,10 @@ const Section = async ({
 }) => {
   const { locale, section: sectionSlug } = await params
   const sp = (await searchParams) ?? {}
+  const section = await fetchSectionBySlug(sectionSlug, locale)
+  if (!section) {
+    notFound()
+  }
   const pageRaw = sp.page ? (Array.isArray(sp.page) ? sp.page[0] : sp.page) : undefined
   const page = pageRaw ? Number(pageRaw) : undefined
 

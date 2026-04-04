@@ -100,10 +100,20 @@ export default function PostsFilterPanel({
 
   const initial = useMemo(() => {
     const sp = new URLSearchParams(searchParams.toString())
+    const hasImagesRaw = sp.get('has_images')
+    const hasImages: 'all' | 'with' | 'without' =
+      hasImagesRaw === '1' || hasImagesRaw === 'true'
+        ? 'with'
+        : hasImagesRaw === '0' || hasImagesRaw === 'false'
+          ? 'without'
+          : 'all'
+    const sort = (sp.get('sort') as 'newest' | 'oldest' | 'price_asc' | 'price_desc' | null) ?? 'newest'
     return {
       cityId: parseNumber(sp.get('city_id')),
       priceMin: sp.get('price_min') ?? '',
       priceMax: sp.get('price_max') ?? '',
+      hasImages,
+      sort: ['newest', 'oldest', 'price_asc', 'price_desc'].includes(sort) ? sort : 'newest',
       parsed: parseAttrSelections(sp),
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,6 +122,8 @@ export default function PostsFilterPanel({
   const [cityId, setCityId] = useState<number | undefined>(initial.cityId)
   const [priceMin, setPriceMin] = useState<string>(initial.priceMin)
   const [priceMax, setPriceMax] = useState<string>(initial.priceMax)
+  const [hasImages, setHasImages] = useState<'all' | 'with' | 'without'>(initial.hasImages)
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price_asc' | 'price_desc'>(initial.sort)
   const [attrs, setAttrs] = useState<AttrSelection>(initial.parsed.options)
   const [ranges, setRanges] = useState<AttrRange>(initial.parsed.ranges)
 
@@ -206,9 +218,11 @@ export default function PostsFilterPanel({
   const hasAnyFilter = useMemo(() => {
     if (cityId) return true
     if (priceMin.trim() || priceMax.trim()) return true
+    if (hasImages !== 'all') return true
+    if (sortBy !== 'newest') return true
     return Object.values(attrs).some((arr) => Array.isArray(arr) && arr.length > 0)
       || Object.values(ranges).some((r) => Boolean(r?.from?.trim() || r?.to?.trim()))
-  }, [cityId, priceMin, priceMax, attrs, ranges])
+  }, [cityId, priceMin, priceMax, hasImages, sortBy, attrs, ranges])
 
   const applyToUrl = () => {
     const sp = new URLSearchParams()
@@ -216,6 +230,9 @@ export default function PostsFilterPanel({
     if (cityId) sp.set('city_id', String(cityId))
     if (priceMin.trim()) sp.set('price_min', priceMin.trim())
     if (priceMax.trim()) sp.set('price_max', priceMax.trim())
+    if (hasImages === 'with') sp.set('has_images', '1')
+    if (hasImages === 'without') sp.set('has_images', '0')
+    if (sortBy !== 'newest') sp.set('sort', sortBy)
 
     for (const [attrIdRaw, optionIds] of Object.entries(attrs)) {
       const attrId = Number(attrIdRaw)
@@ -419,6 +436,35 @@ export default function PostsFilterPanel({
                 onChange={(e) => setPriceMax(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">{t('filter.postImages', locale)}</label>
+            <select
+              className="form-select"
+              value={hasImages}
+              onChange={(e) => setHasImages(e.target.value as 'all' | 'with' | 'without')}
+            >
+              <option value="all">{t('filter.allPosts', locale)}</option>
+              <option value="with">{t('filter.withImages', locale)}</option>
+              <option value="without">{t('filter.withoutImages', locale)}</option>
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">{t('filter.sortBy', locale)}</label>
+            <select
+              className="form-select"
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as 'newest' | 'oldest' | 'price_asc' | 'price_desc')
+              }
+            >
+              <option value="newest">{t('filter.sortNewest', locale)}</option>
+              <option value="oldest">{t('filter.sortOldest', locale)}</option>
+              <option value="price_asc">{t('filter.sortPriceLowToHigh', locale)}</option>
+              <option value="price_desc">{t('filter.sortPriceHighToLow', locale)}</option>
+            </select>
           </div>
 
           <div className="mt-4">

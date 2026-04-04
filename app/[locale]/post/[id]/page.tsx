@@ -7,12 +7,50 @@ import PostViewTracker from './PostViewTracker'
 import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 
-export const metadata: Metadata = { title: 'Post Details' }
-
 type ApiPostDetailsResponse = {
   success?: boolean
   data?: any
   message?: string
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>
+}): Promise<Metadata> {
+  const { locale, id } = await params
+  try {
+    const json = (await callLaravel(`/api/posts/${id}?land=${locale}`, { method: 'GET' })) as ApiPostDetailsResponse
+    const title = json?.data?.title
+      ? `${json.data.title} | ANANAS`
+      : locale === 'ar'
+        ? 'تفاصيل المنشور | ANANAS'
+        : 'Post details | ANANAS'
+    const description = json?.data?.description
+      ? String(json.data.description).slice(0, 160)
+      : locale === 'ar'
+        ? 'استعرض تفاصيل المنشور وخصائصه وتواصل مع صاحب الإعلان.'
+        : 'View post details, attributes, and connect with the publisher.'
+    const canonical = `/${locale}/post/${id}`
+    return {
+      title,
+      description,
+      alternates: { canonical },
+      openGraph: { title, description, type: 'article', url: canonical },
+      twitter: { card: 'summary_large_image', title, description },
+    }
+  } catch {
+    const fallbackTitle = locale === 'ar' ? 'تفاصيل المنشور | ANANAS' : 'Post details | ANANAS'
+    const fallbackDescription =
+      locale === 'ar'
+        ? 'استعرض تفاصيل المنشور وخصائصه وتواصل مع صاحب الإعلان.'
+        : 'View post details, attributes, and connect with the publisher.'
+    return {
+      title: fallbackTitle,
+      description: fallbackDescription,
+      alternates: { canonical: `/${locale}/post/${id}` },
+    }
+  }
 }
 
 function pickLocalizedName(value: any, locale: string): string {

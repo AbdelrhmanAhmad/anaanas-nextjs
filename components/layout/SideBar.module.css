@@ -38,8 +38,8 @@
 
 
 .menuIcon {
-  width: 22px;
-  height: 22px;
+  /* width: 22px; */
+  /* height: 22px; */
   display: grid;
   place-items: center;
   color: #0f172a;

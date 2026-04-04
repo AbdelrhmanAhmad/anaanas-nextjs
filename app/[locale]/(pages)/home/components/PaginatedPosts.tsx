@@ -14,6 +14,8 @@ type FetchParams = {
   cityId?: number
   priceMin?: number
   priceMax?: number
+  hasImages?: boolean
+  sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc'
   attributes?: Record<number, Array<number>>
   attributeRanges?: Record<number, { from?: string | number; to?: string | number }>
 }

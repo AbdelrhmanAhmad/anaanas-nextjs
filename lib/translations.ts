@@ -12,6 +12,10 @@ type TranslationKey =
   | 'home.todaysNews'
   | 'home.viewAllLatestNews'
   | 'home.marketPulse'
+  | 'home.marketPulseEmpty'
+  | 'home.marketPulseGrowth'
+  | 'home.trendingEmpty'
+  | 'home.trendingEngagementHint'
   | 'home.cars'
   | 'home.realEstate'
   | 'home.electronics'
@@ -91,6 +95,21 @@ type TranslationKey =
   | 'auth.enterConfirmPassword'
   | 'auth.rememberMe'
   | 'auth.forgotPassword'
+  | 'auth.forgotPassTitle'
+  | 'auth.forgotPassDesc'
+  | 'auth.sendResetLink'
+  | 'auth.sending'
+  | 'auth.checkEmail'
+  | 'auth.checkEmailDesc'
+  | 'auth.backToSignIn'
+  | 'auth.resetPassTitle'
+  | 'auth.resetPassDesc'
+  | 'auth.newPassword'
+  | 'auth.enterNewPassword'
+  | 'auth.resetPassword'
+  | 'auth.resetting'
+  | 'auth.resetSuccess'
+  | 'auth.resetLinkExpired'
   | 'auth.submit'
   | 'auth.signingIn'
   | 'auth.creating'
@@ -109,7 +128,11 @@ type TranslationKey =
   | 'auth.cookies'
   | 'auth.passwordMismatch'
   | 'auth.passwordRequired'
+  | 'auth.passwordMinLength'
   | 'auth.confirmPasswordRequired'
+  | 'auth.nameRequired'
+  | 'auth.emailRequired'
+  | 'auth.nameMaxLength'
   | 'auth.invalidEmail'
   | 'post.editPost'
   | 'post.deletePost'
@@ -245,6 +268,15 @@ type TranslationKey =
   | 'filter.apply'
   | 'filter.noAttributesAvailable'
   | 'filter.selectField'
+  | 'filter.postImages'
+  | 'filter.allPosts'
+  | 'filter.withImages'
+  | 'filter.withoutImages'
+  | 'filter.sortBy'
+  | 'filter.sortNewest'
+  | 'filter.sortOldest'
+  | 'filter.sortPriceLowToHigh'
+  | 'filter.sortPriceHighToLow'
   | 'createPost.smartTitle'
   | 'createPost.launch'
   | 'createPost.placeholder'
@@ -368,6 +400,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.todaysNews': 'أخبار اليوم',
     'home.viewAllLatestNews': 'عرض جميع الأخبار',
     'home.marketPulse': 'نبض السوق',
+    'home.marketPulseEmpty': 'لا توجد أقسام بزيادة واضحة (+1٪) خلال آخر 30 يوماً مقارنة بالـ 30 يوماً السابقة.',
+    'home.marketPulseGrowth': 'نمو',
+    'home.trendingEmpty': 'لا توجد إعلانات بارزة بالتفاعل حالياً في بلدك.',
+    'home.trendingEngagementHint': 'تعليقات وتفاعلات',
     'home.cars': 'سيارات',
     'home.realEstate': 'عقارات',
     'home.electronics': 'إلكترونيات',
@@ -447,6 +483,21 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auth.enterConfirmPassword': 'أدخل تأكيد كلمة المرور',
     'auth.rememberMe': 'تذكرني؟',
     'auth.forgotPassword': 'نسيت كلمة المرور؟',
+    'auth.forgotPassTitle': 'استعادة كلمة المرور',
+    'auth.forgotPassDesc': 'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.',
+    'auth.sendResetLink': 'إرسال رابط إعادة التعيين',
+    'auth.sending': 'جاري الإرسال...',
+    'auth.checkEmail': 'تحقق من بريدك الإلكتروني',
+    'auth.checkEmailDesc': 'إذا كان هذا البريد مرتبطاً بحساب، فستتلقى رابط إعادة تعيين كلمة المرور.',
+    'auth.backToSignIn': 'العودة لتسجيل الدخول',
+    'auth.resetPassTitle': 'تعيين كلمة مرور جديدة',
+    'auth.resetPassDesc': 'أدخل كلمة المرور الجديدة وتأكيدها.',
+    'auth.newPassword': 'كلمة المرور الجديدة',
+    'auth.enterNewPassword': 'أدخل كلمة المرور الجديدة',
+    'auth.resetPassword': 'تعيين كلمة المرور',
+    'auth.resetting': 'جاري التعيين...',
+    'auth.resetSuccess': 'تم تعيين كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.',
+    'auth.resetLinkExpired': 'انتهت صلاحية الرابط. يرجى طلب رابط جديد.',
     'auth.submit': 'تسجيل الدخول',
     'auth.signingIn': 'جاري تسجيل الدخول...',
     'auth.creating': 'جاري الإنشاء...',
@@ -465,6 +516,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auth.cookies': 'ملفات تعريف الارتباط',
     'auth.passwordMismatch': 'كلمة المرور غير متطابقه',
     'auth.passwordRequired': 'ادخل كلمة المرور',
+    'auth.passwordMinLength': 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+    'auth.nameRequired': 'الاسم مطلوب',
+    'auth.emailRequired': 'البريد الإلكتروني مطلوب',
+    'auth.nameMaxLength': 'الاسم يجب ألا يتجاوز 255 حرفاً',
     'auth.confirmPasswordRequired': 'ادخل تأكيد كلمة المرور',
     'auth.invalidEmail': 'ادخل بريدك الالكتروني الصحيح',
     'post.editPost': 'تعديل المنشور',
@@ -601,6 +656,15 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'تطبيق',
     'filter.noAttributesAvailable': 'لا توجد خصائص متاحة لهذه الفئة.',
     'filter.selectField': 'اختر',
+    'filter.postImages': 'صور المنشور',
+    'filter.allPosts': 'كل المنشورات',
+    'filter.withImages': 'منشورات بصور',
+    'filter.withoutImages': 'منشورات بدون صور',
+    'filter.sortBy': 'ترتيب النتائج',
+    'filter.sortNewest': 'الأحدث',
+    'filter.sortOldest': 'الأقدم',
+    'filter.sortPriceLowToHigh': 'السعر من الأقل إلى الأعلى',
+    'filter.sortPriceHighToLow': 'السعر من الأعلى إلى الأقل',
     'createPost.smartTitle': 'أنشئ إعلانك الذكي',
     'createPost.launch': 'انطلق بإعلانك الذكي',
     'createPost.placeholder': 'ماذا تريد أن تبيع اليوم؟',
@@ -723,6 +787,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.todaysNews': "Today's News",
     'home.viewAllLatestNews': 'View all latest news',
     'home.marketPulse': 'Market Pulse',
+    'home.marketPulseEmpty': 'No sections with at least +1% growth in the last 30 days vs the previous 30 days.',
+    'home.marketPulseGrowth': 'Growth',
+    'home.trendingEmpty': 'No standout posts by engagement in your country right now.',
+    'home.trendingEngagementHint': 'Comments & reactions',
     'home.cars': 'Cars',
     'home.realEstate': 'Real Estate',
     'home.electronics': 'Electronics',
@@ -802,6 +870,21 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auth.enterConfirmPassword': 'Enter password confirmation',
     'auth.rememberMe': 'Remember me?',
     'auth.forgotPassword': 'Forgot password?',
+    'auth.forgotPassTitle': 'Reset Password',
+    'auth.forgotPassDesc': 'Enter your email and we\'ll send you a reset link.',
+    'auth.sendResetLink': 'Send reset link',
+    'auth.sending': 'Sending...',
+    'auth.checkEmail': 'Check your email',
+    'auth.checkEmailDesc': 'If an account exists for this email, you will receive a password reset link.',
+    'auth.backToSignIn': 'Back to sign in',
+    'auth.resetPassTitle': 'Set new password',
+    'auth.resetPassDesc': 'Enter your new password and confirmation.',
+    'auth.newPassword': 'New password',
+    'auth.enterNewPassword': 'Enter new password',
+    'auth.resetPassword': 'Reset password',
+    'auth.resetting': 'Resetting...',
+    'auth.resetSuccess': 'Password has been reset. You can sign in now.',
+    'auth.resetLinkExpired': 'Reset link has expired. Please request a new one.',
     'auth.submit': 'Sign In',
     'auth.signingIn': 'Signing in...',
     'auth.creating': 'Creating...',
@@ -820,6 +903,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auth.cookies': 'Cookies',
     'auth.passwordMismatch': 'Passwords do not match',
     'auth.passwordRequired': 'Enter password',
+    'auth.passwordMinLength': 'Password must be at least 8 characters',
+    'auth.nameRequired': 'Name is required',
+    'auth.emailRequired': 'Email is required',
+    'auth.nameMaxLength': 'Name must not exceed 255 characters',
     'auth.confirmPasswordRequired': 'Enter password confirmation',
     'auth.invalidEmail': 'Enter a valid email address',
     'post.editPost': 'Edit Post',
@@ -956,6 +1043,15 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.apply': 'Apply',
     'filter.noAttributesAvailable': 'No attributes available for this category.',
     'filter.selectField': 'Select',
+    'filter.postImages': 'Post Images',
+    'filter.allPosts': 'All Posts',
+    'filter.withImages': 'Posts with images',
+    'filter.withoutImages': 'Posts without images',
+    'filter.sortBy': 'Sort by',
+    'filter.sortNewest': 'Newest first',
+    'filter.sortOldest': 'Oldest first',
+    'filter.sortPriceLowToHigh': 'Price: low to high',
+    'filter.sortPriceHighToLow': 'Price: high to low',
     'createPost.smartTitle': 'Create Your Smart Ad',
     'createPost.launch': 'Launch Smart Ad',
     'createPost.placeholder': 'What are you selling today?',

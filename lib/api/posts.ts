@@ -51,6 +51,8 @@ type FetchPostsParams = {
    * (Backend support depends on stored data; kept for API parity with UI.)
    */
   attributeRanges?: Record<number, { from?: string | number; to?: string | number }>
+  hasImages?: boolean
+  sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc'
 }
 
 /**
@@ -271,6 +273,14 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<PostsLi
   }
   if (params.priceMax != null && !Number.isNaN(params.priceMax)) {
     searchParams.set('price_max', String(params.priceMax))
+  }
+  if (params.hasImages === true) {
+    searchParams.set('has_images', '1')
+  } else if (params.hasImages === false) {
+    searchParams.set('has_images', '0')
+  }
+  if (params.sort) {
+    searchParams.set('sort', params.sort)
   }
   if (params.attributes) {
     for (const [attrIdRaw, optionIds] of Object.entries(params.attributes)) {
