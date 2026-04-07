@@ -1,0 +1,78 @@
+.wrapper {
+  border-radius: 14px;
+  border: 1px solid #ebe8e1;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
+  overflow: hidden;
+}
+
+.body {
+  padding: 0.65rem !important;
+  background: #fffdf8;
+}
+
+.heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #2f3138;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.tile {
+  border-radius: 11px;
+  padding: 0.52rem 0.48rem;
+  min-height: 72px;
+  color: #202833;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.icon {
+  font-size: 0.72rem;
+}
+
+.toneBlue {
+  background: linear-gradient(130deg, #ddeefe 10%, #b7dcff 50%, #88bcf9 100%);
+}
+
+.toneGold {
+  background: linear-gradient(130deg, #ffe9a9 8%, #ffd36e 52%, #f5be3f 100%);
+}
+
+.toneCoral {
+  background: linear-gradient(130deg, #ffd4bc 8%, #ff9f75 55%, #f57c5f 100%);
+}
+
+.toneGreen {
+  background: linear-gradient(130deg, #d5f5d7 8%, #8fddb0 55%, #54be89 100%);
+}
+
+.toneTeal {
+  background: linear-gradient(130deg, #c7efe9 10%, #91dfd6 55%, #63c9bf 100%);
+}
+
+.tonePurple {
+  background: linear-gradient(130deg, #e2dcfb 8%, #c4b9f3 52%, #a995e3 100%);
+}

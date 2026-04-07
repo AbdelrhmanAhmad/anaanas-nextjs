@@ -23,6 +23,8 @@ import TrendingAdsCard from './home/components/TrendingAdsCard'
 import SmartOpportunityCard from './home/components/SmartOpportunityCard'
 import AnanasVsOthersCard from './home/components/AnanasVsOthersCard'
 import FutureRoadmapCard from './home/components/FutureRoadmapCard'
+import MobileSectionsSwiper from './home/components/MobileSectionsSwiper'
+import MobileAIDashboard from './home/components/MobileAIDashboard'
 
 export async function generateMetadata({
   params,
@@ -63,7 +65,15 @@ const Home = async ({
   return (
     <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
       <Col md={8} lg={6} className=" gap-4">
-        <HomeBanner locale={uiLocale} />
+      <HomeBanner locale={uiLocale} />
+        
+        <div className="d-lg-none">
+          <MobileAIDashboard locale={uiLocale} />
+        </div>
+
+        <div className="d-lg-none">
+          <MobileSectionsSwiper sections={sections} locale={uiLocale} />
+        </div>
         {/* <Stories />   */}
         <CreatePostCard />
         {/* <AiInfrastructureCard locale={uiLocale} /> */}

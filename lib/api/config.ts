@@ -1,5 +1,5 @@
 /** Laravel `php artisan serve` default; override with NEXT_PUBLIC_API_BASE_URL or API_BASE_URL */
-const DEFAULT_API_BASE_URL = 'http://localhost:8000'
+const DEFAULT_API_BASE_URL = 'https://admin.anaanas.com'
 
 function resolveApiBaseUrl(): string {
   const fromEnv =
