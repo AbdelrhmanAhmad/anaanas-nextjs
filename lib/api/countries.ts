@@ -41,7 +41,7 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
 
 export async function fetchCountries(): Promise<Country[]> {
   const url = getApiUrl('/api/countries')
-  console.log('Fetching countries from:', url)
+  // //console.log('Fetching countries from:', url)
   
   const res = await fetch(url, {
     cache: 'no-store',
@@ -53,8 +53,8 @@ export async function fetchCountries(): Promise<Country[]> {
   }
 
   const json = await res.json()
-  console.log('Countries API response (raw):', json)
-  console.log('Response type:', typeof json, 'Is array:', Array.isArray(json))
+  //console.log('Countries API response (raw):', json)
+  //console.log('Response type:', typeof json, 'Is array:', Array.isArray(json))
 
   // التعامل مع بنية الاستجابة المختلفة
   let countriesData: Country[] = []
@@ -62,27 +62,27 @@ export async function fetchCountries(): Promise<Country[]> {
   // الحالة 1: الاستجابة هي array مباشرة
   if (Array.isArray(json)) {
     countriesData = json
-    console.log('Response is direct array')
+    //console.log('Response is direct array')
   }
   // الحالة 2: الاستجابة تحتوي على data
   else if (json && typeof json === 'object') {
     if (json.data && Array.isArray(json.data)) {
       countriesData = json.data
-      console.log('Response has data array')
+      //console.log('Response has data array')
     }
     // الحالة 3: الاستجابة تحتوي على status و data
     else if (json.status && json.data && Array.isArray(json.data)) {
       countriesData = json.data
-      console.log('Response has status and data array')
+      //console.log('Response has status and data array')
     }
     // الحالة 4: الاستجابة تحتوي على countries
     else if (json.countries && Array.isArray(json.countries)) {
       countriesData = json.countries
-      console.log('Response has countries array')
+      //console.log('Response has countries array')
     }
   }
   
-  console.log('Parsed countries data:', countriesData, 'Count:', countriesData.length)
+  //console.log('Parsed countries data:', countriesData, 'Count:', countriesData.length)
 
   // إضافة iso2 أو iso_code إذا لم تكن موجودة
   return countriesData.map((country) => {

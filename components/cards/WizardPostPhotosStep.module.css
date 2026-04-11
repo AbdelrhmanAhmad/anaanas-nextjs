@@ -1,0 +1,298 @@
+/* خطوة صور المعالج — شبكة معاينات + منطقة إفلات */
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.topRowText {
+  flex: 1;
+  min-width: 0;
+}
+
+.rulesStrip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(21, 21, 21, 0.45);
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  line-height: 1.45;
+}
+
+.errorList {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(220, 53, 69, 0.08);
+  border: 1px solid rgba(220, 53, 69, 0.22);
+  color: #842029;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.errorList ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+}
+
+.block {
+  margin-top: 1.15rem;
+}
+
+.block:first-of-type {
+  margin-top: 0.35rem;
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.subTitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #151515;
+  letter-spacing: -0.02em;
+}
+
+.subHint {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(21, 21, 21, 0.48);
+  line-height: 1.45;
+  max-width: 42rem;
+}
+
+.dropShell {
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(160deg, rgba(255, 253, 248, 0.98) 0%, rgba(250, 249, 247, 0.99) 100%);
+  border: 1.5px dashed rgba(21, 21, 21, 0.12);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  outline: none;
+}
+
+.dropShell:focus-visible {
+  border-color: rgba(254, 203, 1, 0.85);
+  box-shadow: 0 0 0 3px rgba(254, 203, 1, 0.22);
+}
+
+.dropShellActive {
+  border-color: rgba(254, 203, 1, 0.9);
+  border-style: solid;
+  box-shadow: 0 10px 28px rgba(254, 203, 1, 0.18);
+  background: linear-gradient(160deg, rgba(255, 251, 235, 0.98) 0%, rgba(255, 255, 255, 0.99) 100%);
+}
+
+.dropShellDisabled {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.dropFooter {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(21, 21, 21, 0.42);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tile {
+  position: relative;
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  aspect-ratio: 1;
+}
+
+.tileImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tileMeta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 8px 7px;
+  background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.78));
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.25;
+  max-height: 42%;
+  overflow: hidden;
+}
+
+.tileName {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tileSize {
+  display: block;
+  opacity: 0.88;
+  font-weight: 600;
+  font-size: 0.62rem;
+  margin-top: 2px;
+}
+
+.tileRemove {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 8px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(185, 28, 28, 0.92);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.tileRemove:hover {
+  background: #b91c1c;
+  transform: scale(1.04);
+}
+
+.tileRemove:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.savedDelete {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 8px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.savedDelete:hover {
+  background: rgba(15, 23, 42, 0.92);
+  transform: scale(1.04);
+}
+
+.savedDelete:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.savedDelete:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.addTile {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(21, 21, 21, 0.16);
+  background: rgba(255, 255, 255, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  color: rgba(21, 21, 21, 0.55);
+  font-size: 0.78rem;
+  font-weight: 900;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.addTile:hover {
+  border-color: rgba(254, 203, 1, 0.75);
+  background: rgba(254, 203, 1, 0.12);
+  color: #151515;
+  box-shadow: 0 8px 20px rgba(254, 203, 1, 0.15);
+}
+
+.addTile:focus-visible {
+  outline: none;
+  border-color: rgba(254, 203, 1, 0.9);
+  box-shadow: 0 0 0 3px rgba(254, 203, 1, 0.25);
+}
+
+.addIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(254, 203, 1, 0.22);
+  color: rgba(21, 21, 21, 0.75);
+}
+
+.fullNote {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: rgba(21, 21, 21, 0.48);
+}
+
+@keyframes photosSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinIcon {
+  animation: photosSpin 0.85s linear infinite;
+}

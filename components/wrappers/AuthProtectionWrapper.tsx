@@ -18,7 +18,7 @@ const AuthProtectionWrapper = ({ children }: ChildrenType) => {
     const isAuthPage = 
     pathname?.includes('/auth/sign-in') 
     || pathname?.includes('/auth/sign-up')
-    console.log("pathname" ,pathname)
+    // console.log("pathname" ,pathname)
 
     const isGlobalPage =
     (!pathname || pathname === '/' || pathname === '/ar' || pathname === '/en')

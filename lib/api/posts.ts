@@ -11,13 +11,13 @@ export type CreatePostData = {
   attributes: Array<{ attributeId: number; optionId: number | number[] }>
 }
 
+export type PostRecord = Record<string, any>
+
 type CreatePostResponse = {
   success: boolean
-  data?: any
+  data?: PostRecord
   message?: string
 }
-
-export type PostRecord = Record<string, any>
 
 export type PostsListResponse<T = PostRecord> = {
   current_page?: number

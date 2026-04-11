@@ -15,19 +15,33 @@ import Link from 'next/link'
 import Select from 'react-select'
 import { useRouter } from 'next/navigation'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react'
 import { fetchCategoriesBySectionId, type Category } from '@/lib/api/categories'
 import { fetchFields, fetchSubFields, type Field, type SubField, type AttributeOption } from '@/lib/api/fields'
 import { useAppData } from '@/context/AppDataContext'
 import type { Section } from '@/lib/api/sections'
-import { createPost, deletePostImage, updatePost, type CreatePostData } from '@/lib/api/posts'
+import { createPost, deletePostImage, updatePost, type CreatePostData, type PostRecord } from '@/lib/api/posts'
 import { useSession } from 'next-auth/react'
 import LoginRequiredDialog from '@/components/dialogs/LoginRequiredDialog'
-import DropzoneFormInput from '../form/DropzoneFormInput'
-import { BsImages } from 'react-icons/bs'
+import PostSuccessCelebrationModal from '@/components/dialogs/PostSuccessCelebrationModal'
+import { dispatchPostCreated } from '@/lib/postCreated'
+import WizardPostPhotosStep from './WizardPostPhotosStep'
+import clsx from 'clsx'
+import {
+  BsBullseye,
+  BsCheck2,
+  BsChevronLeft,
+  BsChevronRight,
+  BsCurrencyDollar,
+  BsGraphUp,
+  BsPeople,
+} from 'react-icons/bs'
 import { useParams } from 'next/navigation'
 import { t } from '@/lib/translations'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { CreatePostWizardStepper, wizardStepMotion } from './CreatePostWizardUI'
 import styles from './CreatePostCard.module.css'
+import { toast } from 'react-toastify'
 
 type CreatePostCardProps = {
   mode?: 'create' | 'edit'
@@ -36,10 +50,77 @@ type CreatePostCardProps = {
   locale?: string
 }
 
+const SMART_CHIP_COMING_ICONS = [BsGraphUp, BsBullseye, BsPeople, BsCurrencyDollar] as const
+const SMART_CHIP_COMING_MIN_WIDTHS = [88, 108, 96, 92] as const
+
+/** اقتراحات ذكية «قريباً»: أيقونة واضحة + شريط نص مموّه بدون نص في DOM */
+function SmartChipsComingSoonTeaser() {
+  return (
+    <div className={`${styles.smartChips} ${styles.smartChipsComing}`} aria-hidden="true">
+      {SMART_CHIP_COMING_MIN_WIDTHS.map((minW, idx) => {
+        const Icon = SMART_CHIP_COMING_ICONS[idx]
+        return (
+          <span
+            key={idx}
+            className={styles.smartChipComing}
+            style={{ minWidth: `${minW}px` }}
+          >
+            <span className={styles.smartChipComingIcon}>
+              <Icon size={14} aria-hidden />
+            </span>
+            <span className={styles.smartChipComingCipher} />
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+/** أنماط react-select ناعمة متوافقة مع حقول المعالج */
+function buildWizardSelectStyles(hasError: boolean) {
+  return {
+    control: (base: Record<string, unknown>, state: { isFocused: boolean }) => ({
+      ...base,
+      minHeight: 46,
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: hasError
+        ? '#e8a0a0'
+        : state.isFocused
+          ? 'rgba(254, 203, 1, 0.82)'
+          : 'rgba(21, 21, 21, 0.08)',
+      backgroundColor: '#faf9f7',
+      boxShadow: state.isFocused && !hasError ? '0 0 0 3px rgba(254, 203, 1, 0.2)' : 'none',
+      '&:hover': {
+        borderColor: hasError ? '#e8a0a0' : 'rgba(21, 21, 21, 0.12)',
+      },
+    }),
+    menu: (base: Record<string, unknown>) => ({
+      ...base,
+      borderRadius: 12,
+      overflow: 'hidden',
+      boxShadow: '0 16px 44px rgba(21, 21, 21, 0.12)',
+    }),
+    menuList: (base: Record<string, unknown>) => ({ ...base, padding: 4 }),
+    option: (base: Record<string, unknown>, state: { isSelected: boolean; isFocused: boolean }) => ({
+      ...base,
+      cursor: 'pointer',
+      backgroundColor: state.isSelected
+        ? '#151515'
+        : state.isFocused
+          ? 'rgba(254, 203, 1, 0.18)'
+          : 'transparent',
+      color: state.isSelected ? '#fecb01' : '#151515',
+    }),
+  }
+}
+
 const CreatePostCard = ({ mode = 'create', initialPost, postId, locale: localeProp }: CreatePostCardProps) => {
   // الحصول على الجلسة أولاً
   const { data: session, status } = useSession()
   const [showLoginAlert, setShowLoginAlert] = useState(false)
+  const [postSuccessOpen, setPostSuccessOpen] = useState(false)
+  const [postSuccessMeta, setPostSuccessMeta] = useState<{ id?: number | string; title?: string } | null>(null)
   const router = useRouter()
   const params = useParams<{ locale?: string }>()
   const isEdit = mode === 'edit'
@@ -126,16 +207,82 @@ const [step, setStep] = useState(1)
       title: t('createPost.smartTitle', locale as any),
       launch: t('createPost.launch', locale as any),
       placeholder: t('createPost.placeholder', locale as any),
-      chips: [
-        t('createPost.chipDemand', locale as any),
-        t('createPost.chipRoi', locale as any),
-        t('createPost.chipTarget', locale as any),
-        t('createPost.chipBudget', locale as any),
-      ],
     }
   }, [locale])
+
+  const wizardStepLabels = useMemo(
+    () => [
+      t('createPost.wizard.step1', locale as any),
+      t('createPost.wizard.step2', locale as any),
+      t('createPost.wizard.step3', locale as any),
+      t('createPost.wizard.step4', locale as any),
+      t('createPost.wizard.step5', locale as any),
+      t('createPost.wizard.step6', locale as any),
+    ],
+    [locale],
+  )
+
+  const reduceMotion = useReducedMotion()
+  const fieldChunkTotal = Math.max(1, Math.ceil(fields.length / FIELDS_PER_SUBSTEP))
+
+  const showWizardStepper =
+    step > 1 ||
+    (typeof title === 'string' && title.trim().length > 0) ||
+    (typeof description === 'string' && description.trim().length > 0)
+
+  const isWizardRtl = locale === 'ar'
+
+  const wizardNav = useMemo(
+    () => ({
+      prev: t('createPost.wizard.navPrev', locale as any),
+      next: t('createPost.wizard.navNext', locale as any),
+      submit: t('createPost.wizard.navSubmit', locale as any),
+      submitting: t('createPost.wizard.navSubmitting', locale as any),
+    }),
+    [locale],
+  )
+
+  const navPrevIcon = isWizardRtl ? (
+    <BsChevronRight className={styles.wizardBtnIcon} aria-hidden />
+  ) : (
+    <BsChevronLeft className={styles.wizardBtnIcon} aria-hidden />
+  )
+  const navNextIcon = isWizardRtl ? (
+    <BsChevronLeft className={styles.wizardBtnIcon} aria-hidden />
+  ) : (
+    <BsChevronRight className={styles.wizardBtnIcon} aria-hidden />
+  )
+
+  const navSubmitIcon = (
+    <BsCheck2 className={styles.wizardBtnIcon} aria-hidden />
+  )
+
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
-  
+
+  const handleDeleteExistingImage = useCallback(
+    async (img: { id: number | string; url: string }) => {
+      if (!postId) return
+      const accessToken = session?.accessToken
+      if (!accessToken) {
+        setShowLoginAlert(true)
+        return
+      }
+      const ok = confirm(t('createPost.photos.confirmDelete', locale as any))
+      if (!ok) return
+      try {
+        setDeletingImageId(String(img.id))
+        await deletePostImage(postId, img.id, accessToken)
+        setExistingImages((prev) => prev.filter((x) => String(x.id) !== String(img.id)))
+      } catch (e) {
+        console.error('Delete image failed', e)
+        alert(e instanceof Error ? e.message : t('createPost.photos.deleteFailed', locale as any))
+      } finally {
+        setDeletingImageId(null)
+      }
+    },
+    [postId, session?.accessToken, locale],
+  )
+
   // مرجع للمكون الرئيسي لعمل scroll to top
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -221,6 +368,7 @@ const [step, setStep] = useState(1)
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
     watch,
     trigger,
     reset,
@@ -316,46 +464,86 @@ const [step, setStep] = useState(1)
     }
   }, [step])
 
-  // إعادة تهيئة الـ form عند تغيير القسم أو الفئة
+  // إعادة تهيئة الحقول الديناميكية عند تغيير القسم أو الفئة — دون مسح العنوان/الوصف في RHF
+  // (كان reset() بدون قيم يفرغ react-hook-form بينما title/description تبقى في useState فيظهر الحقل مملوءاً والتحقق يفشل)
   useEffect(() => {
     if (isEdit) return
-    // إعادة تعيين القيم والحقول المتداخلة عند تغيير القسم
     if (selectedSection) {
       setFormValues({})
       setNestedFields({})
-      reset()
+      reset({
+        title: (getValues('title') as string | undefined) ?? title ?? '',
+        description: (getValues('description') as string | undefined) ?? description ?? '',
+        section_id: selectedSection.id,
+        category_id: undefined,
+        city: undefined,
+        price: undefined,
+      })
       setSubStep(1)
     }
-  }, [selectedSection?.id, reset])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- يشغّل عند تغيير معرّف القسم فقط؛ title/description من آخر إغلاق للـ effect
+  }, [selectedSection?.id, reset, getValues])
 
   useEffect(() => {
     if (isEdit) return
-    // إعادة تعيين القيم والحقول المتداخلة عند تغيير الفئة
     if (selectedCategory) {
       setFormValues({})
       setNestedFields({})
-      reset()
+      reset({
+        title: (getValues('title') as string | undefined) ?? title ?? '',
+        description: (getValues('description') as string | undefined) ?? description ?? '',
+        section_id: selectedSection?.id,
+        category_id: selectedCategory.id,
+        city: undefined,
+        price: undefined,
+      })
       setSubStep(1)
     }
-  }, [selectedCategory?.id, reset])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- يشغّل عند تغيير معرّف الفئة فقط
+  }, [selectedCategory?.id, reset, getValues])
 
-  // جلب الـ categories عند اختيار section
+  // عند العودة لخطوة النص: مزامنة RHF مع الحالة المعروضة (يغطي أي فقدان سابق)
+  useEffect(() => {
+    if (step !== 1) return
+    setValue('title', title, { shouldValidate: false })
+    setValue('description', description, { shouldValidate: false })
+  }, [step, title, description, setValue])
+
+  // عند فتح خطوة القسم/الفئة: التأكد من أن معرفات RHF تطابق الاختيار البصري
+  useEffect(() => {
+    if (isEdit) return
+    if (step !== 3 || !selectedSection) return
+    setValue('section_id', selectedSection.id, { shouldValidate: false })
+  }, [step, selectedSection?.id, isEdit, setValue])
+
+  useEffect(() => {
+    if (isEdit) return
+    if (step !== 4 || !selectedSection || !selectedCategory) return
+    setValue('section_id', selectedSection.id, { shouldValidate: false })
+    setValue('category_id', selectedCategory.id, { shouldValidate: false })
+  }, [step, selectedSection?.id, selectedCategory?.id, isEdit, setValue])
+
+  const loadCategoriesForSection = useCallback(
+    async (sectionId: number) => {
+      setLoadingCategories(true)
+      try {
+        const categoriesData = await fetchCategoriesBySectionId(sectionId, locale)
+        setSectionCategories(categoriesData)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      } finally {
+        setLoadingCategories(false)
+      }
+    },
+    [locale],
+  )
+
+  // جلب الفئات عند تغيير القسم (نفس القسم بدون تغيير لا يعيد التشغيل — لا نفرغ القائمة عند الرجوع من خطوة الفئات)
   useEffect(() => {
     if (selectedSection) {
-      const loadCategories = async () => {
-        setLoadingCategories(true)
-        try {
-          const categoriesData = await fetchCategoriesBySectionId(selectedSection.id, locale)
-          setSectionCategories(categoriesData)
-        } catch (error) {
-          console.error('Error fetching categories:', error)
-        } finally {
-          setLoadingCategories(false)
-        }
-      }
-      loadCategories()
+      void loadCategoriesForSection(selectedSection.id)
     }
-  }, [selectedSection])
+  }, [selectedSection, loadCategoriesForSection])
 
   // جلب الحقول عند الوصول لـ step 4
   useEffect(() => {
@@ -655,12 +843,20 @@ const [step, setStep] = useState(1)
 
       if (response.success) {
         if (isEdit && postId) {
-          alert('تم تعديل الإعلان بنجاح!')
+          toast.success(t('createPost.success.updated', locale as any))
           const nextLocale = locale || (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '')
           const target = nextLocale ? `/${nextLocale}/post/${postId}` : `/post/${postId}`
           router.push(target)
           return
         }
+
+        const created = response.data as PostRecord | undefined
+        if (created && created.id != null) {
+          dispatchPostCreated(created)
+        }
+        startTransition(() => {
+          router.refresh()
+        })
 
         // نجح الإرسال - إعادة تعيين النموذج
         setFormValues({})
@@ -675,8 +871,11 @@ const [step, setStep] = useState(1)
         setImages([])
         setDropzoneKey((prev) => prev + 1)
         reset()
-        // يمكن إضافة toast notification هنا
-        alert('تم إرسال الإعلان بنجاح!')
+        setPostSuccessMeta({
+          id: created?.id,
+          title: (created?.title as string | undefined) || title || undefined,
+        })
+        setPostSuccessOpen(true)
       } else {
         setSubmitError(response.message || 'حدث خطأ أثناء حفظ البيانات')
       }
@@ -702,11 +901,17 @@ const [step, setStep] = useState(1)
     const fieldError = errors[fieldKey]
 
     return (
-      <div key={`${field.id}_${currentPath}`}
-       className={`mb-3 ${level > 0 ? 'ms-4 border-start ps-3 border-primary' : ''}`}>
-        <label className="form-label">
+      <div
+        key={`${field.id}_${currentPath}`}
+        className={clsx(
+          styles.wizardFieldGroup,
+          level > 0 && styles.wizardNestedPanel,
+          level > 1 && styles.wizardNestedPanelDeep,
+        )}
+      >
+        <label className={styles.wizardLabel}>
           {field.name}
-          {field.required && <span className="text-danger">*</span>}
+          {field.required && <span className={styles.wizardRequired}>*</span>}
         </label>
         {fieldError && (
           <div className="text-danger small mb-1">{fieldError.message as string}</div>
@@ -817,12 +1022,7 @@ const [step, setStep] = useState(1)
             className="react-select-container"
             classNamePrefix="react-select"
             required={field.required}
-            styles={{
-              control: (base) => ({
-                ...base,
-                minHeight: '38px',
-              }),
-            }}
+            styles={buildWizardSelectStyles(!!fieldError) as any}
           />
         )}
 
@@ -832,16 +1032,11 @@ const [step, setStep] = useState(1)
               <button
                 key={option.id}
                 type="button"
-                className={`btn btn-lg ${value === option.id.toString()
-                  ? 'btn-primary shadow-sm'
-                  : 'btn-outline-primary'
-                  }`}
-                style={{
-                  minWidth: '120px',
-                  transition: 'all 0.3s ease',
-                  borderWidth: value === option.id.toString() ? '2px' : '1px',
-                  fontWeight: value === option.id.toString() ? '600' : '400',
-                }}
+                className={clsx(
+                  'btn',
+                  styles.wizardRadioChip,
+                  value === option.id.toString() && styles.wizardRadioChipActive,
+                )}
                 onClick={async () => {
                   const selectedValue = option.id.toString()
 
@@ -884,7 +1079,7 @@ const [step, setStep] = useState(1)
         {field.input_type === 'text' && (
           <input
             type="text"
-            className="form-control"
+            className={styles.wizardInput}
             value={value || ''}
             onChange={(e) => handleFieldChange(fieldKey, e.target.value, nestedKey)}
             required={field.required}
@@ -893,7 +1088,7 @@ const [step, setStep] = useState(1)
 
         {field.input_type === 'textarea' && (
           <textarea
-            className="form-control"
+            className={styles.wizardTextarea}
             rows={3}
             value={value || ''}
             onChange={(e) => handleFieldChange(fieldKey, e.target.value, nestedKey)}
@@ -904,7 +1099,7 @@ const [step, setStep] = useState(1)
         {field.input_type === 'number' && (
           <input
             type="number"
-            className="form-control"
+            className={styles.wizardInput}
             value={value || ''}
             onChange={(e) => handleFieldChange(fieldKey, e.target.value, nestedKey)}
             required={field.required}
@@ -951,13 +1146,7 @@ const [step, setStep] = useState(1)
             />
           </div>
 
-          {/* <div className={styles.smartChips}>
-            {smartCopy.chips.map((chip, idx) => (
-              <span key={idx} className={styles.smartChip}>
-                {chip}
-              </span>
-            ))}
-          </div> */}
+          <SmartChipsComingSoonTeaser />
         </Card>
 
         <LoginRequiredDialog
@@ -971,7 +1160,7 @@ const [step, setStep] = useState(1)
 
   return (
     <>
-      <Card ref={cardRef} className={`card-body ${styles.smartCard}`}>
+      <Card ref={cardRef} className={`card-body ${styles.smartCard} ${styles.wizardCard}`}>
         <div className={styles.smartRow}>
           <div className="avatar avatar-xs">
             <span role="button">
@@ -980,52 +1169,57 @@ const [step, setStep] = useState(1)
             </span>
           </div>
 
-          <div className={styles.smartContent}>
+          <div
+            className={styles.smartContent}
+            dir={isWizardRtl ? 'rtl' : 'ltr'}
+          >
             <div className={styles.smartHeaderInline}>
               <h5 className={styles.smartTitle}>{smartCopy.title}</h5>
               <button type="button" className={styles.smartBtn} onClick={() => setStep(1)}>
                 {smartCopy.launch}
               </button>
             </div>
+{/* 
+          <AnimatePresence initial={false}>
+            {showWizardStepper && (
+              <motion.div
+                key="wizard-stepper"
+                initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                className={styles.wizardStepperSticky}
+              >
+                <CreatePostWizardStepper
+                  currentStep={step}
+                  stepLabels={wizardStepLabels}
+                  subStep={subStep}
+                  subStepTotal={fieldChunkTotal}
+                  subStepPartLabel={`${t('createPost.wizard.dynamicFields', locale as any)} · ${subStep}/${fieldChunkTotal}`}
+                  dir={isWizardRtl ? 'rtl' : 'ltr'}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence> */}
 
-          {/* شريط التقدم للـ steps الرئيسية */}
-          <div className="mb-3  d-none">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-muted small">
-                الخطوة {step} من 6
-              </span>
-              <div className="d-flex gap-1">
-                {[1, 2, 3, 4, 5, 6].map((stepNum) => (
-                  <div
-                    key={stepNum}
-                    className={`rounded-circle ${stepNum <= step ? 'bg-primary' : 'bg-secondary'}`}
-                    style={{ width: '10px', height: '10px' }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="progress" style={{ height: '6px' }}>
-              <div
-                className="progress-bar"
-                role="progressbar"
-                style={{
-                  width: `${(step / 6) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
-
-
+          <div className={styles.wizardScroll}>
           <form className="w-100">
+          <AnimatePresence mode="wait">
 {
   step === 1 && (
-    <>
-                  <div className="mb-3">
-                    <label className="form-label">
-                      عنوان الإعلان <span className="text-danger">*</span>
+    <motion.div key="w-1" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
+                  <p className={styles.wizardLead}>
+                    {t('createPost.wizard.lead', locale as any)}
+                  </p>
+
+                  <div className={styles.wizardFieldGroup}>
+                    <label className={styles.wizardLabel} htmlFor="create-post-title">
+                      عنوان الإعلان
+                      <span className={styles.wizardRequired}>*</span>
                     </label>
                     <input
-                      className={`form-control ${styles.smartInput} ${errors.title ? 'is-invalid' : ''}`}
+                      id="create-post-title"
+                      className={clsx(styles.wizardInput, errors.title && 'is-invalid')}
                       name="title"
                       placeholder={smartCopy.placeholder}
                       value={title || ''}
@@ -1038,174 +1232,113 @@ const [step, setStep] = useState(1)
                       <div className="text-danger small mt-1">{errors.title.message as string}</div>
                     )}
                   </div>
-                  <div className={styles.smartChips}>
-                    {smartCopy.chips.map((chip, idx) => (
-                      <span key={idx} className={styles.smartChip}>
-                        {chip}
+
+                  {title.trim().length > 0 && <SmartChipsComingSoonTeaser />}
+
+                  {title.trim().length > 0 && (
+                    <div className={styles.wizardFieldGroup}>
+                      <label className={styles.wizardLabel} htmlFor="create-post-description">
+                        وصف الإعلان
+                        <span className={styles.wizardRequired}>*</span>
+                      </label>
+                      <textarea
+                        id="create-post-description"
+                        className={clsx(styles.wizardTextarea, errors.description && 'is-invalid')}
+                        rows={4}
+                        name="description"
+                        placeholder="اكتب وصفاً يوضّح الحالة، المواصفات، وما يميّز إعلانك"
+                        value={description || ''}
+                        onChange={(e) => {
+                          setDescription(e.target.value)
+                          setValue('description', e.target.value, { shouldValidate: true })
+                        }}
+                        required
+                      />
+                      {errors.description && (
+                        <div className="text-danger small mt-1">{errors.description.message as string}</div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className={styles.wizardNavRow}>
+                    <span aria-hidden="true" />
+                    <button
+                      type="button"
+                      className={styles.wizardBtnPrimary}
+                      onClick={async () => {
+                        const titleValid = await trigger('title')
+                        const descriptionValid = await trigger('description')
+                        if (titleValid && descriptionValid) {
+                          setStep(step + 1)
+                        }
+                      }}
+                    >
+                      <span className={styles.wizardBtnInner}>
+                        {wizardNav.next}
+                        {navNextIcon}
                       </span>
-                    ))}
+                    </button>
                   </div>
-                  {
-                    title &&
-                    <>
-
-                      <div className="mb-3">
-                        <label className="form-label">
-                          وصف الإعلان <span className="text-danger">*</span>
-                        </label>
-                        <textarea
-                          className={`form-control ${errors.description ? 'is-invalid' : ''}`}
-                          rows={3}
-                          name="description"
-                          placeholder="اكتب وصف الاعلان"
-                          value={description || ''}
-                          onChange={(e) => {
-                            setDescription(e.target.value)
-                            setValue('description', e.target.value, { shouldValidate: true })
-                          }}
-                          required
-                        />
-                        {errors.description && (
-                          <div className="text-danger small mt-1">{errors.description.message as string}</div>
-                        )}
-          </div>
-                      <div className="d-flex justify-content-between align-items-center mt-3">
-                        <div></div>
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          onClick={async () => {
-                            const titleValid = await trigger('title')
-                            const descriptionValid = await trigger('description')
-                            if (titleValid && descriptionValid) {
-                              setStep(step + 1)
-                            }
-                          }}
-                        >
-                          التالي →
-                        </button>
-                      </div>
-
-
-
-                    </>
-                  }
-
-
-    </>
+    </motion.div>
   )
 }
 {
   step === 2 && (
-    <>
-      <div className="mb-4">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <label className="form-label fw-bold mb-2">صور الإعلان</label>
-            <p className="text-muted small mb-0">يمكنك رفع حتى 5 صور. يفضّل صور واضحة تبين تفاصيل الإعلان.</p>
-          </div>
-          {images.length > 0 && (
-            <span className="badge bg-light text-dark border">
-              {images.length} / 5 صور
-            </span>
-          )}
-        </div>
+    <motion.div key="w-2" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
+      <WizardPostPhotosStep
+        locale={locale}
+        dir={isWizardRtl ? 'rtl' : 'ltr'}
+        classNames={{
+          section: styles.wizardSection,
+          sectionTitle: styles.wizardSectionTitle,
+          sectionHint: styles.wizardSectionHint,
+          badgeSoft: styles.wizardBadgeSoft,
+        }}
+        images={images}
+        onImagesChange={setImages}
+        dropzoneKey={dropzoneKey}
+        isEdit={isEdit}
+        existingImages={existingImages}
+        deletingImageId={deletingImageId}
+        onDeleteExistingImage={isEdit ? handleDeleteExistingImage : undefined}
+      />
 
-        {isEdit && existingImages.length > 0 && (
-          <div className="mt-3">
-            <div className="d-flex justify-content-between align-items-center">
-              <div className="fw-semibold">الصور الحالية</div>
-              <small className="text-muted">يمكنك حذف الصور القديمة</small>
-            </div>
-            <div className="row g-2 mt-2">
-              {existingImages.map((img) => (
-                <div key={String(img.id)} className="col-6 col-md-4 col-lg-3">
-                  <div className="border rounded p-2 h-100">
-                    <img src={img.url} alt="post image" className="w-100 rounded" style={{ objectFit: 'cover', height: 110 }} />
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-danger w-100 mt-2"
-                      disabled={deletingImageId === String(img.id)}
-                      onClick={async () => {
-                        if (!postId) return
-                        const accessToken = session?.accessToken
-                        if (!accessToken) {
-                          setShowLoginAlert(true)
-                          return
-                        }
-                        const ok = confirm('هل تريد حذف هذه الصورة؟')
-                        if (!ok) return
-                        try {
-                          setDeletingImageId(String(img.id))
-                          await deletePostImage(postId, img.id, accessToken)
-                          setExistingImages((prev) => prev.filter((x) => String(x.id) !== String(img.id)))
-                        } catch (e) {
-                          console.error('Delete image failed', e)
-                          alert(e instanceof Error ? e.message : 'فشل حذف الصورة')
-                        } finally {
-                          setDeletingImageId(null)
-                        }
-                      }}
-                    >
-                      {deletingImageId === String(img.id) ? 'جارٍ الحذف...' : 'حذف'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mt-3">
-          <DropzoneFormInput
-            key={dropzoneKey}
-            label=""
-            showPreview
-            icon={BsImages}
-            iconProps={{ className: 'display-4 text-primary' }}
-            text="اسحب أو اضغط لرفع الصور (PNG, JPG, JPEG)"
-            textClassName="text-muted fw-semibold"
-            helpText={
-              <ul className="mb-0 small text-muted">
-                <li>الحد الأقصى 5 صور.</li>
-                <li>سيتم إرفاق الصور مع إرسال الإعلان.</li>
-              </ul>
-            }
-            onFileUpload={(files) => {
-              const safeFiles = Array.isArray(files) ? files.slice(0, 5) : []
-              setImages(safeFiles)
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="d-flex justify-content-between align-items-center mt-3">
+      <div className={styles.wizardNavRow}>
         <button
           type="button"
-          className="btn btn-secondary"
+          className={styles.wizardBtnSecondary}
           onClick={() => setStep(1)}
         >
-          ← السابق
+          <span className={styles.wizardBtnInner}>
+            {navPrevIcon}
+            {wizardNav.prev}
+          </span>
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className={styles.wizardBtnPrimary}
           onClick={() => setStep(3)}
         >
-          التالي →
+          <span className={styles.wizardBtnInner}>
+            {wizardNav.next}
+            {navNextIcon}
+          </span>
         </button>
       </div>
-    </>
+    </motion.div>
   )
 }
 {
   step === 3 && (
-    <>
+    <motion.div key="w-3" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
 <Row className="position-relative">
           <Col xl={12} lg={11} className="mx-auto">
-                      <label className="form-label">
-                        اختر القسم <span className="text-danger">*</span>
-                      </label>
+                      <section className={styles.wizardSection}>
+                      <h3 className={styles.wizardSectionTitle}>اختر القسم</h3>
+                      <p className={styles.wizardSectionHint}>
+                        القسم يحدد أين يظهر إعلانك ضمن أقسام المنصة المبوبة.
+                      </p>
+                      </section>
                       {errors.section_id && (
                         <div className="alert alert-danger">
                           {errors.section_id.message as string}
@@ -1219,7 +1352,7 @@ const [step, setStep] = useState(1)
                       ) : loadingSections ? (
                         <div className="text-center py-4">جاري التحميل...</div>
                       ) : (
-                        <div className="d-flex gap-3 mt-4 pb-2 flex-wrap">
+                        <div className={styles.wizardPickGrid}>
                           {sections.map((sectionItem) => (
                             <div
                               key={sectionItem.id}
@@ -1232,9 +1365,8 @@ const [step, setStep] = useState(1)
                                   setStep(4)
                                 }
                               }}
-                              className={`card card-body mb-0 p-3 text-center flex-shrink-0 ${selectedSection?.id === sectionItem.id ? 'border-primary border-2' : ''
+                              className={`card card-body mb-0 p-3 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${selectedSection?.id === sectionItem.id ? styles.wizardPickCardActive : ''
                                 }`}
-                              style={{ minWidth: 150, maxWidth: 180, cursor: 'pointer' }}
                             >
                               {sectionItem.icon && (
                                 <Image
@@ -1251,44 +1383,57 @@ const [step, setStep] = useState(1)
                           ))}
                         </div>
                       )}
-                      <div className="d-flex justify-content-between align-items-center mt-3">
+                      <div className={styles.wizardNavRow}>
                         <button
                           type="button"
-                          className="btn btn-secondary"
+                          className={styles.wizardBtnSecondary}
                           onClick={() => setStep(step - 1)}
                         >
-                          ← السابق
+                          <span className={styles.wizardBtnInner}>
+                            {navPrevIcon}
+                            {wizardNav.prev}
+                          </span>
                         </button>
                         {(selectedSection || isEdit) && (
                           <button
                             type="button"
-                            className="btn btn-primary"
+                            className={styles.wizardBtnPrimary}
                             onClick={async () => {
                               if (isEdit) {
                                 setStep(4)
                                 return
                               }
                               const isValid = await trigger('section_id')
-                              if (isValid) setStep(4)
+                              if (!isValid) return
+                              if (selectedSection && sectionCategories.length === 0) {
+                                await loadCategoriesForSection(selectedSection.id)
+                              }
+                              setStep(4)
                             }}
                           >
-                            التالي →
+                            <span className={styles.wizardBtnInner}>
+                              {wizardNav.next}
+                              {navNextIcon}
+                            </span>
                           </button>
                         )}
                       </div>
                     </Col>
                   </Row>
-                </>
+    </motion.div>
               )
             }
             {
               step === 4 && (
-                <>
+    <motion.div key="w-4" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
                   <Row className="position-relative">
                     <Col xl={12} lg={11} className="mx-auto">
-                      <label className="form-label">
-                        اختر الفئة <span className="text-danger">*</span>
-                      </label>
+                      <section className={styles.wizardSection}>
+                        <h3 className={styles.wizardSectionTitle}>اختر الفئة</h3>
+                        <p className={styles.wizardSectionHint}>
+                          الفئة تساعد المشترين على العثور على إعلانك بسرعة.
+                        </p>
+                      </section>
                       {errors.category_id && (
                         <div className="alert alert-danger">
                           {errors.category_id.message as string}
@@ -1304,12 +1449,14 @@ const [step, setStep] = useState(1)
                       ) : (
                         <>
                           {selectedSection && (
-                            <div className="mb-3 p-2 bg-light rounded">
-                              <small className="text-muted">القسم المختار:</small>
-                              <h6 className="mb-0">{selectedSection.name}</h6>
+                            <div className={clsx(styles.wizardSummaryBanner, 'mb-3')}>
+                              <p className={styles.wizardSummaryMeta}>
+                                القسم المختار
+                              </p>
+                              <p className={styles.wizardSummaryPickTitle}>{selectedSection.name}</p>
                             </div>
                           )}
-                          <div className="d-flex gap-3 mt-4 pb-2 flex-wrap">
+                          <div className={styles.wizardPickGrid}>
                             {sectionCategories.map((category) => (
                               <div
                   key={category.id}
@@ -1322,9 +1469,8 @@ const [step, setStep] = useState(1)
                                     setStep(5)
                                   }
                                 }}
-                                className={`card card-body mb-0 p-3 text-center flex-shrink-0 ${selectedCategory?.id === category.id ? 'border-primary border-2' : ''
+                                className={`card card-body mb-0 p-3 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${selectedCategory?.id === category.id ? styles.wizardPickCardActive : ''
                                   }`}
-                                style={{ minWidth: 150, maxWidth: 180, cursor: 'pointer' }}
                 >
                   {category.icon && (
                     <Image
@@ -1342,23 +1488,25 @@ const [step, setStep] = useState(1)
                           </div>
                         </>
                       )}
-                      <div className="d-flex justify-content-between align-items-center mt-3">
+                      <div className={styles.wizardNavRow}>
                         <button
                           type="button"
-                          className="btn btn-secondary"
+                          className={styles.wizardBtnSecondary}
                           onClick={() => {
                             setSelectedCategory(null)
-                            setSectionCategories([])
                             setValue('category_id', undefined)
                             setStep(step - 1)
                           }}
                         >
-                          ← السابق
+                          <span className={styles.wizardBtnInner}>
+                            {navPrevIcon}
+                            {wizardNav.prev}
+                          </span>
                         </button>
                         {(selectedCategory || isEdit) && (
                           <button
                             type="button"
-                            className="btn btn-primary"
+                            className={styles.wizardBtnPrimary}
                             onClick={async () => {
                               if (isEdit) {
                                 setStep(5)
@@ -1368,36 +1516,46 @@ const [step, setStep] = useState(1)
                               if (isValid) setStep(5)
                             }}
                           >
-                            التالي →
+                            <span className={styles.wizardBtnInner}>
+                              {wizardNav.next}
+                              {navNextIcon}
+                            </span>
                           </button>
                         )}
             </div>
           </Col>
         </Row>
-                </>
+    </motion.div>
               )
             }
             {
               step === 6 && (
-                <>
+    <motion.div key="w-6" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
                   <Row className="position-relative">
                     <Col xl={12} lg={11} className="mx-auto">
                       {selectedSection && selectedCategory && (
-                        <div className="mt-4">
-                          <div className="mb-4">
-                            <h5 className="mb-3">معلومات إضافية</h5>
-                            <div className="text-muted small mb-3">
-                              <span>القسم: {selectedSection.name}</span>
-                              <span className="mx-2">•</span>
-                              <span>الفئة: {selectedCategory.name}</span>
-                            </div>
+                        <div className="mt-2">
+                          <section className={styles.wizardSection}>
+                            <h3 className={styles.wizardSectionTitle}>الموقع والسعر</h3>
+                            <p className={styles.wizardSectionHint}>
+                              آخر خطوة قبل النشر: حدّد المدينة والسعر بما يتوافق مع سوقك.
+                            </p>
+                          </section>
+
+                          <div className={clsx(styles.wizardSummaryBanner, 'mb-4')}>
+                            <p className={styles.wizardSummaryMeta}>
+                              {selectedSection.name}
+                              <span className="mx-2">·</span>
+                              {selectedCategory.name}
+                            </p>
                           </div>
 
                           <form onSubmit={handleSubmit(onSubmit)}>
                             {/* حقل اختيار المدينة */}
-                            <div className="mb-4">
-                              <label className="form-label">
-                                اختر المدينة <span className="text-danger">*</span>
+                            <div className={styles.wizardFieldGroup}>
+                              <label className={styles.wizardLabel}>
+                                المدينة
+                                <span className={styles.wizardRequired}>*</span>
                               </label>
                               {loadingCities ? (
                                 <div className="text-center py-3">
@@ -1432,16 +1590,7 @@ const [step, setStep] = useState(1)
                                     noOptionsMessage={() => 'لا توجد مدن متاحة'}
                                     className="react-select-container"
                                     classNamePrefix="react-select"
-                                    styles={{
-                                      control: (base, state) => ({
-                                        ...base,
-                                        minHeight: '38px',
-                                        borderColor: errors.city ? '#dc3545' : state.isFocused ? '#86b7fe' : '#ced4da',
-                                        '&:hover': {
-                                          borderColor: errors.city ? '#dc3545' : '#86b7fe',
-                                        },
-                                      }),
-                                    }}
+                                    styles={buildWizardSelectStyles(!!errors.city) as any}
                                   />
                                   {errors.city && (
                                     <div className="text-danger small mt-1">{errors.city.message as string}</div>
@@ -1459,14 +1608,15 @@ const [step, setStep] = useState(1)
                             </div>
 
                             {/* حقل السعر */}
-                            <div className="mb-4">
-                              <label className="form-label">
-                                السعر <span className="text-danger">*</span>
+                            <div className={styles.wizardFieldGroup}>
+                              <label className={styles.wizardLabel}>
+                                السعر
+                                <span className={styles.wizardRequired}>*</span>
                               </label>
-                              <div className="input-group">
+                              <div className={styles.wizardInputGroup}>
                                 <input
                                   type="number"
-                                  className={`form-control ${errors.price ? 'is-invalid' : ''}`}
+                                  className={clsx(styles.wizardInput, errors.price && 'is-invalid')}
                                   placeholder="أدخل السعر"
                                   value={formValues.price || ''}
                                   onChange={(e) => {
@@ -1477,7 +1627,7 @@ const [step, setStep] = useState(1)
                                   min="0"
                                   step="0.01"
                                 />
-                                <span className="input-group-text">ر.س</span>
+                                <span className={styles.wizardInputSuffix}>ر.س</span>
                               </div>
                               {errors.price && (
                                 <div className="text-danger small mt-1">{errors.price.message as string}</div>
@@ -1495,10 +1645,10 @@ const [step, setStep] = useState(1)
                             )}
 
                             {/* أزرار التنقل */}
-                            <div className="d-flex justify-content-between align-items-center mt-4">
+                            <div className={clsx(styles.wizardNavRow, styles.wizardNavRowTight)}>
                               <button
                                 type="button"
-                                className="btn btn-secondary"
+                                className={styles.wizardBtnSecondary}
                                 onClick={() => {
                                   // إعادة تعيين subStep إلى آخر substep
                                   const maxSubStep = Math.ceil(fields.length / FIELDS_PER_SUBSTEP)
@@ -1506,12 +1656,15 @@ const [step, setStep] = useState(1)
                                   setStep(5)
                                 }}
                               >
-                                ← السابق
+                                <span className={styles.wizardBtnInner}>
+                                  {navPrevIcon}
+                                  {wizardNav.prev}
+                                </span>
                               </button>
 
                               <button
                                 type="button"
-                                className="btn btn-primary"
+                                className={styles.wizardBtnPrimary}
                                 disabled={isSubmitting}
                                 onClick={async () => {
                                   // التحقق من city و price قبل الإرسال
@@ -1525,12 +1678,15 @@ const [step, setStep] = useState(1)
                                 }}
                               >
                                 {isSubmitting ? (
-                                  <>
-                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                                    جاري الإرسال...
-                                  </>
+                                  <span className={styles.wizardBtnInner}>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                                    {wizardNav.submitting}
+                                  </span>
                                 ) : (
-                                  'إرسال'
+                                  <span className={styles.wizardBtnInner}>
+                                    {wizardNav.submit}
+                                    {navSubmitIcon}
+                                  </span>
                                 )}
                               </button>
             </div>
@@ -1539,55 +1695,40 @@ const [step, setStep] = useState(1)
                       )}
                     </Col>
                   </Row>
-                </>
+    </motion.div>
               )
             }
             {
               step === 5 && (
-                <>
+    <motion.div
+      key={`w-5-${subStep}`}
+      className={styles.wizardStepSurface}
+      {...wizardStepMotion(reduceMotion)}
+    >
                   <Row className="position-relative">
                     <Col xl={12} lg={11} className="mx-auto">
                       {selectedSection && selectedCategory && (
-                        <div className="mt-4">
-                          <div className="mb-3">
-                            <h6>القسم: {selectedSection.name}</h6>
-                            <h6>الفئة: {selectedCategory.name}</h6>
-          </div>
+                        <div className="mt-2">
+                          <section className={styles.wizardSection}>
+                            <h3 className={styles.wizardSectionTitle}>
+                              {t('createPost.wizard.dynamicFields', locale as any)}
+                            </h3>
+                            <p className={styles.wizardSectionHint}>
+                              أكمل الحقول التالية حسب نوع إعلانك. يمكن تقسيمها على أكثر من صفحة إذا كانت كثيرة.
+                            </p>
+                          </section>
+                          <div className={clsx(styles.wizardSummaryBanner, 'mb-4')}>
+                            <p className={styles.wizardSummaryMeta}>
+                              {selectedSection.name}
+                              <span className="mx-2">·</span>
+                              {selectedCategory.name}
+                            </p>
+                          </div>
 
                           {loadingFields ? (
                             <div className="text-center py-4">جاري تحميل الحقول...</div>
                           ) : (
                             <>
-                              {/* عرض مؤشر التقدم */}
-                              {fields.length > FIELDS_PER_SUBSTEP && (
-                                <div className="mb-4 d-block mt-5 py-3">
-                                  <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <span className="text-muted">
-                                      الخطوة {subStep} من {Math.ceil(fields.length / FIELDS_PER_SUBSTEP)}
-                                    </span>
-                                    <div className="d-flex gap-1">
-                                      {Array.from({ length: Math.ceil(fields.length / FIELDS_PER_SUBSTEP) }, (_, i) => (
-                                        <div
-                                          key={i + 1}
-                                          className={`rounded-circle ${i + 1 === subStep ? 'bg-primary' : 'bg-secondary'
-                                            }`}
-                                          style={{ width: '12px', height: '12px' }}
-                                        />
-                                      ))}
-            </div>
-          </div>
-                                  <div className="progress" style={{ height: '4px' }}>
-                                    <div
-                                      className="progress-bar"
-                                      role="progressbar"
-                                      style={{
-                                        width: `${(subStep / Math.ceil(fields.length / FIELDS_PER_SUBSTEP)) * 100}%`,
-                                      }}
-                                    />
-          </div>
-                                </div>
-                              )}
-
                               <form>
                                 {fields
                                   .sort((a, b) => a.sort - b.sort)
@@ -1609,11 +1750,10 @@ const [step, setStep] = useState(1)
                                 )}
 
                                 {/* أزرار التنقل */}
-                                <div className="d-flex justify-content-between align-items-center mt-4">
-                                  {/* زر السابق */}
+                                <div className={styles.wizardNavRow}>
                                   <button
                                     type="button"
-                                    className="btn btn-secondary"
+                                    className={styles.wizardBtnSecondary}
                                     onClick={() => {
                                       if (subStep > 1) {
                                         // إذا لم تكن substep الأولى، ارجع substep
@@ -1629,14 +1769,16 @@ const [step, setStep] = useState(1)
                                       }
                                     }}
                                   >
-                                    ← السابق
+                                    <span className={styles.wizardBtnInner}>
+                                      {navPrevIcon}
+                                      {wizardNav.prev}
+                                    </span>
                                   </button>
 
-                                  {/* زر التالي أو إرسال */}
                                   {subStep < Math.ceil(fields.length / FIELDS_PER_SUBSTEP) ? (
                                     <button
                                       type="button"
-                                      className="btn btn-primary"
+                                      className={styles.wizardBtnPrimary}
                                       onClick={async () => {
                                         // التحقق من الحقول في الـ sub-step الحالي فقط
                                         const currentFields = fields
@@ -1669,12 +1811,15 @@ const [step, setStep] = useState(1)
                                         }
                                       }}
                                     >
-                                      التالي →
+                                      <span className={styles.wizardBtnInner}>
+                                        {wizardNav.next}
+                                        {navNextIcon}
+                                      </span>
                                     </button>
                                   ) : (
                                     <button
                                       type="button"
-                                      className="btn btn-primary"
+                                      className={styles.wizardBtnPrimary}
                                       onClick={async () => {
                                         // التحقق من جميع الحقول الديناميكية فقط (بدون city و price)
                                         const allFieldKeys = fields.map((f) => f.key_name)
@@ -1693,7 +1838,10 @@ const [step, setStep] = useState(1)
                                         }
                                       }}
                                     >
-                                      التالي →
+                                      <span className={styles.wizardBtnInner}>
+                                        {wizardNav.next}
+                                        {navNextIcon}
+                                      </span>
                                     </button>
                                   )}
             </div>
@@ -1704,18 +1852,27 @@ const [step, setStep] = useState(1)
                       )}
           </Col>
                   </Row>
-                </>
+    </motion.div>
               )
             }
-
-
+          </AnimatePresence>
           </form>
+            </div>
+
         </div>
 
         </div>
 
 
       </Card>
+
+      <PostSuccessCelebrationModal
+        show={postSuccessOpen}
+        onHide={() => setPostSuccessOpen(false)}
+        locale={locale}
+        postId={postSuccessMeta?.id}
+        postTitle={postSuccessMeta?.title}
+      />
     </>
   )
 }

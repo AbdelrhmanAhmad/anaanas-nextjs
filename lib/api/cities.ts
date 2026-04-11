@@ -35,7 +35,7 @@ export async function fetchCitiesByCountryId(countryId: number): Promise<City[]>
     citiesData = json.data
   }
 
-  console.log('Fetched cities:', { countryId, citiesData, json })
+  // console.log('Fetched cities:', { countryId, citiesData, json })
   return citiesData
 }
 

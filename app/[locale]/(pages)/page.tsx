@@ -89,9 +89,9 @@ const Home = async ({
             <FutureRoadmapCard locale={uiLocale} />
           </div>
 
-          <EliteCards locale={uiLocale} />
+          {/* <EliteCards locale={uiLocale} /> */}
           {/* links Cards */}
-          <div className={sideStyles.sideCard}>
+          {/* <div className={sideStyles.sideCard}>
             <h5 className={sideStyles.cardTitle}>{t('home.quickLinks', uiLocale)}</h5>
             <div className={sideStyles.sideStack}>
               <Link
@@ -126,7 +126,7 @@ const Home = async ({
                 <BsArrowUpRight />
               </Link>
             </div>
-          </div>
+          </div> */}
 
           {/* Keep these disabled as before */}
           <div className="d-none">

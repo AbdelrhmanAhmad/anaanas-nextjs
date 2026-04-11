@@ -47,20 +47,13 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import SharePostModal from '@/components/share/SharePostModal'
 import { useLayoutContext } from '@/context/useLayoutContext'
 import { deletePost } from '@/lib/api/posts'
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 
 import avatar12 from '@/assets/images/avatar/12.jpg'
 import postImg3 from '@/assets/images/post/1by1/03.jpg'
 import postImg1 from '@/assets/images/post/3by2/01.jpg'
 import postImg2 from '@/assets/images/post/3by2/02.jpg'
 import VideoPlayer from './components/VideoPlayer'
-
-const normalizeImageUrl = (url?: string) => {
-  if (!url) return ''
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') || url.startsWith('/')) {
-    return url
-  }
-  return `/${url}`
-}
 
 type PostCardProps = {
   post: PostRecord
@@ -234,7 +227,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const commentsCount = post?.comments_count ?? post?.commentsCount ?? 0
   const caption = post?.description ?? post?.caption ?? ''
   const title = post?.title ?? ''
-  const image = normalizeImageUrl(post?.post_images[0]?.image_full_url ?? post?.image)
+  const image = resolveMediaUrl(post?.post_images[0]?.image_full_url ?? post?.image)
   const sectionName = (post as any)?.section?.name ?? ''
   const categoryName = (post as any)?.category?.name ?? ''
   const cityName = (post as any)?.city?.name ?? ''
@@ -246,7 +239,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const photos = post?.photos
   const isVideo = post?.isVideo
   const commentsPreview = (post?.comments as ApiComment[] | undefined) ?? []
-  const avatarSrc = user?.avatar || user?.profile_image || user?.image || ''
+  const avatarSrc = resolveMediaUrl(user?.avatar || user?.profile_image || user?.image || '')
 
   const isDetailsPage = Boolean(pathname?.includes('/post/'))
   const postDetailsHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}` : `/post/${post?.id}`
@@ -991,7 +984,14 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         <div id={`comments-${post?.id}`} className="d-flex mb-3">
               <div className="avatar avatar-xs me-2">
                 <span role="button">
-              <Image className="avatar-img rounded-circle" src={((session as any)?.user?.image || avatar12) as any} alt="avatar" width={32} height={32} />
+              <Image
+                    unoptimized
+                    className="avatar-img rounded-circle"
+                    src={(resolveMediaUrl((session as any)?.user?.image) || avatar12) as any}
+                    alt="avatar"
+                    width={32}
+                    height={32}
+                  />
                 </span>
               </div>
 

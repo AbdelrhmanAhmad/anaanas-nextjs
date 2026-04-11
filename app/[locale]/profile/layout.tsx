@@ -7,7 +7,7 @@ import { usePathname, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import ProfileImageEditor from './layout/components/ProfileImageEditor'
-import { getApiUrl } from '@/lib/api/config'
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@/lib/localization'
 import clsx from 'clsx'
@@ -46,14 +46,6 @@ import { PROFILE_MENU_ITEMS } from '@/assets/data/menu-items'
 import avatar7 from '@/assets/images/avatar/07.jpg'
 import background5 from '@/assets/images/bg/05.jpg'
 
-const normalizeImageUrl = (url?: string) => {
-  if (!url) return ''
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') || url.startsWith('/')) {
-    return url
-  }
-  return getApiUrl(`/storage/${url.replace(/^\/+/, '')}`)
-}
-
 const Photos = ({
   locale,
   images,
@@ -76,7 +68,7 @@ const Photos = ({
         ) : (
           <Row className="g-2">
             {images.slice(0, 6).map((img, idx) => {
-              const src = normalizeImageUrl(img.image_full_url || img.image)
+              const src = resolveMediaUrl(img.image_full_url || img.image)
               if (!src) return null
               return (
                 <Col xs={4} key={`${src}-${idx}`}>
@@ -144,16 +136,16 @@ const ProfileLayout = ({ children }: ChildrenType) => {
     }
   }, [session, refreshKey])
 
-  const avatarUrl = userData?.avatar_url 
-    ? userData.avatar_url
-    : (userData?.avatar 
-      ? (userData.avatar.startsWith('http') ? userData.avatar : getApiUrl(`/storage/${userData.avatar}`))
-      : avatar7.src)
+  const avatarUrl = userData?.avatar_url
+    ? resolveMediaUrl(userData.avatar_url)
+    : userData?.avatar
+      ? resolveMediaUrl(userData.avatar)
+      : avatar7.src
   const coverUrl = userData?.cover_image_url
-    ? userData.cover_image_url
-    : (userData?.cover_image
-      ? (userData.cover_image.startsWith('http') ? userData.cover_image : getApiUrl(`/storage/${userData.cover_image}`))
-      : background5.src)
+    ? resolveMediaUrl(userData.cover_image_url)
+    : userData?.cover_image
+      ? resolveMediaUrl(userData.cover_image)
+      : background5.src
 
   const formatDate = (value?: string) => {
     if (!value) return ''

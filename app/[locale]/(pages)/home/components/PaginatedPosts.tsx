@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { fetchPosts, type PostRecord } from '@/lib/api/posts'
 import PostCard from '@/components/cards/PostCard'
 import LoadMoreButton from './LoadMoreButton'
+import { POST_CREATED_EVENT, type PostCreatedDetail } from '@/lib/postCreated'
 
 type FetchParams = {
   countryId?: number
@@ -45,6 +46,32 @@ export default function PaginatedPosts({
     setLoading(false)
   }, [resetKey, initialPosts, initialNextPageUrl])
 
+  /** إدراج إعلان جديد في أعلى التغذية (نفس حدث صفحة الملف الشخصي) — عند الترتيب «الأحدث» وبدون فلتر قسم/فئة */
+  const shouldPrependCreatedPost =
+    (fetchParams.sort === undefined || fetchParams.sort === 'newest') &&
+    !fetchParams.sectionSlug &&
+    !fetchParams.categorySlug
+
+  const onPostCreated = useCallback(
+    (ev: Event) => {
+      if (!shouldPrependCreatedPost) return
+      const e = ev as CustomEvent<PostCreatedDetail>
+      const post = e.detail?.post
+      if (!post || post.id == null) return
+      setPosts((prev) => {
+        const id = post.id
+        if (prev.some((p) => String(p?.id) === String(id))) return prev
+        return [post, ...prev]
+      })
+    },
+    [shouldPrependCreatedPost],
+  )
+
+  useEffect(() => {
+    window.addEventListener(POST_CREATED_EVENT, onPostCreated as EventListener)
+    return () => window.removeEventListener(POST_CREATED_EVENT, onPostCreated as EventListener)
+  }, [onPostCreated])
+
   const canLoadMore = Boolean(nextPageUrl)
 
   const handleDelete = (postId: number | string) => {
@@ -71,7 +98,7 @@ export default function PaginatedPosts({
   }
 
   return (
-    <>
+    <div id="home-feed-posts" className="vstack gap-4">
       {posts.map((post, idx) => (
         <PostCard post={post} key={post?.id ?? idx} onDelete={handleDelete} />
       ))}
@@ -80,7 +107,7 @@ export default function PaginatedPosts({
           <LoadMoreButton onClick={handleLoadMore} loading={loading} disabled={!canLoadMore || loading} />
         </div>
       )}
-    </>
+    </div>
   )
 }
 

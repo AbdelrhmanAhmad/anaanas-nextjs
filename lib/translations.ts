@@ -284,6 +284,44 @@ type TranslationKey =
   | 'createPost.chipRoi'
   | 'createPost.chipTarget'
   | 'createPost.chipBudget'
+  | 'createPost.wizard.step1'
+  | 'createPost.wizard.step2'
+  | 'createPost.wizard.step3'
+  | 'createPost.wizard.step4'
+  | 'createPost.wizard.step5'
+  | 'createPost.wizard.step6'
+  | 'createPost.wizard.dynamicFields'
+  | 'createPost.wizard.lead'
+  | 'createPost.wizard.navPrev'
+  | 'createPost.wizard.navNext'
+  | 'createPost.wizard.navSubmit'
+  | 'createPost.wizard.navSubmitting'
+  | 'createPost.photos.title'
+  | 'createPost.photos.hint'
+  | 'createPost.photos.savedTitle'
+  | 'createPost.photos.savedHint'
+  | 'createPost.photos.newTitle'
+  | 'createPost.photos.badgeSuffix'
+  | 'createPost.photos.dropHint'
+  | 'createPost.photos.dropActive'
+  | 'createPost.photos.addSlot'
+  | 'createPost.photos.removeAria'
+  | 'createPost.photos.deleteSaved'
+  | 'createPost.photos.deleting'
+  | 'createPost.photos.rules'
+  | 'createPost.photos.confirmDelete'
+  | 'createPost.photos.deleteFailed'
+  | 'createPost.photos.errTooLarge'
+  | 'createPost.photos.errBadType'
+  | 'createPost.photos.errSlotsFull'
+  | 'createPost.photos.errSomeSkipped'
+  | 'createPost.success.celebrationTitle'
+  | 'createPost.success.celebrationSubtitle'
+  | 'createPost.success.viewPost'
+  | 'createPost.success.viewFeed'
+  | 'createPost.success.viewHomeFeed'
+  | 'createPost.success.close'
+  | 'createPost.success.updated'
   | 'auction.searchPlaceholder'
   | 'auction.postAd'
   | 'auction.boost'
@@ -672,6 +710,46 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'createPost.chipRoi': '📊 توقع عائد 82%',
     'createPost.chipTarget': '🎯 الفئة العمرية 25–34',
     'createPost.chipBudget': '💰 الميزانية المقترحة: $45',
+    'createPost.wizard.step1': 'النص',
+    'createPost.wizard.step2': 'الصور',
+    'createPost.wizard.step3': 'القسم',
+    'createPost.wizard.step4': 'الفئة',
+    'createPost.wizard.step5': 'التفاصيل',
+    'createPost.wizard.step6': 'النشر',
+    'createPost.wizard.dynamicFields': 'حقول الإعلان',
+    'createPost.wizard.lead':
+      'ابدأ بعنوان واضح يصف ما تبيعه، ثم أضِف وصفاً يجيب عن الأسئلة الشائعة للمشترين.',
+    'createPost.wizard.navPrev': 'رجوع',
+    'createPost.wizard.navNext': 'متابعة',
+    'createPost.wizard.navSubmit': 'نشر الإعلان',
+    'createPost.wizard.navSubmitting': 'جاري النشر…',
+    'createPost.photos.title': 'صور الإعلان',
+    'createPost.photos.hint':
+      'أضف حتى 5 صور واضحة (JPG أو PNG أو WebP). الحد الأقصى 5 ميجابايت لكل صورة. الصور تُرفق عند نشر أو تحديث الإعلان.',
+    'createPost.photos.savedTitle': 'صور محفوظة على السيرفر',
+    'createPost.photos.savedHint': 'تظهر في إعلانك الحالي. يمكنك حذف أي منها قبل الحفظ.',
+    'createPost.photos.newTitle': 'صور جديدة للإرسال',
+    'createPost.photos.badgeSuffix': 'صورة للإرسال',
+    'createPost.photos.dropHint': 'اسحب الصور هنا أو استخدم «إضافة صور».',
+    'createPost.photos.dropActive': 'أفلت لإضافة الصور…',
+    'createPost.photos.addSlot': 'إضافة صور',
+    'createPost.photos.removeAria': 'إزالة من القائمة',
+    'createPost.photos.deleteSaved': 'حذف من الإعلان',
+    'createPost.photos.deleting': 'جارٍ الحذف…',
+    'createPost.photos.rules': 'JPG · PNG · WebP — حتى 5 ميجابايت لكل ملف — 5 صور كحد أقصى.',
+    'createPost.photos.confirmDelete': 'هل تريد حذف هذه الصورة من الإعلان؟',
+    'createPost.photos.deleteFailed': 'تعذّر حذف الصورة',
+    'createPost.photos.errTooLarge': 'ملف أكبر من 5 ميجابايت تم تجاهله.',
+    'createPost.photos.errBadType': 'يُقبل فقط JPG أو PNG أو WebP.',
+    'createPost.photos.errSlotsFull': 'وصلتَ إلى الحد الأقصى (5 صور). احذف صورة لإضافة أخرى.',
+    'createPost.photos.errSomeSkipped': 'بعض الملفات لم تُضف لأن العدد بلغ الحد الأقصى.',
+    'createPost.success.celebrationTitle': '🎉 نشر ناجح!',
+    'createPost.success.celebrationSubtitle': 'أصبح إعلانك متاحاً. يمكنك مشاهدته أو العثور عليه في قائمة إعلاناتك.',
+    'createPost.success.viewPost': 'مشاهدة الإعلان',
+    'createPost.success.viewFeed': 'الانتقال لقائمة إعلاناتي',
+    'createPost.success.viewHomeFeed': 'الانتقال لتغذية الرئيسية',
+    'createPost.success.close': 'متابعة التصفح',
+    'createPost.success.updated': 'تم تحديث الإعلان بنجاح',
     'auction.searchPlaceholder': 'ابحث عن أي شيء...',
     'auction.postAd': 'أضف إعلان',
     'auction.boost': 'تعزيز',
@@ -1059,6 +1137,46 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'createPost.chipRoi': '📊 82% ROI Forecast',
     'createPost.chipTarget': '🎯 Target Age 25–34',
     'createPost.chipBudget': '💰 Suggested Budget: $45',
+    'createPost.wizard.step1': 'Text',
+    'createPost.wizard.step2': 'Photos',
+    'createPost.wizard.step3': 'Section',
+    'createPost.wizard.step4': 'Category',
+    'createPost.wizard.step5': 'Details',
+    'createPost.wizard.step6': 'Publish',
+    'createPost.wizard.dynamicFields': 'Ad fields',
+    'createPost.wizard.lead':
+      'Start with a clear title, then add a short description buyers will understand at a glance.',
+    'createPost.wizard.navPrev': 'Back',
+    'createPost.wizard.navNext': 'Continue',
+    'createPost.wizard.navSubmit': 'Publish ad',
+    'createPost.wizard.navSubmitting': 'Publishing…',
+    'createPost.photos.title': 'Ad photos',
+    'createPost.photos.hint':
+      'Add up to 5 clear photos (JPG, PNG, or WebP). Max 5 MB per file. Photos are sent when you publish or update the ad.',
+    'createPost.photos.savedTitle': 'Saved on the server',
+    'createPost.photos.savedHint': 'These are on your current ad. You can remove any before saving.',
+    'createPost.photos.newTitle': 'New photos to upload',
+    'createPost.photos.badgeSuffix': 'to upload',
+    'createPost.photos.dropHint': 'Drop images here or use “Add photos”.',
+    'createPost.photos.dropActive': 'Drop to add photos…',
+    'createPost.photos.addSlot': 'Add photos',
+    'createPost.photos.removeAria': 'Remove from list',
+    'createPost.photos.deleteSaved': 'Remove from ad',
+    'createPost.photos.deleting': 'Removing…',
+    'createPost.photos.rules': 'JPG · PNG · WebP — up to 5 MB each — 5 photos max.',
+    'createPost.photos.confirmDelete': 'Remove this photo from the ad?',
+    'createPost.photos.deleteFailed': 'Could not delete the photo',
+    'createPost.photos.errTooLarge': 'A file over 5 MB was skipped.',
+    'createPost.photos.errBadType': 'Only JPG, PNG, or WebP are accepted.',
+    'createPost.photos.errSlotsFull': 'Maximum reached (5 photos). Remove one to add more.',
+    'createPost.photos.errSomeSkipped': 'Some files were not added because the limit was reached.',
+    'createPost.success.celebrationTitle': '🎉 Published successfully!',
+    'createPost.success.celebrationSubtitle': 'Your ad is live. Open it or find it in your ads list.',
+    'createPost.success.viewPost': 'View ad',
+    'createPost.success.viewFeed': 'Go to my ads',
+    'createPost.success.viewHomeFeed': 'Go to home feed',
+    'createPost.success.close': 'Keep browsing',
+    'createPost.success.updated': 'Ad updated successfully',
     'auction.searchPlaceholder': 'Search for anything...',
     'auction.postAd': 'Post Ad',
     'auction.boost': 'Boost',

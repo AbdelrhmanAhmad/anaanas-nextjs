@@ -9,14 +9,7 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import 'glightbox/dist/css/glightbox.min.css'
-
-const normalizeImageUrl = (url?: string) => {
-  if (!url) return ''
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') || url.startsWith('/')) {
-    return url
-  }
-  return `/${url}`
-}
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 
 export default function PostImagesGallery({
   images,
@@ -54,7 +47,7 @@ export default function PostImagesGallery({
 
   if (images.length === 1) {
     const img = images[0]
-    const src = normalizeImageUrl(img.url)
+    const src = resolveMediaUrl(img.url)
     return (
       <a
         href={src}
@@ -79,7 +72,7 @@ export default function PostImagesGallery({
         loop={images.length > 1}
       >
         {images.map((img, idx) => {
-          const src = normalizeImageUrl(img.url)
+          const src = resolveMediaUrl(img.url)
           return (
             <SwiperSlide key={`${img.url}-${idx}`}>
               <a

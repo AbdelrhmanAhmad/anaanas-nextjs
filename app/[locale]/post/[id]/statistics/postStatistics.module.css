@@ -1,0 +1,93 @@
+.pageRoot {
+  min-height: 100vh;
+  padding-bottom: 3rem;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(254, 203, 1, 0.22), transparent 58%),
+    radial-gradient(ellipse 70% 40% at 100% 20%, rgba(21, 21, 21, 0.06), transparent 50%),
+    linear-gradient(180deg, #faf6ef 0%, #f2ebe2 38%, #e8dfd3 100%);
+}
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(1rem, 4vw, 2.25rem);
+  margin-bottom: 1.75rem;
+}
+
+.heroCopy {
+  flex: 1;
+  min-width: min(100%, 220px);
+}
+
+.mascotWrap {
+  flex-shrink: 0;
+}
+
+.mascotSvg {
+  width: clamp(100px, 22vw, 150px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 14px 28px rgba(21, 21, 21, 0.12));
+}
+
+.toolbarCard :global(.card-body) {
+  padding-top: 1.35rem;
+}
+
+.kpiCol {
+  perspective: 900px;
+}
+
+.kpiCard :global(.card-body) {
+  padding-top: 1.4rem;
+}
+
+.kpiValue {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.kpiRange {
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+.chartsShell :global(.card-body) {
+  padding-top: 1.35rem;
+}
+
+.chartsShell :global(.nav-tabs) {
+  border-bottom-color: rgba(21, 21, 21, 0.1);
+}
+
+.chartsShell :global(.nav-tabs .nav-link) {
+  border: none;
+  color: rgba(21, 21, 21, 0.55);
+  font-weight: 700;
+  padding: 0.5rem 0.85rem;
+}
+
+.chartsShell :global(.nav-tabs .nav-link.active) {
+  color: #151515;
+  border-bottom: 3px solid #fecb01;
+  background: transparent;
+}
+
+.chartPanel {
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 246, 242, 0.95) 100%);
+  border: 1px solid rgba(21, 21, 21, 0.06);
+  padding: 1rem;
+}
+
+.backBtn {
+  border-radius: 12px;
+  font-weight: 700;
+  border-color: rgba(21, 21, 21, 0.15);
+}
+
+.backBtn:hover {
+  border-color: rgba(21, 21, 21, 0.28);
+  background: rgba(255, 255, 255, 0.85);
+}

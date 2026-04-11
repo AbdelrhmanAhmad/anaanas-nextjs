@@ -1,0 +1,227 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+}
+
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(165deg, #fffdf8 0%, #fff 45%, #f8fafc 100%);
+  border: 1px solid rgba(254, 203, 1, 0.45);
+  box-shadow:
+    0 24px 48px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.celebrateTop {
+  position: relative;
+  min-height: 120px;
+  background: linear-gradient(180deg, rgba(254, 203, 1, 0.35) 0%, transparent 100%);
+  overflow: hidden;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -20px;
+  width: 36px;
+  height: 46px;
+  border-radius: 50% 50% 48% 48%;
+  box-shadow: inset -6px -4px 0 rgba(0, 0, 0, 0.06);
+  animation: floatUp 3.2s ease-in-out infinite;
+}
+
+.balloon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 1px;
+  height: 16px;
+  background: rgba(21, 21, 21, 0.2);
+  transform: translateX(-50%);
+}
+
+.b1 {
+  left: 8%;
+  background: linear-gradient(145deg, #f87171, #dc2626);
+  animation-delay: 0s;
+}
+.b2 {
+  left: 22%;
+  background: linear-gradient(145deg, #60a5fa, #2563eb);
+  animation-delay: 0.4s;
+}
+.b3 {
+  left: 42%;
+  width: 42px;
+  height: 54px;
+  background: linear-gradient(145deg, #fbbf24, #f59e0b);
+  animation-delay: 0.2s;
+}
+.b4 {
+  right: 22%;
+  background: linear-gradient(145deg, #a78bfa, #7c3aed);
+  animation-delay: 0.55s;
+}
+.b5 {
+  right: 8%;
+  background: linear-gradient(145deg, #34d399, #059669);
+  animation-delay: 0.15s;
+}
+
+@keyframes floatUp {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+
+.confettiLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  top: -8px;
+  width: 8px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.9;
+  animation: confettiFall 2.8s linear infinite;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(140px) rotate(720deg);
+    opacity: 0.3;
+  }
+}
+
+.body {
+  padding: 1.25rem 1.35rem 1.5rem;
+  text-align: center;
+}
+
+.iconWrap {
+  width: 64px;
+  height: 64px;
+  margin: -40px auto 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #fef3c7, #fcd34d);
+  border: 3px solid #fff;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+  position: relative;
+  z-index: 2;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #151515;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0 0 1.15rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(21, 21, 21, 0.55);
+}
+
+.postTitle {
+  font-weight: 800;
+  color: #111827;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 0.92rem;
+  background: linear-gradient(180deg, #fecb01, #f5b800);
+  color: #151515;
+  box-shadow: 0 10px 22px rgba(254, 203, 1, 0.35);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btnPrimary:hover {
+  color: #151515;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(254, 203, 1, 0.42);
+}
+
+.btnGhost {
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(21, 21, 21, 0.12);
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  background: #fff;
+  color: rgba(21, 21, 21, 0.65);
+}
+
+.btnGhost:hover {
+  background: rgba(15, 23, 42, 0.04);
+  color: #151515;
+}
+
+.closeX {
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 10px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(21, 21, 21, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.closeX:hover {
+  color: #151515;
+  background: #fff;
+}
