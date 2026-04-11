@@ -1,0 +1,55 @@
+.wrapper {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.swiper {
+  padding: 2px 1px 4px;
+}
+
+.slide {
+  height: calc((112px - 10px) / 2) !important;
+}
+
+.card {
+  min-height: 50px;
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #0b1220;
+  background: linear-gradient(145deg, #ffffff, #f7faff);
+  border: 1px solid #e6edf8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.iconWrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #edf4ff, #e8f1ff);
+  flex-shrink: 0;
+}
+
+.fallback {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
