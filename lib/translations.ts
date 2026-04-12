@@ -172,6 +172,9 @@ type TranslationKey =
   | 'post.likeComment'
   | 'post.statistics'
   | 'post.detailsTitle'
+  | 'post.similarTitle'
+  | 'post.moreFromSection'
+  | 'post.noSimilar'
   | 'post.noAttributes'
   | 'post.attribute'
   | 'post.value'
@@ -188,6 +191,8 @@ type TranslationKey =
   | 'profile.about.mobile'
   | 'profile.about.username'
   | 'profile.about.joined'
+  | 'profile.followsTitle'
+  | 'profile.followsHint'
   | 'profile.tabs.feed'
   | 'profile.tabs.about'
   | 'profile.tabs.activity'
@@ -598,6 +603,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.likeComment': 'إعجاب',
     'post.statistics': 'إحصائيات الإعلان',
     'post.detailsTitle': 'تفاصيل الإعلان',
+    'post.similarTitle': 'إعلانات مشابهة',
+    'post.moreFromSection': 'المزيد من القسم',
+    'post.noSimilar': 'لا توجد إعلانات مشابهة حالياً.',
     'post.noAttributes': 'لا توجد خصائص متاحة لهذا الإعلان.',
     'post.attribute': 'الخاصية',
     'post.value': 'القيمة',
@@ -614,6 +622,8 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'profile.about.mobile': 'رقم الهاتف',
     'profile.about.username': 'اسم المستخدم',
     'profile.about.joined': 'تاريخ الانضمام',
+    'profile.followsTitle': 'متابعاتك',
+    'profile.followsHint': 'الأقسام والفئات والأشخاص الذين تتابعهم سيظهرون هنا قريباً.',
     'profile.tabs.feed': 'المنشورات',
     'profile.tabs.about': 'نبذة',
     'profile.tabs.activity': 'النشاط',
@@ -1025,6 +1035,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.likeComment': 'Like',
     'post.statistics': 'Ad Statistics',
     'post.detailsTitle': 'Ad Details',
+    'post.similarTitle': 'Similar listings',
+    'post.moreFromSection': 'More from this section',
+    'post.noSimilar': 'No similar listings right now.',
     'post.noAttributes': 'No attributes are available for this ad.',
     'post.attribute': 'Attribute',
     'post.value': 'Value',
@@ -1041,6 +1054,8 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'profile.about.mobile': 'Phone number',
     'profile.about.username': 'Username',
     'profile.about.joined': 'Joined on',
+    'profile.followsTitle': 'Your follows',
+    'profile.followsHint': 'Sections, categories, and people you follow will appear here soon.',
     'profile.tabs.feed': 'Feed',
     'profile.tabs.about': 'About',
     'profile.tabs.activity': 'Activity',

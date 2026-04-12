@@ -7,6 +7,7 @@ import CreatePostCard from '@/components/cards/CreatePostCard'
 import Feeds from '../../home/components/Feeds'
 import PostsFilterPanel from './PostsFilterPanel'
 import MobileFiltersModal from './MobileFiltersModal'
+import FollowToggleButton from '@/components/follows/FollowToggleButton'
 import { fetchSectionBySlug } from '@/lib/api/sections'
 import { fetchCategoriesBySectionId } from '@/lib/api/categories'
 import { fetchFields } from '@/lib/api/fields'
@@ -248,6 +249,15 @@ const Section = async ({
 
   return (
     <Col md={8} lg={8} className="vstack gap-3">
+      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h1 className="h5 mb-0">{category.name}</h1>
+        <FollowToggleButton
+          target="category"
+          targetId={category.id}
+          locale={locale === 'en' ? 'en' : 'ar'}
+          className="btn btn-outline-dark btn-sm"
+        />
+      </div>
       <div className="mb-0">
         <MobileFiltersModal fields={fields} cities={cities} />
       </div>

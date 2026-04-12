@@ -1,10 +1,10 @@
 'use client'
 import { useChatContext } from '@/context/useChatContext'
-import type { ChatMessageType, ChatType } from '@/types/data'
+import type { ChatMessageType } from '@/types/data'
 import { yupResolver } from '@hookform/resolvers/yup'
 import clsx from 'clsx'
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Button,
   Card,
@@ -15,12 +15,10 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  OverlayTrigger,
-  Tooltip,
 } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
-import { BsArchive, BsCameraVideoFill, BsCheckLg, BsMicMute, BsPersonCheck, BsTelephoneFill, BsThreeDotsVertical, BsTrash } from 'react-icons/bs'
-import { FaCircle, FaPaperclip, FaPaperPlane } from 'react-icons/fa'
+import { BsArchive, BsCheckLg, BsMicMute, BsPersonCheck, BsThreeDotsVertical, BsTrash } from 'react-icons/bs'
+import { FaPaperclip, FaPaperPlane } from 'react-icons/fa'
 import * as yup from 'yup'
 import { FaCheck, FaCheckDouble, FaFaceSmile } from 'react-icons/fa6'
 import TextFormInput from '@/components/form/TextFormInput'
@@ -122,7 +120,7 @@ const ChatArea = () => {
     newMessage: yup.string().required('Please enter message'),
   })
 
-  const { reset, handleSubmit, control } = useForm({
+  const { reset, handleSubmit, control, setValue, getValues } = useForm({
     resolver: yupResolver(messageSchema),
   })
 
@@ -284,16 +282,6 @@ const ChatArea = () => {
                 </div>
               </div>
               <div className="d-flex align-items-center">
-                <OverlayTrigger placement="top" overlay={<Tooltip>Audio call</Tooltip>}>
-                  <Button variant="primary-soft" className="icon-md rounded-circle me-2 px-2">
-                    <BsTelephoneFill />
-                  </Button>
-                </OverlayTrigger>
-                <OverlayTrigger placement="top" overlay={<Tooltip>Video call</Tooltip>}>
-                  <Button variant="primary-soft" className="icon-md rounded-circle me-2 px-2">
-                    <BsCameraVideoFill />
-                  </Button>
-                </OverlayTrigger>
                 <Dropdown>
                   <DropdownToggle as="a" className="icon-md rounded-circle btn btn-primary-soft me-2 px-2 content-none" role="button">
                     <BsThreeDotsVertical />
@@ -376,7 +364,14 @@ const ChatArea = () => {
               <FaFaceSmile className="fs-6" />
             </DropdownToggle>
             <DropdownMenu className="p-0 rounded-4">
-              <EmojiPicker data={data} theme={theme} onEmojiSelect={(e: any) => console.info(e.native)} />
+              <EmojiPicker
+                data={data}
+                theme={theme}
+                onEmojiSelect={(e: { native: string }) => {
+                  const cur = getValues('newMessage') || ''
+                  setValue('newMessage', cur + e.native, { shouldValidate: true, shouldDirty: true })
+                }}
+              />
             </DropdownMenu>
           </Dropdown>
           <Button variant="secondary-soft" size="sm" className="ms-2" disabled={sending}>

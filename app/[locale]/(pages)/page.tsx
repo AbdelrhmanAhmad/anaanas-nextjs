@@ -25,6 +25,7 @@ import AnanasVsOthersCard from './home/components/AnanasVsOthersCard'
 import FutureRoadmapCard from './home/components/FutureRoadmapCard'
 import MobileSectionsSwiper from './home/components/MobileSectionsSwiper'
 import MobileAIDashboard from './home/components/MobileAIDashboard'
+import homeDiscoveryStyles from './homeDiscovery.module.css'
 
 export async function generateMetadata({
   params,
@@ -66,14 +67,15 @@ const Home = async ({
     <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
       <Col md={8} lg={6} className=" gap-4">
       <HomeBanner locale={uiLocale} />
-        
-        <div className="d-lg-none">
-          <MobileAIDashboard locale={uiLocale} />
-        </div>
 
-        <div className="d-lg-none">
-          <MobileSectionsSwiper sections={sections} locale={uiLocale} />
-        </div>
+        <Row className={`g-3 ${homeDiscoveryStyles.discoveryRow}`}>
+          <Col md={12} lg={5} className={homeDiscoveryStyles.discoveryAi}>
+            <MobileAIDashboard locale={uiLocale === 'en' ? 'en' : 'ar'} className="h-100" />
+          </Col>
+          <Col md={12} lg={7} className={homeDiscoveryStyles.discoverySections}>
+            <MobileSectionsSwiper sections={sections} locale={uiLocale} />
+          </Col>
+        </Row>
         {/* <Stories />   */}
         <CreatePostCard />
         {/* <AiInfrastructureCard locale={uiLocale} /> */}

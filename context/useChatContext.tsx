@@ -25,7 +25,8 @@ export const ChatProvider = ({ children }: ChildrenType) => {
 
   const changeActiveChat = useCallback(async (chatId: ChatType['id']) => {
     try {
-      const res = await fetch(`/api/chats/${chatId}`, {
+      const id = encodeURIComponent(String(chatId))
+      const res = await fetch(`/api/chats/${id}`, {
         method: 'GET',
         headers: { Accept: 'application/json' },
       })
@@ -79,6 +80,7 @@ export const ChatProvider = ({ children }: ChildrenType) => {
     <ChatContext.Provider
       value={{
         activeChat,
+        chats,
         changeActiveChat,
         chatList,
         chatToast,

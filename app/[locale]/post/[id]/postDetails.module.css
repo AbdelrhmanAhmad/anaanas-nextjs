@@ -1,0 +1,159 @@
+.layoutRow {
+  align-items: flex-start;
+}
+
+.sidebarCol {
+  position: sticky;
+  top: 1rem;
+}
+
+.sidebarTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #151515;
+  margin-bottom: 0.75rem;
+}
+
+.sidebarStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sidebarStack .simpleCard {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.sidebarStack .simpleThumb {
+  width: 38%;
+  min-width: 112px;
+  aspect-ratio: auto;
+}
+
+.sidebarStack .simpleBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+.moreSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(21, 21, 21, 0.08);
+}
+
+.moreTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #151515;
+  margin-bottom: 1rem;
+}
+
+.moreGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 576px) {
+  .moreGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
+  .moreGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.simpleCard {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.simpleCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(21, 21, 21, 0.08);
+}
+
+.simpleThumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+}
+
+.simpleImg {
+  object-fit: cover;
+}
+
+.simplePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  opacity: 0.45;
+}
+
+.simpleBody {
+  padding: 0.5rem 0.6rem 0.65rem;
+}
+
+.simpleTitle {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #151515;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.simplePrice {
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+@media (max-width: 991.98px) {
+  .sidebarStack .simpleCard {
+    flex-direction: column;
+  }
+
+  .sidebarStack .simpleThumb {
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.discoveryRow {
+  margin-bottom: 1rem;
+}
+
+.discoveryAi {
+  display: flex;
+}
+
+.discoveryAi > :global(.card) {
+  flex: 1;
+}
+
+.discoverySections {
+  min-width: 0;
+}

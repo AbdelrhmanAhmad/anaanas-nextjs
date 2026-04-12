@@ -3,9 +3,10 @@ import styles from './MobileAIDashboard.module.css'
 
 type MobileAIDashboardProps = {
   locale: 'ar' | 'en'
+  className?: string
 }
 
-const MobileAIDashboard = ({ locale }: MobileAIDashboardProps) => {
+const MobileAIDashboard = ({ locale, className }: MobileAIDashboardProps) => {
   const isAr = locale === 'ar'
 
   const cards = [
@@ -48,7 +49,7 @@ const MobileAIDashboard = ({ locale }: MobileAIDashboardProps) => {
   ]
 
   return (
-    <Card className={styles.wrapper}>
+    <Card className={`${styles.wrapper} ${className ?? ''}`.trim()}>
       <CardBody className={styles.body}>
         <h6 className={styles.heading}>{isAr ? 'لوحة الذكاء الاصطناعي' : 'AI Dashboard'}</h6>
         <div className={styles.grid} dir={isAr ? 'rtl' : 'ltr'}>

@@ -30,6 +30,7 @@ import {
   BsXCircle,
 } from 'react-icons/bs'
 import Link from 'next/link'
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 
 import avatar4 from '@/assets/images/avatar/04.jpg'
 import avatar5 from '@/assets/images/avatar/05.jpg'
@@ -93,15 +94,16 @@ const Media = async () => {
       <CardBody>
         <Row className="g-3">
           {images.map((img) => {
-            const imageUrl = img.image_full_url || img.image
+            const imageUrl = resolveMediaUrl(img.image_full_url || img.image)
             if (!imageUrl) return null
-            
+
             return (
               <Col sm={6} md={4} lg={3} key={img.id}>
                 <GlightBox href={imageUrl} data-gallery="image-popup">
-                  <Image 
-                    className="rounded img-fluid" 
-                    src={imageUrl} 
+                  <Image
+                    className="rounded img-fluid"
+                    src={imageUrl}
+                    unoptimized
                     alt={img.post?.title || 'Post image'} 
                     width={300}
                     height={300}

@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
                 hostname: '**.amazonaws.com',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: '**.cloudfront.net',
+                pathname: '/**',
+            },
         ],
     },
     // Transpile next-auth to avoid chunk generation issues

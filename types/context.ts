@@ -31,6 +31,7 @@ export type LayoutType = LayoutState & {
 
 export type ChatContextType = {
   activeChat?: ChatType
+  chats: ChatType[]
   changeActiveChat: (chatId: ChatType['id']) => Promise<void>
   chatList: OffcanvasControlType
   chatToast: OffcanvasControlType

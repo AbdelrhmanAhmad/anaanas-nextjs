@@ -8,7 +8,7 @@ import { BsChatLeftTextFill, BsGearFill, BsShop } from 'react-icons/bs'
 import LogoBox from '@/components/LogoBox'
 import CollapseMenu from './CollapseMenu'
 import MobileMenuToggle from './MobileMenuToggle'
-import NotificationDropdown from './NotificationDropdown'
+import NotificationsBell from './NotificationsBell'
 import ProfileDropdown from './ProfileDropdown'
 import StyledHeader from './StyledHeader'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
@@ -65,7 +65,7 @@ const TopHeader = () => {
             </Link>
           </li>
 
-          {/* <NotificationDropdown /> */}
+          {status === 'authenticated' && <NotificationsBell locale={locale} />}
 
           <ProfileDropdown locale={locale} />
         </ul>

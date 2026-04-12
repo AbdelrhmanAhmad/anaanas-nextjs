@@ -1,165 +1,74 @@
-import { Button, Card, CardBody, CardHeader, CardTitle, Col, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Row } from 'react-bootstrap'
-import { interestsData } from './data'
-import Image from 'next/image'
-import { BsBriefcase, BsCalendarDate, BsEnvelope, BsGeoAlt, BsHeart, BsPencilSquare, BsPlusCircleDotted, BsThreeDots, BsTrash } from 'react-icons/bs'
-import Link from 'next/link'
+import { Card, CardBody, CardHeader, CardTitle } from 'react-bootstrap'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+import Link from 'next/link'
+import { t } from '@/lib/translations'
+import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
+import { callLaravel } from '@/lib/laravelClient'
 
 export const metadata: Metadata = { title: 'About' }
 
-const Interests = () => {
+function pickName(value: any, locale: 'ar' | 'en') {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'object') {
+    if (typeof value[locale] === 'string') return value[locale]
+    if (typeof value.ar === 'string') return value.ar
+    if (typeof value.en === 'string') return value.en
+  }
+  return String(value)
+}
+
+const FollowsBlock = async () => {
+  const headersList = await headers()
+  const headerLocale = headersList.get('x-locale') || 'ar'
+  const locale = (isSupportedLocale(headerLocale) ? headerLocale : DEFAULT_LOCALE) as 'ar' | 'en'
+  let sections: any[] = []
+  let categories: any[] = []
+  try {
+    const res = await callLaravel('/api/follows', { method: 'GET' })
+    sections = Array.isArray(res?.data?.sections) ? res.data.sections : []
+    categories = Array.isArray(res?.data?.categories) ? res.data.categories : []
+  } catch {
+    sections = []
+    categories = []
+  }
+
   return (
     <Card>
       <CardHeader className="d-sm-flex justify-content-between border-0 pb-0">
-        <CardTitle>Interests</CardTitle>
-        <Button variant="primary-soft" size="sm">
-          {' '}
-          See all
-        </Button>
+        <CardTitle>{t('profile.followsTitle', locale)}</CardTitle>
       </CardHeader>
       <CardBody>
-        <Row className="g-4">
-          {interestsData.map((item, idx) => (
-            <Col sm={6} lg={4} key={idx}>
-              <div className="d-flex align-items-center position-relative">
-                <div className="avatar">
-                  <Image className="avatar-img" src={item.image} alt="image" />
-                </div>
-                <div className="ms-2">
-                  <h6 className="mb-0">
-                    {' '}
-                    <Link className="stretched-link" href="#">
-                      {item.name}{' '}
-                    </Link>
-                  </h6>
-                  <p className="small mb-0">{item.description}</p>
-                </div>
-              </div>
-            </Col>
-          ))}
-        </Row>
+        {sections.length === 0 && categories.length === 0 ? (
+          <p className="text-muted small mb-0">{t('profile.followsHint', locale)}</p>
+        ) : (
+          <div className="d-flex flex-wrap gap-2">
+            {sections.map((s) => (
+              <Link key={`sec-${s.id}`} href={`/${locale}/${s.slug}`} className="badge bg-light text-dark text-decoration-none px-3 py-2">
+                #{pickName(s.name, locale)}
+              </Link>
+            ))}
+            {categories.map((c) => (
+              <Link
+                key={`cat-${c.id}`}
+                href={`/${locale}/${c.section?.slug || ''}/${c.slug}`}
+                className="badge bg-warning-subtle text-dark text-decoration-none px-3 py-2"
+              >
+                {pickName(c.name, locale)}
+              </Link>
+            ))}
+          </div>
+        )}
       </CardBody>
     </Card>
   )
 }
 
-const ActionDropdown = () => {
-  return (
-    <Dropdown className="ms-auto">
-      <DropdownToggle
-        as="a"
-        className="nav nav-link text-secondary mb-0"
-        role="button"
-        id="aboutAction"
-        data-bs-toggle="dropdown"
-        aria-expanded="false">
-        <BsThreeDots />
-      </DropdownToggle>
-      <DropdownMenu className="dropdown-menu-end" aria-labelledby="aboutAction">
-        <li>
-          <DropdownItem href="#">
-            {' '}
-            <BsPencilSquare size={22} className="fa-fw pe-2" />
-            Edit
-          </DropdownItem>
-        </li>
-        <li>
-          <DropdownItem href="#">
-            {' '}
-            <BsTrash size={22} className="fa-fw pe-2" />
-            Delete
-          </DropdownItem>
-        </li>
-      </DropdownMenu>
-    </Dropdown>
-  )
-}
-
-const About = () => {
+const About = async () => {
   return (
     <>
-      <Card>
-        <CardHeader className="border-0 pb-0">
-          <CardTitle> Profile Info</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <div className="rounded border px-3 py-2 mb-3">
-            <div className="d-flex align-items-center justify-content-between">
-              <h6>Overview</h6>
-              <ActionDropdown />
-            </div>
-            <p>
-              He moonlights difficult engrossed it, sportsmen. Interested has all Devonshire difficulty gay assistance joy. Handsome met debating sir
-              dwelling age material. As style lived he worse dried. Offered related so visitors we private removed. Moderate do subjects to distance.{' '}
-            </p>
-          </div>
-          <Row className="g-4">
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsCalendarDate className="fa-fw me-2" /> Born: <strong> October 20, 1990 </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsHeart className="fa-fw me-2" /> Status: <strong> Single </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsBriefcase className="fa-fw me-2" /> <strong> Lead Developer </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsGeoAlt className="fa-fw me-2" /> Lives in: <strong> New Hampshire </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsGeoAlt className="fa-fw me-2" /> Joined on: <strong> Nov 26, 2019 </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6}>
-              <div className="d-flex align-items-center rounded border px-3 py-2">
-                <p className="mb-0">
-                  <BsEnvelope className="fa-fw me-2" /> Email: <strong> stackbros07@gmail.com </strong>
-                </p>
-                <ActionDropdown />
-              </div>
-            </Col>
-            <Col sm={6} className="position-relative">
-              <Link className="btn btn-dashed rounded w-100 icons-center justify-content-center" href="#">
-                {' '}
-                <BsPlusCircleDotted className="me-1" />
-                Add a workplace
-              </Link>
-            </Col>
-            <Col sm={6} className="position-relative">
-              <Link className="btn btn-dashed rounded w-100 icons-center justify-content-center" href="#">
-                {' '}
-                <BsPlusCircleDotted className="me-1" />
-                Add a education
-              </Link>
-            </Col>
-          </Row>
-        </CardBody>
-      </Card>
-      <Interests />
+      <FollowsBlock />
     </>
   )
 }
