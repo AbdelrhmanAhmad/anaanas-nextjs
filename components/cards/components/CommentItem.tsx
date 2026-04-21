@@ -47,8 +47,12 @@ const CommentItem = ({
 }: CommentItemProps) => {
   // Raw backend paths (e.g. "upload/profiles/...webp") must be normalized before
   // hitting next/image — otherwise `new URL(src)` throws "Invalid URL".
-  const avatarSrc = (socialUser?.avatar && resolveMediaUrl(socialUser.avatar)) || defaultUserAvatar.src
-  const attachmentSrc = image ? resolveMediaUrl(image) : ''
+  // Note: the legacy `CommentType.socialUser.avatar` is typed as `StaticImageData` but at
+  // runtime the API returns a string URL, so cast defensively to `string | undefined`.
+  const rawAvatar = (socialUser?.avatar as unknown as string | undefined) ?? undefined
+  const rawImage = (image as unknown as string | undefined) ?? undefined
+  const avatarSrc = (rawAvatar && resolveMediaUrl(rawAvatar)) || defaultUserAvatar.src
+  const attachmentSrc = rawImage ? resolveMediaUrl(rawImage) : ''
   return (
     <li className={styles.item}>
       {socialUser && (
