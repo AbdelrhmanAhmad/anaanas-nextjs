@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Button, Card, Col, Container, Form, Row, Tab, Tabs } from 'react-bootstrap'
+import { Button, Card, Col, Container, Form, Placeholder, Row, Tab, Tabs } from 'react-bootstrap'
 import {
   Bar,
   BarChart,
@@ -44,6 +44,19 @@ type StatsData = {
   }>
   breakdown: Array<{ event: string; count: number }>
   top?: { user_agents?: Array<{ user_agent: string; count: number }> }
+  reactions?: {
+    by_type?: Array<{ type: string; count: number }>
+    daily_by_type?: Array<{
+      date: string
+      like: number
+      love: number
+      care: number
+      haha: number
+      wow: number
+      sad: number
+      angry: number
+    }>
+  }
 }
 
 function todayISO() {
@@ -96,20 +109,65 @@ const listItem = {
   }),
 }
 
+type ReactionTypeKey = 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry'
+
+const reactionTypes: ReactionTypeKey[] = ['like', 'love', 'care', 'haha', 'wow', 'sad', 'angry']
+const reactionColors: Record<ReactionTypeKey, string> = {
+  like: '#1877f2',
+  love: '#f43f5e',
+  care: '#f59e0b',
+  haha: '#facc15',
+  wow: '#06b6d4',
+  sad: '#8b5cf6',
+  angry: '#ef4444',
+}
+const reactionEmojis: Record<ReactionTypeKey, string> = {
+  like: '👍',
+  love: '❤️',
+  care: '🥰',
+  haha: '😂',
+  wow: '😮',
+  sad: '😢',
+  angry: '😡',
+}
+
+function reactionLabel(key: ReactionTypeKey, locale: SupportedLocale) {
+  if (locale === 'ar') {
+    const map: Record<ReactionTypeKey, string> = {
+      like: 'أعجبني',
+      love: 'أحببته',
+      care: 'مهتم',
+      haha: 'أضحكني',
+      wow: 'أدهشني',
+      sad: 'أحزنني',
+      angry: 'أغضبني',
+    }
+    return map[key]
+  }
+  const map: Record<ReactionTypeKey, string> = {
+    like: 'Like',
+    love: 'Love',
+    care: 'Care',
+    haha: 'Haha',
+    wow: 'Wow',
+    sad: 'Sad',
+    angry: 'Angry',
+  }
+  return map[key]
+}
+
 export default function PostStatisticsClient({
   locale = 'ar',
   postId,
-  post,
-  initial,
 }: {
   locale?: SupportedLocale
   postId: string
-  post: any
-  initial: StatsData | null
 }) {
-  const [from, setFrom] = useState<string>(initial?.range?.from ?? daysAgoISO(29))
-  const [to, setTo] = useState<string>(initial?.range?.to ?? todayISO())
-  const [data, setData] = useState<StatsData | null>(initial)
+  const [from, setFrom] = useState<string>(daysAgoISO(29))
+  const [to, setTo] = useState<string>(todayISO())
+  const [post, setPost] = useState<any>(null)
+  const [postLoading, setPostLoading] = useState(true)
+  const [data, setData] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -133,6 +191,57 @@ export default function PostStatisticsClient({
     ]
   }, [data, locale])
 
+  const reactionByType = useMemo(() => {
+    const src = Array.isArray(data?.reactions?.by_type) ? data!.reactions!.by_type! : []
+    return reactionTypes.map((type) => {
+      const found = src.find((x) => String(x.type).toLowerCase() === type)
+      const count = Number(found?.count ?? 0)
+      return {
+        type,
+        name: reactionLabel(type, locale),
+        emoji: reactionEmojis[type],
+        color: reactionColors[type],
+        count,
+      }
+    })
+  }, [data, locale])
+
+  const reactionByTypeForChart = useMemo(() => {
+    return reactionByType.filter((x) => x.count > 0).map((x) => ({ name: `${x.emoji} ${x.name}`, value: x.count, color: x.color }))
+  }, [reactionByType])
+
+  const reactionDaily = useMemo(() => {
+    const src = Array.isArray(data?.reactions?.daily_by_type) ? data!.reactions!.daily_by_type! : []
+    return src.map((row) => ({
+      date: row.date,
+      like: Number(row.like ?? 0),
+      love: Number(row.love ?? 0),
+      care: Number(row.care ?? 0),
+      haha: Number(row.haha ?? 0),
+      wow: Number(row.wow ?? 0),
+      sad: Number(row.sad ?? 0),
+      angry: Number(row.angry ?? 0),
+    }))
+  }, [data])
+
+  const fetchPost = async () => {
+    setPostLoading(true)
+    try {
+      const res = await fetch(`/api/posts/${encodeURIComponent(postId)}?land=${encodeURIComponent(locale)}`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json?.success || !json?.data) throw new Error(json?.message || 'Failed to load post')
+      setPost(json.data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load post')
+    } finally {
+      setPostLoading(false)
+    }
+  }
+
   const apply = async (nextFrom = from, nextTo = to) => {
     setLoading(true)
     setError(null)
@@ -155,6 +264,12 @@ export default function PostStatisticsClient({
     }
   }
 
+  useEffect(() => {
+    void fetchPost()
+    void apply(from, to)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postId, locale])
+
   const setPreset = (days: number) => {
     const nf = daysAgoISO(days - 1)
     const nt = todayISO()
@@ -176,7 +291,6 @@ export default function PostStatisticsClient({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <AnanasStatsMascot />
           <div className={styles.heroCopy}>
             <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
               <div className="d-flex align-items-center gap-2">
@@ -191,7 +305,14 @@ export default function PostStatisticsClient({
               </Link>
             </div>
             <div className="text-muted small mt-2" style={{ maxWidth: '42rem' }}>
-              {t('stats.subtitle', locale)}: <span className="fw-semibold text-dark">{post?.title ?? `#${postId}`}</span>
+              {t('stats.subtitle', locale)}:{' '}
+              {postLoading ? (
+                <Placeholder as="span" animation="glow">
+                  <Placeholder xs={4} />
+                </Placeholder>
+              ) : (
+                <span className="fw-semibold text-dark">{post?.title ?? `#${postId}`}</span>
+              )}
             </div>
           </div>
         </motion.div>
@@ -244,7 +365,7 @@ export default function PostStatisticsClient({
         </motion.div>
 
         <Row className="g-3 mb-3">
-          {kpis.map((k, idx) => (
+          {(loading && !data ? Array.from({ length: 6 }).map((_, idx) => ({ key: `skeleton-${idx}` })) : kpis).map((k: any, idx) => (
             <Col key={k.key} xs={12} sm={6} lg={4} xl={2} className={styles.kpiCol}>
               <motion.div
                 custom={idx}
@@ -256,9 +377,9 @@ export default function PostStatisticsClient({
               >
                 <Card className={`border-0 shadow-none h-100 ${wizardStyles.wizardCard} ${wizardStyles.smartCard} ${styles.kpiCard}`}>
                   <Card.Body>
-                    <div className="small text-muted">{k.label}</div>
-                    <div className={`fs-4 fw-bold ${styles.kpiValue}`} style={{ color: k.color }}>
-                      {formatNum(k.value)}
+                    <div className="small text-muted">{loading && !data ? <Placeholder xs={5} /> : k.label}</div>
+                    <div className={`fs-4 fw-bold ${styles.kpiValue}`} style={{ color: k.color ?? '#64748b' }}>
+                      {loading && !data ? <Placeholder xs={4} /> : formatNum(k.value)}
                     </div>
                     <div className={`text-muted ${styles.kpiRange}`}>
                       {from} → {to}
@@ -285,18 +406,22 @@ export default function PostStatisticsClient({
                           <div className="small text-muted">{t('stats.hint.uniqueDefinition', locale)}</div>
                         </div>
                         <div style={{ width: '100%', height: 320 }}>
-                          <ResponsiveContainer>
-                            <LineChart data={daily} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" />
-                              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#64748b" />
-                              <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
-                              <Tooltip />
-                              <Legend />
-                              <Line type="monotone" dataKey="impressions" name={t('stats.kpi.impressions', locale)} stroke="#0d6efd" strokeWidth={2} dot={false} />
-                              <Line type="monotone" dataKey="unique_impressions" name={t('stats.kpi.uniqueImpressions', locale)} stroke="#6610f2" strokeWidth={2} dot={false} />
-                              <Line type="monotone" dataKey="views" name={t('stats.kpi.views', locale)} stroke="#151515" strokeWidth={2} dot={false} />
-                            </LineChart>
-                          </ResponsiveContainer>
+                          {loading && !data ? (
+                            <div className={styles.panelSkeleton} />
+                          ) : (
+                            <ResponsiveContainer>
+                              <LineChart data={daily} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" />
+                                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#64748b" />
+                                <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="impressions" name={t('stats.kpi.impressions', locale)} stroke="#0d6efd" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="unique_impressions" name={t('stats.kpi.uniqueImpressions', locale)} stroke="#6610f2" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="views" name={t('stats.kpi.views', locale)} stroke="#151515" strokeWidth={2} dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          )}
                         </div>
                       </div>
                     </Col>
@@ -306,16 +431,20 @@ export default function PostStatisticsClient({
                           {t('stats.charts.breakdown', locale)}
                         </div>
                         <div style={{ width: '100%', height: 320 }}>
-                          <ResponsiveContainer>
-                            <PieChart>
-                              <Tooltip />
-                              <Pie data={breakdownForChart} dataKey="value" nameKey="name" outerRadius={110} label>
-                                {breakdownForChart.map((_, i) => (
-                                  <Cell key={i} fill={pieColors[i % pieColors.length]} />
-                                ))}
-                              </Pie>
-                            </PieChart>
-                          </ResponsiveContainer>
+                          {loading && !data ? (
+                            <div className={styles.panelSkeleton} />
+                          ) : (
+                            <ResponsiveContainer>
+                              <PieChart>
+                                <Tooltip />
+                                <Pie data={breakdownForChart} dataKey="value" nameKey="name" outerRadius={110} label>
+                                  {breakdownForChart.map((_, i) => (
+                                    <Cell key={i} fill={pieColors[i % pieColors.length]} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          )}
                         </div>
                       </div>
                     </Col>
@@ -328,22 +457,95 @@ export default function PostStatisticsClient({
                       {t('stats.charts.interactionsOverTime', locale)}
                     </div>
                     <div style={{ width: '100%', height: 360 }}>
-                      <ResponsiveContainer>
-                        <BarChart data={daily}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" />
-                          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#64748b" />
-                          <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="calls" name={t('stats.kpi.calls', locale)} fill="#dc3545" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="shares" name={t('stats.kpi.shares', locale)} fill="#0dcaf0" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="chats" name={t('stats.kpi.chats', locale)} fill="#fecb01" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="likes" name={t('stats.event.likes', locale)} fill="#198754" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="comments" name={t('stats.event.comments', locale)} fill="#151515" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                      {loading && !data ? (
+                        <div className={styles.panelSkeleton} />
+                      ) : (
+                        <ResponsiveContainer>
+                          <BarChart data={daily}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" />
+                            <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#64748b" />
+                            <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="calls" name={t('stats.kpi.calls', locale)} fill="#dc3545" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="shares" name={t('stats.kpi.shares', locale)} fill="#0dcaf0" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="chats" name={t('stats.kpi.chats', locale)} fill="#fecb01" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="likes" name={t('stats.event.likes', locale)} fill="#198754" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="comments" name={t('stats.event.comments', locale)} fill="#151515" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
                     </div>
                   </div>
+                </Tab>
+
+                <Tab eventKey="reactions" title={locale === 'ar' ? 'التفاعلات' : 'Reactions'}>
+                  <Row className="g-3">
+                    <Col lg={5}>
+                      <div className={styles.chartPanel}>
+                        <div className="fw-bold mb-2" style={{ color: '#151515' }}>
+                          {locale === 'ar' ? 'أنواع التفاعلات' : 'Reaction Types'}
+                        </div>
+                        <div style={{ width: '100%', height: 330 }}>
+                          {loading && !data ? (
+                            <div className={styles.panelSkeleton} />
+                          ) : (
+                            <ResponsiveContainer>
+                              <PieChart>
+                                <Tooltip />
+                                <Legend />
+                                <Pie data={reactionByTypeForChart} dataKey="value" nameKey="name" outerRadius={110} label>
+                                  {reactionByTypeForChart.map((entry, i) => (
+                                    <Cell key={i} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          )}
+                        </div>
+                      </div>
+                    </Col>
+                    <Col lg={7}>
+                      <div className={styles.chartPanel}>
+                        <div className="fw-bold mb-2" style={{ color: '#151515' }}>
+                          {locale === 'ar' ? 'التفاعلات حسب اليوم والنوع' : 'Daily Reactions by Type'}
+                        </div>
+                        <div style={{ width: '100%', height: 330 }}>
+                          {loading && !data ? (
+                            <div className={styles.panelSkeleton} />
+                          ) : (
+                            <ResponsiveContainer>
+                              <BarChart data={reactionDaily}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(21,21,21,0.08)" />
+                                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#64748b" />
+                                <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                                <Tooltip />
+                                <Legend />
+                                {reactionTypes.map((type) => (
+                                  <Bar
+                                    key={type}
+                                    dataKey={type}
+                                    name={`${reactionEmojis[type]} ${reactionLabel(type, locale)}`}
+                                    fill={reactionColors[type]}
+                                    radius={[4, 4, 0, 0]}
+                                  />
+                                ))}
+                              </BarChart>
+                            </ResponsiveContainer>
+                          )}
+                        </div>
+                        <div className="mt-2 d-flex flex-wrap gap-2">
+                          {reactionByType.map((item) => (
+                            <span key={item.type} className={styles.reactionChip} style={{ borderColor: `${item.color}44` }}>
+                              <span>{item.emoji}</span>
+                              <span className="fw-semibold">{item.name}</span>
+                              <span className="text-muted">{formatNum(item.count)}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </Col>
+                  </Row>
                 </Tab>
 
                 <Tab eventKey="audience" title={t('stats.tabs.audience', locale)}>
@@ -360,6 +562,17 @@ export default function PostStatisticsClient({
                           </tr>
                         </thead>
                         <tbody>
+                          {loading && !data && (
+                            <tr>
+                              <td colSpan={2}>
+                                <Placeholder animation="glow">
+                                  <Placeholder xs={12} />
+                                  <Placeholder xs={10} />
+                                  <Placeholder xs={8} />
+                                </Placeholder>
+                              </td>
+                            </tr>
+                          )}
                           {(data?.top?.user_agents ?? []).map((row, idx) => (
                             <tr key={idx}>
                               <td className="text-break">{row.user_agent}</td>

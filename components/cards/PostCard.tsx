@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
-import { sendAnalyticsEvent } from '@/lib/analytics/socket'
+import { ensureAnalyticsSocket, sendAnalyticsEvent } from '@/lib/analytics/socket'
 import {
   Card,
   CardBody,
@@ -48,8 +48,10 @@ import SharePostModal from '@/components/share/SharePostModal'
 import { useLayoutContext } from '@/context/useLayoutContext'
 import { deletePost } from '@/lib/api/posts'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import { useCurrentUser } from '@/context/useCurrentUser'
+import styles from './PostCard.module.css'
 
-import avatar12 from '@/assets/images/avatar/12.jpg'
+import defaultUserAvatar from '@/assets/images/avatar/user-default.svg'
 import postImg3 from '@/assets/images/post/1by1/03.jpg'
 import postImg1 from '@/assets/images/post/3by2/01.jpg'
 import postImg2 from '@/assets/images/post/3by2/02.jpg'
@@ -104,8 +106,55 @@ type PostReactionToggleResponse = {
     post_id?: number | string
     likes_count?: number
     toggled_on?: boolean
+    reaction_type_by_me?: 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry' | null
+    reaction_counts?: Partial<Record<'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry', number>>
   }
   message?: string
+}
+
+type PostReactionSummaryResponse = {
+  success?: boolean
+  data?: {
+    likes_count?: number
+    liked_by_me?: boolean
+    reaction_type_by_me?: 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry' | null
+    reaction_counts?: Partial<Record<'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry', number>>
+  }
+  message?: string
+}
+
+type ReactionKey = 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry'
+
+const REACTION_ORDER: ReactionKey[] = ['like', 'love', 'care', 'haha', 'wow', 'sad', 'angry']
+const REACTION_EMOJI: Record<ReactionKey, string> = {
+  like: '👍',
+  love: '❤️',
+  care: '🥰',
+  haha: '😂',
+  wow: '😮',
+  sad: '😢',
+  angry: '😡',
+}
+
+const EMPTY_REACTION_COUNTS: Record<ReactionKey, number> = {
+  like: 0,
+  love: 0,
+  care: 0,
+  haha: 0,
+  wow: 0,
+  sad: 0,
+  angry: 0,
+}
+
+const normalizeReactionCounts = (input?: Partial<Record<ReactionKey, number>> | null): Record<ReactionKey, number> => {
+  const result = { ...EMPTY_REACTION_COUNTS }
+  if (!input) return result
+
+  for (const key of REACTION_ORDER) {
+    const value = Number(input[key] ?? 0)
+    result[key] = Number.isFinite(value) && value > 0 ? Math.floor(value) : 0
+  }
+  return result
 }
 
 const ActionMenu = ({
@@ -224,10 +273,15 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     Number((session as any)?.user?.id) === Number((post as any)?.user_id)
   const initialPostLikesCount = post?.likes_count ?? post?.likesCount ?? 0
   const initialPostLikedByMe = Boolean((post as any)?.liked_by_me)
+  const initialReactionTypeByMe =
+    ((post as any)?.reaction_type_by_me as 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry' | null | undefined) ?? null
+  const initialReactionCounts = normalizeReactionCounts((post as any)?.reaction_counts ?? null)
   const commentsCount = post?.comments_count ?? post?.commentsCount ?? 0
   const caption = post?.description ?? post?.caption ?? ''
   const title = post?.title ?? ''
-  const image = resolveMediaUrl(post?.post_images[0]?.image_full_url ?? post?.image)
+  const postImages = Array.isArray((post as any)?.post_images) ? ((post as any).post_images as any[]) : []
+  const image = resolveMediaUrl(postImages[0]?.image_full_url ?? post?.image)
+  const imageCount = postImages.length > 0 ? postImages.length : image ? 1 : 0
   const sectionName = (post as any)?.section?.name ?? ''
   const categoryName = (post as any)?.category?.name ?? ''
   const cityName = (post as any)?.city?.name ?? ''
@@ -239,13 +293,27 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const photos = post?.photos
   const isVideo = post?.isVideo
   const commentsPreview = (post?.comments as ApiComment[] | undefined) ?? []
-  const avatarSrc = resolveMediaUrl(user?.avatar || user?.profile_image || user?.image || '')
+  // Post author avatar — normalize any backend path and fall back to the default avatar.
+  const avatarSrc =
+    resolveMediaUrl(user?.avatar_url || user?.avatar || user?.profile_image || user?.image || '') ||
+    defaultUserAvatar.src
 
   const isDetailsPage = Boolean(pathname?.includes('/post/'))
   const postDetailsHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}` : `/post/${post?.id}`
 
   const cardRef = useRef<HTMLDivElement | null>(null)
   const impressionSentRef = useRef(false)
+
+  // Current (logged-in) user avatar comes from the shared CurrentUserProvider,
+  // which fetches /api/auth/profile ONCE for the whole app (not per-card) and
+  // re-renders all consumers on `profile:updated` events.
+  const { user: currentUser, avatarUrl: currentUserAvatarResolved } = useCurrentUser()
+  const currentUserAvatar = currentUser ? currentUserAvatarResolved : null
+
+  useEffect(() => {
+    // Warm up analytics socket early for viewport tracking.
+    ensureAnalyticsSocket()
+  }, [])
 
   useEffect(() => {
     // Track impressions only in feeds (not details page) and only once
@@ -280,6 +348,48 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     observer.observe(el)
     return () => observer.disconnect()
   }, [isDetailsPage, post?.id])
+
+  // The backend now always includes `reaction_counts` + `liked_by_me` +
+  // `reaction_type_by_me` inside the post payload (see PostController::index
+  // and SectionController::getPosts), so we no longer need a per-card GET
+  // to /api/posts/{id}/reactions on mount. This eliminates an N+1 request
+  // pattern (one request per rendered card) that was hammering the server.
+  //
+  // The fallback fetch is only issued when the post object was constructed
+  // from a legacy/partial source that literally omits `reaction_counts`.
+  useEffect(() => {
+    const postId = post?.id
+    if (!postId) return
+
+    const payloadHasCounts = (post as any)?.reaction_counts !== undefined &&
+                             (post as any)?.reaction_counts !== null
+    if (payloadHasCounts) return
+
+    const controller = new AbortController()
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/posts/${postId}/reactions`, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        })
+        const json = (await res.json().catch(() => ({}))) as PostReactionSummaryResponse
+        if (!res.ok || !json?.success || !json?.data) return
+
+        const counts = normalizeReactionCounts(json.data.reaction_counts ?? null)
+        setPostReactionCounts(counts)
+        setPostLikesCount(Number(json.data.likes_count ?? 0))
+        setPostLikedByMe(Boolean(json.data.liked_by_me))
+        setPostReactionTypeByMe((json.data.reaction_type_by_me as any) ?? null)
+      } catch (e: any) {
+        if (e?.name !== 'AbortError') {
+          console.error('Failed to load reaction summary', e)
+        }
+      }
+    })()
+
+    return () => controller.abort()
+  }, [post?.id])
   const postEditHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}/edit` : `/post/${post?.id}/edit`
 
   const currentUserId = (session as any)?.user?.id
@@ -329,6 +439,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const [sending, setSending] = useState(false)
   const [postLikesCount, setPostLikesCount] = useState<number>(Number(initialPostLikesCount) || 0)
   const [postLikedByMe, setPostLikedByMe] = useState<boolean>(initialPostLikedByMe)
+  const [postReactionTypeByMe, setPostReactionTypeByMe] = useState<
+    'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry' | null
+  >(initialPostLikedByMe ? (initialReactionTypeByMe ?? 'like') : null)
+  const [postReactionCounts, setPostReactionCounts] = useState<Record<ReactionKey, number>>(initialReactionCounts)
   const [isExpanded, setIsExpanded] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(Boolean(commentsCount) && commentsCount > commentsPreview.length)
@@ -338,6 +452,51 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const [replyPageById, setReplyPageById] = useState<Record<string, number>>({})
   const [hasMoreRepliesById, setHasMoreRepliesById] = useState<Record<string, boolean>>({})
 
+  const topReactionKeys = useMemo(() => {
+    return [...REACTION_ORDER]
+      .sort((a, b) => {
+        const byCount = (postReactionCounts[b] ?? 0) - (postReactionCounts[a] ?? 0)
+        if (byCount !== 0) return byCount
+        return REACTION_ORDER.indexOf(a) - REACTION_ORDER.indexOf(b)
+      })
+      .filter((key) => (postReactionCounts[key] ?? 0) > 0)
+      .slice(0, 3)
+  }, [postReactionCounts])
+
+  const myReactionLabel = useMemo(() => {
+    if (!postReactionTypeByMe) return ''
+    const labelsAr: Record<ReactionKey, string> = {
+      like: 'أعجبني',
+      love: 'أحببته',
+      care: 'مهتم',
+      haha: 'أضحكني',
+      wow: 'أدهشني',
+      sad: 'أحزنني',
+      angry: 'أغضبني',
+    }
+    const labelsEn: Record<ReactionKey, string> = {
+      like: 'Like',
+      love: 'Love',
+      care: 'Care',
+      haha: 'Haha',
+      wow: 'Wow',
+      sad: 'Sad',
+      angry: 'Angry',
+    }
+    const dict = locale === 'ar' ? labelsAr : labelsEn
+    return dict[postReactionTypeByMe]
+  }, [locale, postReactionTypeByMe])
+
+  const handleCardOpenDetails = (e: any) => {
+    if (isDetailsPage || !postDetailsHref) return
+    const target = e?.target as HTMLElement | null
+    if (!target) return
+    if (target.closest('a,button,input,textarea,select,label,[role="button"],.dropdown-menu,.modal,[data-glightbox]')) {
+      return
+    }
+    router.push(postDetailsHref)
+  }
+
   const initialUiComments = useMemo<CommentType[]>(() => {
     const basePostId = String(post?.id ?? '')
 
@@ -346,7 +505,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       .map((c) => {
         const created = c.created_at ? new Date(c.created_at) : new Date()
         const authorName = c.user?.name || t('post.user', locale)
-        const authorAvatar = (c.user?.avatar || avatar12) as any
+        const authorAvatar = (
+          resolveMediaUrl((c.user as any)?.avatar_url || c.user?.avatar || '') ||
+          defaultUserAvatar.src
+        ) as any
         return {
           id: String(c.id),
           postId: basePostId as any,
@@ -389,7 +551,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     const mapped = items.map((c) => {
       const created = c.created_at ? new Date(c.created_at) : new Date()
       const authorName = c.user?.name || t('post.user', locale)
-      const authorAvatar = (c.user?.avatar || avatar12) as any
+      const authorAvatar = (
+        resolveMediaUrl((c.user as any)?.avatar_url || c.user?.avatar || '') ||
+        defaultUserAvatar.src
+      ) as any
       return {
         id: String(c.id),
         postId: String(postId) as any,
@@ -464,7 +629,12 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       const c = json.data
       const created = c.created_at ? new Date(c.created_at) : new Date()
       const authorName = c.user?.name || (session as any)?.user?.name || t('post.you', locale)
-      const sessionAvatar = ((session as any)?.user?.image || avatar12) as any
+      // Prefer the freshly-loaded profile avatar, then session image, then default.
+      const sessionAvatar = (
+        currentUserAvatar ||
+        resolveMediaUrl((session as any)?.user?.image || '') ||
+        defaultUserAvatar.src
+      ) as any
 
       const mapped: CommentType = {
         id: String(c.id),
@@ -473,7 +643,9 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         socialUser: {
           id: String(c.user?.id ?? (session as any)?.user?.id ?? 'me') as any,
           name: authorName,
-          avatar: (c.user?.avatar || sessionAvatar) as any,
+          avatar: (
+            resolveMediaUrl((c.user as any)?.avatar_url || c.user?.avatar || '') || sessionAvatar
+          ) as any,
           mutualCount: 0,
           role: 'user',
           status: 'online',
@@ -500,7 +672,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     }
   }
 
-  const onToggleLikePost = async () => {
+  const onToggleLikePost = async (reactionType?: 'like' | 'love' | 'care' | 'haha' | 'wow' | 'sad' | 'angry') => {
     if (status !== 'authenticated') {
       setShowLoginAlert(true)
       return
@@ -511,25 +683,46 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     // optimistic UI
     const prevLiked = postLikedByMe
     const prevCount = postLikesCount
-    setPostLikedByMe(!prevLiked)
-    setPostLikesCount(Math.max(0, prevCount + (prevLiked ? -1 : 1)))
+    const prevReactionType = postReactionTypeByMe
+    const prevReactionCounts = postReactionCounts
+
+    if (!reactionType && prevLiked) {
+      // remove existing reaction
+      setPostLikedByMe(false)
+      setPostReactionTypeByMe(null)
+      setPostLikesCount(Math.max(0, prevCount - 1))
+    } else if (reactionType && !prevLiked) {
+      // first reaction
+      setPostLikedByMe(true)
+      setPostReactionTypeByMe(reactionType)
+      setPostLikesCount(prevCount + 1)
+    } else if (reactionType && prevLiked) {
+      // switch reaction type (same total count)
+      setPostLikedByMe(true)
+      setPostReactionTypeByMe(reactionType)
+      setPostLikesCount(prevCount)
+    }
 
     try {
       const res = await fetch(`/api/posts/${postId}/reactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ type: 'like' }),
+        body: JSON.stringify({ type: reactionType ?? (prevReactionType ?? 'like') }),
       })
       const json = (await res.json().catch(() => ({}))) as PostReactionToggleResponse
       if (!res.ok || !json?.success) throw new Error(json?.message || 'Failed to like post')
 
       setPostLikesCount(Number(json.data?.likes_count ?? 0))
       setPostLikedByMe(Boolean(json.data?.toggled_on))
+      setPostReactionTypeByMe((json.data?.reaction_type_by_me as any) ?? null)
+      setPostReactionCounts(normalizeReactionCounts((json.data?.reaction_counts as any) ?? null))
     } catch (e) {
       console.error('Error toggling post like:', e)
       // rollback
       setPostLikedByMe(prevLiked)
       setPostLikesCount(prevCount)
+      setPostReactionTypeByMe(prevReactionType)
+      setPostReactionCounts(prevReactionCounts)
     }
   }
 
@@ -540,17 +733,14 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
     if (!post?.id || !contactHref) return
 
     try {
-      await fetch(`/api/posts/${post.id}/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          event: 'post_call',
-          meta: {
-            contact_method: user?.mobile ? 'tel' : 'mailto',
-            target_user_id: user?.id ?? post?.user_id,
-          },
-        }),
-        keepalive: true,
+      await sendAnalyticsEvent({
+        post_id: String(post.id),
+        event: 'post_call',
+        meta: {
+          contact_method: user?.mobile ? 'tel' : 'mailto',
+          target_user_id: user?.id ?? post?.user_id,
+          path: typeof window !== 'undefined' ? window.location.pathname : null,
+        },
       })
     } catch (e) {
       console.error('Failed to log contact event', e)
@@ -669,7 +859,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       const mappedReplies: CommentType[] = items.map((c) => {
         const created = c.created_at ? new Date(c.created_at) : new Date()
         const authorName = c.user?.name || t('post.user', locale)
-        const authorAvatar = (c.user?.avatar || avatar12) as any
+        const authorAvatar = (
+          resolveMediaUrl((c.user as any)?.avatar_url || c.user?.avatar || '') ||
+          defaultUserAvatar.src
+        ) as any
         return {
           id: String(c.id),
           postId: String(post?.id ?? '') as any,
@@ -751,7 +944,11 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       const c = json.data
       const created = c.created_at ? new Date(c.created_at) : new Date()
       const authorName = c.user?.name || (session as any)?.user?.name || t('post.you', locale)
-      const sessionAvatar = ((session as any)?.user?.image || avatar12) as any
+      const sessionAvatar = (
+        currentUserAvatar ||
+        resolveMediaUrl((session as any)?.user?.image || '') ||
+        defaultUserAvatar.src
+      ) as any
 
       const mappedReply: CommentType = {
         id: String(c.id),
@@ -760,7 +957,9 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         socialUser: {
           id: String(c.user?.id ?? (session as any)?.user?.id ?? 'me') as any,
           name: authorName,
-          avatar: (c.user?.avatar || sessionAvatar) as any,
+          avatar: (
+            resolveMediaUrl((c.user as any)?.avatar_url || c.user?.avatar || '') || sessionAvatar
+          ) as any,
           mutualCount: 0,
           role: 'user',
           status: 'online',
@@ -792,39 +991,36 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   }
 
   return (
-    <Card ref={cardRef as any}>
-      <CardHeader className="border-0 pb-0">
+    <Card ref={cardRef as any}  className={styles.fbCard} style={{ cursor: isDetailsPage ? 'default' : 'pointer' }}>
+      <CardHeader className={styles.fbHeader}>
         <div className="d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center">
-            <div className="avatar avatar-story me-2">
+            <div className="me-2">
               {avatarSrc ? (
                 <span role="button">
-                  {' '}
                   <Image
                     unoptimized
                     width={44}
                     height={44}
-                    className="avatar-img rounded-circle"
+                    className={styles.avatar}
                     src={avatarSrc}
                     alt={userName}
-                  />{' '}
+                  />
                 </span>
               ) : (
-                <div className="avatar-img rounded-circle bg-light d-flex align-items-center justify-content-center text-uppercase small">
+                <div className={`${styles.avatar} bg-light d-flex align-items-center justify-content-center text-uppercase small`}>
                   {userName?.slice(0, 1) || '?'}
                 </div>
               )}
             </div>
 
             <div>
-              <div className="nav nav-divider">
-                <h6 className="nav-item card-title mb-0">
-                  {' '}
-                  <span role="button">{userName} </span>
-                </h6>
-                {createdAtDate && <span className="nav-item small"> {timeSince(createdAtDate)}</span>}
+              <h6 className={styles.userName}>
+                <span role="button">{userName}</span>
+              </h6>
+              <div className={styles.metaRow}>
+                {createdAtDate && <span>{timeSince(createdAtDate)}</span>}
               </div>
-              {user?.email && <p className="mb-0 small">{user.email}</p>}
             </div>
           </div>
           
@@ -842,18 +1038,18 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
       {/* تفاصيل tags */}
       {(sectionName || categoryName || cityName) && (
-        <CardBody className="pt-3 pb-0">
+        <CardBody className={styles.tags}>
           <div className="d-flex flex-wrap gap-2">
             {sectionName && sectionSlug ? (
               <Link
-                href={localeFromParams ? `/${localeFromParams}/${sectionSlug}` : `/${sectionSlug}`}
-                className="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle text-decoration-none"
+                href={localeFromParams ? `/${localeFromParams}/sections/${sectionSlug}` : `/sections/${sectionSlug}`}
+                className={`${styles.chip} bg-primary-subtle text-primary border-primary-subtle`}
               >
                 {sectionName}
               </Link>
             ) : (
               sectionName && (
-                <span className="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle">
+                <span className={`${styles.chip} bg-primary-subtle text-primary border-primary-subtle`}>
                   {sectionName}
                 </span>
               )
@@ -861,20 +1057,20 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
             {categoryName && sectionSlug && categorySlug ? (
               <Link
-                href={localeFromParams ? `/${localeFromParams}/${sectionSlug}/${categorySlug}` : `/${sectionSlug}/${categorySlug}`}
-                className="badge rounded-pill bg-success-subtle text-success border border-success-subtle text-decoration-none"
+                href={localeFromParams ? `/${localeFromParams}/sections/${sectionSlug}/${categorySlug}` : `/sections/${sectionSlug}/${categorySlug}`}
+                className={`${styles.chip} bg-success-subtle text-success border-success-subtle`}
               >
                 {categoryName}
               </Link>
             ) : (
               categoryName && (
-                <span className="badge rounded-pill bg-success-subtle text-success border border-success-subtle">
+                <span className={`${styles.chip} bg-success-subtle text-success border-success-subtle`}>
                   {categoryName}
                 </span>
               )
             )}
             {cityName && (
-              <span className="badge rounded-pill bg-warning-subtle text-dark border border-warning-subtle">
+              <span className={`${styles.chip} bg-warning-subtle text-dark border-warning-subtle`}>
                 {cityName}
               </span>
             )}
@@ -882,16 +1078,16 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         </CardBody>
       )}
 
-      <CardBody>
+      <CardBody className={styles.content}>
         {title && (
-          <h6 className="mb-1">
-            <Link href={postDetailsHref} className="text-decoration-none">
+          <h6 className={styles.title}>
+            <Link href={postDetailsHref} className="text-decoration-none text-reset">
               {title}
             </Link>
           </h6>
         )}
         {normalizedCaption && (
-          <p className="mb-0">
+          <p className={styles.caption}>
             {shouldTruncateCaption ? shortCaption : normalizedCaption}{' '}
             {shouldTruncateCaption && hasLongCaption && (
               <Link href={postDetailsHref} className="ms-1">
@@ -905,11 +1101,20 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
 
         {image && !banner && (
-          <GlightBox href={image} data-gallery="post-images">
-            <Image unoptimized width={720} height={350} className="card-img" src={image} alt={title || 'Post'} />
-          </GlightBox>
+          <Link href={postDetailsHref} className={`${styles.mediaLink} text-decoration-none`}>
+            <div className={styles.mediaWrap}>
+              <Image unoptimized width={720} height={350} className={styles.mainImage} src={image} alt={title || 'Post'} />
+              {imageCount > 1 && (
+                <span className={styles.imageCount}>
+                  +{imageCount}
+                </span>
+              )}
+            </div>
+          </Link>
         )}
 
+
+<div  onClick={handleCardOpenDetails}>
 
 
       {banner }
@@ -946,8 +1151,35 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           </div>
         )}
         {isVideo && <VideoPlayer />}
+
+
+        </div>
+
+        <div className={styles.reactionSummaryBar}>
+          <div className={styles.reactionSummaryLeft}>
+            {topReactionKeys.length > 0 && (
+              <span className={styles.reactionPills} aria-label={locale === 'ar' ? 'التفاعلات' : 'Reactions'}>
+                {topReactionKeys.map((key) => (
+                  <span key={key} className={styles.reactionPill}>
+                    {REACTION_EMOJI[key]}
+                  </span>
+                ))}
+              </span>
+            )}
+            <span className={styles.reactionCountText}>{postLikesCount}</span>
+          </div>
+          {postReactionTypeByMe && (
+            <div className={styles.myReactionBadge}>
+              <span className={styles.myReactionEmoji}>{REACTION_EMOJI[postReactionTypeByMe]}</span>
+              <span>{locale === 'ar' ? `تفاعلك: ${myReactionLabel}` : `Your reaction: ${myReactionLabel}`}</span>
+            </div>
+          )}
+        </div>
+
+
         <PostActions
           postLikedByMe={postLikedByMe}
+          reactionTypeByMe={postReactionTypeByMe}
           postLikesCount={postLikesCount}
           onToggleLikePost={onToggleLikePost}
           commentsCount={commentsCount}
@@ -981,22 +1213,27 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           defaultMessage={`${t('post.watchOnAnanas', locale)}: ${title || (locale === 'ar' ? 'منشور' : 'Post')}`}
         />
       
-        <div id={`comments-${post?.id}`} className="d-flex mb-3">
-              <div className="avatar avatar-xs me-2">
+        <div id={`comments-${post?.id}`} className={styles.commentsComposer}>
+              <div>
                 <span role="button">
               <Image
+                    key={currentUserAvatar || 'default'}
                     unoptimized
-                    className="avatar-img rounded-circle"
-                    src={(resolveMediaUrl((session as any)?.user?.image) || avatar12) as any}
-                    alt="avatar"
-                    width={32}
-                    height={32}
+                    className={styles.commentsAvatar}
+                    src={
+                      (currentUserAvatar ||
+                        resolveMediaUrl((session as any)?.user?.image || '') ||
+                        defaultUserAvatar.src) as any
+                    }
+                    alt={(session as any)?.user?.name || 'avatar'}
+                    width={34}
+                    height={34}
                   />
                 </span>
               </div>
 
           <form
-            className="nav nav-item w-100 position-relative"
+            className={styles.commentsFormWrap}
             onSubmit={(e) => {
               e.preventDefault()
               void onSendComment()
@@ -1011,7 +1248,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
             )}
             <textarea
               data-autoresize
-              className="form-control pe-5 bg-light"
+              className={`form-control ${styles.commentsInput}`}
               rows={1}
               placeholder={status === 'authenticated' ? t('post.addComment', locale) : t('post.loginToComment', locale)}
               value={commentText}
@@ -1019,7 +1256,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
               disabled={status !== 'authenticated' || sending}
             />
             <button
-              className="nav-link bg-transparent px-3 position-absolute top-50 end-0 translate-middle-y border-0"
+              className={styles.sendBtn}
               type="submit"
               disabled={status !== 'authenticated' || sending || !commentText.trim()}
             >
@@ -1029,7 +1266,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
             </div>
 
         {uiComments.length > 0 && (
-            <ul className="comment-wrap list-unstyled">
+            <ul className={styles.commentsList}>
             {uiComments.map((comment) => (
               <CommentItem
                 {...(comment as any)}
@@ -1057,7 +1294,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         />
       </CardBody>
 
-      <CardFooter className="border-0 pt-0">
+      <CardFooter className={styles.cardFooter}>
         {hasMore && (
           <LoadContentButton
             name={isExpanded ? t('post.loadMoreComments', locale) : t('post.viewMoreComments', locale)}

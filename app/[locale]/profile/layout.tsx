@@ -3,11 +3,13 @@ import GlightBox from '@/components/GlightBox'
 import type { ChildrenType } from '@/types/component'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useParams } from 'next/navigation'
+import { usePathname, useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import ProfileImageEditor from './layout/components/ProfileImageEditor'
+import EditProfileModal from './layout/components/EditProfileModal'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import { useCurrentUser } from '@/context/useCurrentUser'
 import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@/lib/localization'
 import clsx from 'clsx'
@@ -43,7 +45,7 @@ import {
 
 import { PROFILE_MENU_ITEMS } from '@/assets/data/menu-items'
 
-import avatar7 from '@/assets/images/avatar/07.jpg'
+import defaultUserAvatar from '@/assets/images/avatar/user-default.svg'
 import background5 from '@/assets/images/bg/05.jpg'
 
 const Photos = ({
@@ -87,31 +89,31 @@ const Photos = ({
 
 const ProfileLayout = ({ children }: ChildrenType) => {
   const pathName = usePathname()
-  const { data: session } = useSession()
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const params = useParams<{ locale?: string }>()
   const localeParam = Array.isArray(params?.locale) ? params.locale[0] : params?.locale
   const locale = (localeParam && isSupportedLocale(localeParam)) ? localeParam : DEFAULT_LOCALE
-  const [userData, setUserData] = useState<any>(null)
+  // The profile user now comes from the shared CurrentUserProvider (deduplicated
+  // /api/auth/profile). `refreshKey` changes trigger an explicit refresh() call
+  // instead of re-running a local fetch effect. `setUserData` is exposed for
+  // optimistic updates from child components (e.g. ProfileImageEditor).
+  const { user: userData, refresh: refreshCurrentUser, setUser: setUserData } = useCurrentUser()
   const [refreshKey, setRefreshKey] = useState(0)
   const [myImages, setMyImages] = useState<any[]>([])
   const [myImagesLoading, setMyImagesLoading] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await fetch('/api/auth/profile')
-        const data = await res.json()
-        if (data.success && data.data?.user) {
-          setUserData(data.data.user)
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
+    if (status === 'unauthenticated') {
+      const next = encodeURIComponent(pathName || `/${locale}/profile/feed`)
+      router.replace(`/${locale}/auth/sign-in?callbackUrl=${next}`)
     }
-    if (session) {
-      fetchUserData()
-    }
-  }, [session, refreshKey])
+  }, [status, router, pathName, locale])
+
+  useEffect(() => {
+    if (refreshKey > 0) void refreshCurrentUser()
+  }, [refreshKey, refreshCurrentUser])
 
   useEffect(() => {
     const fetchMyImages = async () => {
@@ -136,16 +138,17 @@ const ProfileLayout = ({ children }: ChildrenType) => {
     }
   }, [session, refreshKey])
 
-  const avatarUrl = userData?.avatar_url
-    ? resolveMediaUrl(userData.avatar_url)
-    : userData?.avatar
-      ? resolveMediaUrl(userData.avatar)
-      : avatar7.src
-  const coverUrl = userData?.cover_image_url
-    ? resolveMediaUrl(userData.cover_image_url)
-    : userData?.cover_image
-      ? resolveMediaUrl(userData.cover_image)
-      : background5.src
+  const hasAvatar = Boolean(userData?.avatar_url || userData?.avatar)
+  // resolveMediaUrl returns '' for nullish/invalid input; coalesce to the default asset
+  // so <Image> never receives an empty string (Next.js image loader throws "Invalid URL").
+  const avatarUrl =
+    (userData?.avatar_url && resolveMediaUrl(userData.avatar_url)) ||
+    (userData?.avatar && resolveMediaUrl(userData.avatar)) ||
+    defaultUserAvatar.src
+  const coverUrl =
+    (userData?.cover_image_url && resolveMediaUrl(userData.cover_image_url)) ||
+    (userData?.cover_image && resolveMediaUrl(userData.cover_image)) ||
+    background5.src
 
   const formatDate = (value?: string) => {
     if (!value) return ''
@@ -201,6 +204,18 @@ const ProfileLayout = ({ children }: ChildrenType) => {
     }
   }
 
+  if (status === 'loading' || status === 'unauthenticated') {
+    return (
+      <main>
+        <Container>
+          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+            <div className="spinner-border text-primary" role="status" aria-hidden="true" />
+          </div>
+        </Container>
+      </main>
+    )
+  }
+
   return (
     <>
       <main>
@@ -217,21 +232,35 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                     backgroundRepeat: 'no-repeat',
                   }}
                 >
-                  <ProfileImageEditor type="cover" onUpdate={() => setRefreshKey(k => k + 1)} />
+                  <ProfileImageEditor
+                    type="cover"
+                    onUpdate={(updated) => {
+                      if (updated) setUserData(updated)
+                      setRefreshKey((k) => k + 1)
+                    }}
+                  />
                 </div>
                 <CardBody className="py-0">
                   <div className="d-sm-flex align-items-start text-center text-sm-start">
                     <div className="position-relative">
                       <div className="avatar avatar-xxl mt-n5 mb-3">
-                        <Image 
-                          className="avatar-img rounded-circle border border-white border-3" 
-                          src={avatarUrl} 
-                          alt="avatar"
+                        <Image
+                          key={avatarUrl}
+                          className="avatar-img rounded-circle border border-white border-3"
+                          src={avatarUrl}
+                          alt={userData?.name || session?.user?.name || 'avatar'}
                           width={120}
                           height={120}
+                          unoptimized
                         />
                       </div>
-                      <ProfileImageEditor type="avatar" onUpdate={() => setRefreshKey(k => k + 1)} />
+                      <ProfileImageEditor
+                        type="avatar"
+                        onUpdate={(updated) => {
+                          if (updated) setUserData(updated)
+                          setRefreshKey((k) => k + 1)
+                        }}
+                      />
                     </div>
                     <div className="ms-sm-4 mt-sm-3">
                       <h1 className="mb-0 h5">
@@ -240,7 +269,12 @@ const ProfileLayout = ({ children }: ChildrenType) => {
                       <p>{userData?.bio || t('profile.aboutEmpty', locale)}</p>
                     </div>
                     <div className="d-flex mt-3 justify-content-center ms-sm-auto">
-                      <Button variant="danger-soft" className="me-2" type="button">
+                      <Button
+                        variant="danger-soft"
+                        className="me-2"
+                        type="button"
+                        onClick={() => setShowEdit(true)}
+                      >
                         {' '}
                         <BsPencilFill size={19} className="pe-1" /> {t('profile.editProfile', locale)}{' '}
                       </Button>
@@ -343,6 +377,16 @@ const ProfileLayout = ({ children }: ChildrenType) => {
           </Row>
         </Container>
       </main>
+      <EditProfileModal
+        show={showEdit}
+        onHide={() => setShowEdit(false)}
+        locale={locale}
+        user={userData}
+        onUpdated={(updated) => {
+          if (updated) setUserData(updated)
+          setRefreshKey((k) => k + 1)
+        }}
+      />
     </>
   )
 }

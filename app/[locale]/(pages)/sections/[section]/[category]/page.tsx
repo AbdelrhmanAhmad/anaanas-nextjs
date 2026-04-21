@@ -4,15 +4,19 @@ import { notFound } from 'next/navigation'
 import { Col, Row } from 'react-bootstrap'
 
 import CreatePostCard from '@/components/cards/CreatePostCard'
-import Feeds from '../../home/components/Feeds'
+import Feeds from '../../../home/components/Feeds'
 import PostsFilterPanel from './PostsFilterPanel'
 import MobileFiltersModal from './MobileFiltersModal'
-import FollowToggleButton from '@/components/follows/FollowToggleButton'
 import { fetchSectionBySlug } from '@/lib/api/sections'
 import { fetchCategoriesBySectionId } from '@/lib/api/categories'
 import { fetchFields } from '@/lib/api/fields'
 import { getCountryByCode } from '@/lib/api/countries'
 import { fetchCitiesByCountryId } from '@/lib/api/cities'
+import ActiveFilterChips from '../_components/ActiveFilterChips'
+import ResultsSummaryBar from '../_components/ResultsSummaryBar'
+import CategoryHero from '../_components/CategoryHero'
+import BreadcrumbJsonLd from '../_components/BreadcrumbJsonLd'
+import { getSiteOrigin } from '@/lib/seo/origin'
 
 type PageSearchParams = Record<string, string | string[] | undefined>
 
@@ -57,16 +61,10 @@ function buildFilterSummary(
   if (sort !== 'newest') {
     parts.push(
       sort === 'oldest'
-        ? ar
-          ? 'الأقدم أولًا'
-          : 'oldest first'
+        ? (ar ? 'الأقدم أولًا' : 'oldest first')
         : sort === 'price_asc'
-          ? ar
-            ? 'السعر تصاعدي'
-            : 'price low to high'
-          : ar
-            ? 'السعر تنازلي'
-            : 'price high to low',
+          ? (ar ? 'السعر تصاعدي' : 'price low to high')
+          : (ar ? 'السعر تنازلي' : 'price high to low'),
     )
   }
   return parts
@@ -88,10 +86,10 @@ export async function generateMetadata({
   const sectionName = section?.name ?? ''
   const categoryName = category?.name ?? ''
 
-  const title =
+  const baseTitle =
     sectionName && categoryName
       ? `${categoryName} | ${sectionName}`
-      : categoryName || sectionName || 'المنشورات'
+      : categoryName || sectionName || (locale === 'ar' ? 'المنشورات' : 'Listings')
 
   const cityId = parseNumber(firstValue(sp.city_id))
   const priceMin = parseNumber(firstValue(sp.price_min))
@@ -108,15 +106,15 @@ export async function generateMetadata({
     Object.keys(parsedAttrs.ranges).length > 0 ||
     (page != null && page > 1)
 
-  const basePath = `/${locale}/${sectionSlug}/${categorySlug}`
+  const title = page && page > 1 ? `${baseTitle} – ${locale === 'ar' ? 'صفحة' : 'Page'} ${page}` : baseTitle
+
+  const basePath = `/${locale}/sections/${sectionSlug}/${categorySlug}`
   const descriptionBase =
     sectionName && categoryName
-      ? locale === 'ar'
-        ? `تصفح أحدث المنشورات في ${categoryName} ضمن قسم ${sectionName}`
-        : `Browse latest posts in ${categoryName} under ${sectionName}`
-      : locale === 'ar'
-        ? 'تصفح أحدث المنشورات'
-        : 'Browse latest posts'
+      ? (locale === 'ar'
+          ? `تصفح أحدث المنشورات في ${categoryName} ضمن قسم ${sectionName}`
+          : `Browse latest posts in ${categoryName} under ${sectionName}`)
+      : (locale === 'ar' ? 'تصفح أحدث المنشورات' : 'Browse latest posts')
   const description =
     filterSummary.length > 0
       ? `${descriptionBase} (${filterSummary.join(locale === 'ar' ? '، ' : ', ')})`
@@ -125,9 +123,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: basePath,
-    },
+    alternates: { canonical: basePath },
     openGraph: {
       title,
       description,
@@ -140,10 +136,7 @@ export async function generateMetadata({
       title,
       description,
     },
-    robots: {
-      index: !hasSeoFilters,
-      follow: true,
-    },
+    robots: { index: !hasSeoFilters, follow: true },
   }
 }
 
@@ -155,9 +148,6 @@ function parseAttrFilters(searchParams: Record<string, string | string[] | undef
   const ranges: Record<number, { from?: string; to?: string }> = {}
 
   for (const [k, v] of Object.entries(searchParams)) {
-    // Preferred:
-    // attr[795][]=11880
-    // attr[900][from]=10
     const mList = k.match(/^attr\[(\d+)\]\[\]$/)
     const mSingle = k.match(/^attr\[(\d+)\]$/)
     const mFromTo = k.match(/^attr\[(\d+)\]\[(from|to)\]$/)
@@ -247,20 +237,46 @@ const Section = async ({
   const page = parseNumber(firstValue(sp.page))
   const parsedAttrs = parseAttrFilters(sp)
 
+  const origin = getSiteOrigin(headersList)
+  const uiLocale: 'ar' | 'en' = locale === 'en' ? 'en' : 'ar'
+
+  const filterSummary = buildFilterSummary(locale, hasImages, sort, cityId, priceMin, priceMax)
+  const summaryText =
+    filterSummary.length > 0
+      ? (uiLocale === 'ar' ? `تصفية: ${filterSummary.join('، ')}` : `Filtered by: ${filterSummary.join(', ')}`)
+      : uiLocale === 'ar'
+        ? `تصفح أحدث المنشورات في ${category.name}`
+        : `Browse latest posts in ${category.name}`
+
   return (
     <Col md={8} lg={8} className="vstack gap-3">
-      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h1 className="h5 mb-0">{category.name}</h1>
-        <FollowToggleButton
-          target="category"
-          targetId={category.id}
-          locale={locale === 'en' ? 'en' : 'ar'}
-          className="btn btn-outline-dark btn-sm"
-        />
-      </div>
-      <div className="mb-0">
-        <MobileFiltersModal fields={fields} cities={cities} />
-      </div>
+      <BreadcrumbJsonLd
+        items={[
+          { name: uiLocale === 'ar' ? 'الرئيسية' : 'Home', url: `${origin}/${uiLocale}` },
+          { name: section.name, url: `${origin}/${uiLocale}/sections/${sectionSlug}` },
+          { name: category.name, url: `${origin}/${uiLocale}/sections/${sectionSlug}/${categorySlug}` },
+        ]}
+      />
+
+      <CategoryHero
+        locale={uiLocale}
+        section={{ id: section.id, name: section.name, slug: section.slug, image: section.image ?? null }}
+        category={{ id: category.id, name: category.name, slug: category.slug, icon: category.icon ?? null }}
+        categoriesInSection={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug, icon: c.icon ?? null }))}
+      />
+
+      <ActiveFilterChips locale={uiLocale} cities={cities} fields={fields} />
+
+      <ResultsSummaryBar
+        locale={uiLocale}
+        heading={category.name}
+        subtitle={summaryText}
+        trailing={
+          <div className="d-lg-none w-100">
+            <MobileFiltersModal fields={fields} cities={cities} />
+          </div>
+        }
+      />
 
       <Row className="g-4">
         <Col md={12} lg={8} className="vstack gap-4">
@@ -277,7 +293,7 @@ const Section = async ({
               attributes: parsedAttrs.options,
               attributeRanges: parsedAttrs.ranges,
               page: Number.isFinite(page as any) && (page as number) > 0 ? (page as number) : undefined,
-              basePath: `/${locale}/${sectionSlug}/${categorySlug}`,
+              basePath: `/${uiLocale}/sections/${sectionSlug}/${categorySlug}`,
             }}
           />
         </Col>

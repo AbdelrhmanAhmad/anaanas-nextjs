@@ -32,7 +32,7 @@ export type PostsListResponse<T = PostRecord> = {
   to?: number
 }
 
-type FetchPostsParams = {
+export type FetchPostsParams = {
   countryId?: number
   land?: string
   page?: number
@@ -41,6 +41,8 @@ type FetchPostsParams = {
   cityId?: number
   priceMin?: number
   priceMax?: number
+  /** Free-text search across post title and description. */
+  q?: string
   /**
    * Map of attributeId -> selected optionIds
    * This includes nested sub-attributes as well.
@@ -258,6 +260,9 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<PostsLi
   }
   if (params.page) {
     searchParams.set('page', String(params.page))
+  }
+  if (params.q && params.q.trim() !== '') {
+    searchParams.set('q', params.q.trim())
   }
   if (params.sectionSlug) {
     searchParams.set('section_slug', params.sectionSlug)

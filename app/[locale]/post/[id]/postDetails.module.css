@@ -13,29 +13,10 @@
   color: #151515;
   margin-bottom: 0.75rem;
 }
-
 .sidebarStack {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-}
-
-.sidebarStack .simpleCard {
-  flex-direction: row;
-  align-items: stretch;
-}
-
-.sidebarStack .simpleThumb {
-  width: 38%;
-  min-width: 112px;
-  aspect-ratio: auto;
-}
-
-.sidebarStack .simpleBody {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex: 1;
 }
 
 .moreSection {
@@ -74,25 +55,28 @@
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(21, 21, 21, 0.08);
+  border: 1px solid rgba(21, 21, 21, 0.1);
   background: #fff;
-  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.06);
+  box-shadow: 0 8px 20px rgba(21, 21, 21, 0.08);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    border-color 0.2s ease;
+  min-height: 100%;
 }
 
 .simpleCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(21, 21, 21, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(21, 21, 21, 0.14);
+  border-color: rgba(254, 203, 1, 0.45);
 }
 
 .simpleThumb {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  background: linear-gradient(145deg, #f7f9fc, #ecf1f7);
 }
 
 .simpleImg {
@@ -109,11 +93,15 @@
 }
 
 .simpleBody {
-  padding: 0.5rem 0.6rem 0.65rem;
+  padding: 0.75rem 0.8rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 116px;
 }
 
 .simpleTitle {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: #151515;
   line-height: 1.3;
@@ -123,23 +111,49 @@
   overflow: hidden;
 }
 
-.simplePrice {
-  margin-top: 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #0f766e;
+.simplePriceBadge {
+  position: absolute;
+  top: 8px;
+  inset-inline-start: 8px;
+  z-index: 2;
+  background: rgba(21, 21, 21, 0.78);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.24rem 0.54rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  backdrop-filter: blur(4px);
 }
 
-@media (max-width: 991.98px) {
-  .sidebarStack .simpleCard {
-    flex-direction: column;
-  }
+.simpleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
 
-  .sidebarStack .simpleThumb {
-    width: 100%;
-    min-width: 0;
-    aspect-ratio: 4 / 3;
-  }
+.simpleChip {
+  font-size: 0.66rem;
+  font-weight: 700;
+  border: 1px solid rgba(21, 21, 21, 0.12);
+  background: rgba(248, 250, 252, 0.9);
+  color: #475569;
+  border-radius: 999px;
+  padding: 0.16rem 0.44rem;
+  white-space: nowrap;
+}
+
+.simpleAction {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.simpleCard:hover .simpleAction {
+  color: #111827;
 }
 
 .discoveryRow {
@@ -156,4 +170,13 @@
 
 .discoverySections {
   min-width: 0;
+}
+
+
+
+.heroCard{
+  background: #FFF !important ; 
+}
+.contactCard{
+  background: #FFF !important ; 
 }

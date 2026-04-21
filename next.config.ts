@@ -2,8 +2,12 @@ import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
     /* config options here */
-    allowedDevOrigins: ['demo.anaanas.com'],
+    allowedDevOrigins: ['demo.anaanas.com', 'demo.localhost', 'localhost:3000', '127.0.0.1:3000'],
     images: {
+        // We only include SVGs that ship with the app (e.g. default user avatar).
+        dangerouslyAllowSVG: true,
+        contentDispositionType: 'attachment',
+        contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
         remotePatterns: [
             {
                 protocol: 'http',

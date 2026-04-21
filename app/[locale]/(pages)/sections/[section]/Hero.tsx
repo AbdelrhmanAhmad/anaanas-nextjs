@@ -55,7 +55,9 @@ const Hero = () => {
                     target="section"
                     targetId={section.id}
                     locale={localeParam === 'en' ? 'en' : 'ar'}
-                    className="btn btn-sm btn-light"
+                    variant="hero"
+                    followLabel={localeParam === 'en' ? 'Follow section' : 'متابعة القسم'}
+                    followingLabel={localeParam === 'en' ? 'Following' : 'تتابع القسم'}
                   />
                 </div>
               </Col>
@@ -98,7 +100,7 @@ const Hero = () => {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Link
-                        href={localeParam ? `/${localeParam}/${section.slug}/${category.slug}` : `${section.slug}/${category.slug}`}
+                        href={localeParam ? `/${localeParam}/sections/${section.slug}/${category.slug}` : `sections/${section.slug}/${category.slug}`}
                         className={styles.categoryCard}
                       >
                         <div className={styles.categoryCardTop}>

@@ -1,0 +1,79 @@
+.item {
+  margin-bottom: 0.72rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e4e6eb;
+  flex-shrink: 0;
+}
+
+.bubble {
+  background: #f0f2f5;
+  border-radius: 16px;
+  padding: 0.48rem 0.7rem;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #050505;
+  font-weight: 700;
+}
+
+.comment {
+  margin: 0.1rem 0 0;
+  font-size: 0.89rem;
+  color: #1c1e21;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.66rem;
+  margin-top: 0.2rem;
+  padding-inline-start: 0.18rem;
+  color: #65676b;
+}
+
+.actionBtn {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.actionBtn:hover {
+  color: #1c1e21;
+}
+
+.replyWrap {
+  margin-top: 0.4rem;
+}
+
+.nested {
+  list-style: none;
+  margin: 0.45rem 0 0 2rem;
+  padding: 0;
+}
+
+@media (max-width: 576px) {
+  .nested {
+    margin-inline-start: 1.4rem;
+  }
+}

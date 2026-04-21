@@ -1,0 +1,376 @@
+/* ===================== Active filter chips ===================== */
+
+.activeChipsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.95rem;
+  background: linear-gradient(135deg, #fffdf3 0%, #fffaef 100%);
+  border: 1px solid rgba(254, 203, 1, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.04);
+}
+
+.activeChipsTitle {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #6b5a00;
+  letter-spacing: 0.01em;
+}
+
+.activeChipsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.activeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.7rem 0.32rem 0.75rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #151515;
+  border: 1px solid rgba(21, 21, 21, 0.1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.activeChip:hover {
+  border-color: rgba(220, 53, 69, 0.55);
+  background: #fff5f6;
+  color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.activeChipLabel {
+  line-height: 1;
+}
+
+.activeChipClose {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.activeChip:hover .activeChipClose {
+  opacity: 1;
+}
+
+.clearAllBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  background: transparent;
+  color: #151515;
+  border: 1.5px dashed rgba(21, 21, 21, 0.3);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.clearAllBtn:hover {
+  border-color: #151515;
+  background: #151515;
+  color: #fecb01;
+}
+
+/* ===================== Summary bar ===================== */
+
+.summaryBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.summaryBar::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #151515 0%, #fecb01 55%, #151515 100%);
+  opacity: 0.85;
+}
+
+.summaryBarLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.summaryHeading {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #151515;
+  line-height: 1.25;
+}
+
+.summarySubtitle {
+  font-size: 0.82rem;
+  color: #6b7280;
+  line-height: 1.25;
+}
+
+.summaryBarRight {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.summaryTrailing {
+  display: inline-flex;
+}
+
+.sortGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 999px;
+  background: #f7f7f7;
+  border: 1px solid rgba(21, 21, 21, 0.07);
+}
+
+.sortIcon {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-inline-start: 0.25rem;
+}
+
+.sortPill {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: transparent;
+  color: #151515;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.sortPill:hover {
+  background: rgba(254, 203, 1, 0.2);
+}
+
+.sortPillActive {
+  background: #177dc1;
+  color : #fff;
+  box-shadow: 0 3px 10px rgba(21, 21, 21, 0.2); /* no box shadow */
+}
+
+.sortPillActive:hover {
+  background: #177dc1;
+  color: #fff;
+
+}
+
+@media (max-width: 575.98px) {
+  .summaryBar {
+    padding: 0.65rem 0.75rem;
+  }
+  .summaryHeading {
+    font-size: 0.95rem;
+  }
+  .sortGroup {
+    padding: 0.25rem;
+  }
+  .sortPill {
+    padding: 0.28rem 0.6rem;
+    font-size: 0.72rem;
+  }
+  .sortIcon {
+    display: none;
+  }
+}
+
+/* ===================== Section-level filters (city / price / images) ===================== */
+
+.sectionFiltersCard {
+  background: #fff;
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  border-radius: 16px;
+  padding: 1.1rem 1rem 1rem;
+  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.sectionFiltersCard::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #151515 0%, #fecb01 55%, #151515 100%);
+  opacity: 0.9;
+}
+
+.sectionFiltersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.sectionFiltersTitle {
+  font-weight: 800;
+  color: #151515;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.sectionFiltersSub {
+  color: #6b7280;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.fieldGroup {
+  margin-bottom: 0.9rem;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #151515;
+  margin-bottom: 0.35rem;
+}
+
+.fieldInput,
+.fieldSelect {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(21, 21, 21, 0.12);
+  padding: 0.55rem 0.75rem;
+  background: #fff;
+  font-size: 0.9rem;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.fieldInput:focus,
+.fieldSelect:focus {
+  outline: none;
+  border-color: #fecb01;
+  box-shadow: 0 0 0 0.2rem rgba(254, 203, 1, 0.25);
+}
+
+.fieldRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.imagesToggleGroup {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.imagesToggleBtn {
+  flex: 1 1 30%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(21, 21, 21, 0.1);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #151515;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+  text-align: center;
+}
+
+.imagesToggleBtn:hover {
+  border-color: rgba(254, 203, 1, 0.8);
+}
+
+.imagesToggleBtnActive {
+  background: #177dc1;
+  color : #fff;
+
+  transform: translateY(-1px);
+}
+
+.imagesToggleBtnActive:hover {
+  background: #177dc1;
+  color : #fff;
+
+}
+
+.filtersActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.applyBtn,
+.resetBtn {
+  flex: 1;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.applyBtn {
+  background: #177dc1;
+  color : #fff;
+
+  box-shadow: 0 8px 18px rgba(21, 21, 21, 0.22);
+}
+
+.applyBtn:hover {
+  background: #177dc1;
+  color : #fff;
+
+  transform: translateY(-1px);
+}
+
+.resetBtn {
+  background: #fff;
+  color: #151515;
+  border-color: rgba(21, 21, 21, 0.15);
+}
+
+.resetBtn:hover {
+  background: #fff5d1;
+  border-color: #fecb01;
+}

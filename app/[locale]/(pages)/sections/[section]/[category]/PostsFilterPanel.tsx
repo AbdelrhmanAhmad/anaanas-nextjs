@@ -377,15 +377,34 @@ export default function PostsFilterPanel({
   }
 
   return (
-    <div className="card border-0 shadow-sm">
+    <div
+      className="card border-0 shadow-sm"
+      style={{
+        borderRadius: 18,
+        overflow: 'hidden',
+        position: 'sticky',
+        top: 90,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          height: 3,
+          background: 'linear-gradient(90deg, #151515 0%, #fecb01 55%, #151515 100%)',
+        }}
+      />
       <div className="card-body">
         <div className="d-flex align-items-center justify-content-between mb-3">
           <div>
-            <div className="h6 mb-0">{t('filter.filterResults', locale)}</div>
+            <div className="h6 mb-0 fw-bold">{t('filter.filterResults', locale)}</div>
             <div className="text-muted small">{t('filter.filterDescription', locale)}</div>
           </div>
           {hasAnyFilter && (
-            <a className="btn btn-sm btn-outline-secondary" href={pathname}>
+            <a
+              className="btn btn-sm btn-outline-dark rounded-pill px-3"
+              href={pathname}
+              style={{ fontWeight: 700 }}
+            >
               {t('filter.reset', locale)}
             </a>
           )}
@@ -470,7 +489,17 @@ export default function PostsFilterPanel({
           <div className="mt-4">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <div className="form-label fw-semibold mb-0">{t('filter.postAttributes', locale)}</div>
-              <button type="button" className="btn btn-sm btn-primary" onClick={applyToUrl}>
+              <button
+                type="button"
+                className="btn btn-sm rounded-pill px-3"
+                onClick={applyToUrl}
+                style={{
+                  background: '#177dc1',
+                  color: '#fff',
+                  fontWeight: 800,
+                  border: 'none',
+                }}
+              >
                 {t('filter.apply', locale)}
               </button>
             </div>

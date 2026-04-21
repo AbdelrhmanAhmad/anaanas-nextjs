@@ -9,6 +9,7 @@ import {NotificationProvider} from '@/context/useNotificationContext'
 import type {ChildrenType} from '@/types/component'
 import {ChatProvider} from '@/context/useChatContext'
 import {AppDataProvider} from '@/context/AppDataContext'
+import {CurrentUserProvider} from '@/context/useCurrentUser'
 import AutoLoginWrapper from './AutoLoginWrapper'
 import DirectionSync from '@/components/DirectionSync'
 
@@ -16,7 +17,7 @@ const LayoutProvider = dynamic(() => import('@/context/useLayoutContext').then((
 
 const AppProvidersWrapper = ({children}: ChildrenType) => {
     const handleChangeTitle = () => {
-        if (document.visibilityState === 'hidden') document.title = 'Please come back 🥺'
+        if (document.visibilityState === 'hidden') document.title = 'اناناس بانتظار عودتك 🥺'
         else document.title = DEFAULT_PAGE_TITLE
     }
 
@@ -50,6 +51,7 @@ const AppProvidersWrapper = ({children}: ChildrenType) => {
         <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
             <DirectionSync />
             <AutoLoginWrapper>
+                <CurrentUserProvider>
                 <AppDataProvider>
             <LayoutProvider>
                 <ChatProvider>
@@ -60,6 +62,7 @@ const AppProvidersWrapper = ({children}: ChildrenType) => {
                 </ChatProvider>
             </LayoutProvider>
                 </AppDataProvider>
+                </CurrentUserProvider>
             </AutoLoginWrapper>
         </SessionProvider>
     )

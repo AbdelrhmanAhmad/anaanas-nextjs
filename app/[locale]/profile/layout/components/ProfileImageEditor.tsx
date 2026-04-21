@@ -5,14 +5,13 @@ import { Button, Modal } from 'react-bootstrap'
 import { BsCamera } from 'react-icons/bs'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import { getApiUrl } from '@/lib/api/config'
 
 type ProfileImageEditorProps = {
   currentImage?: string
   type: 'avatar' | 'cover'
-  onUpdate?: () => void
+  onUpdate?: (updatedUser?: any) => void
 }
 
 export default function ProfileImageEditor({ currentImage, type, onUpdate }: ProfileImageEditorProps) {
@@ -20,7 +19,6 @@ export default function ProfileImageEditor({ currentImage, type, onUpdate }: Pro
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { data: session } = useSession()
-  const router = useRouter()
   const { showNotification } = useNotificationContext()
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +59,9 @@ export default function ProfileImageEditor({ currentImage, type, onUpdate }: Pro
       const formData = new FormData()
       const fieldName = type === 'avatar' ? 'avatar_file' : 'cover_image_file'
       formData.append(fieldName, file)
+      // PHP does not auto-populate $_FILES on PUT requests with multipart bodies,
+      // so we use POST + Laravel method spoofing (_method=PUT) to reach updateProfile().
+      formData.append('_method', 'PUT')
 
       // Get accessToken from session
       const accessToken = (session as any)?.accessToken
@@ -71,7 +72,7 @@ export default function ProfileImageEditor({ currentImage, type, onUpdate }: Pro
 
       // Send directly to Laravel
       const res = await fetch(getApiUrl('/api/auth/profile'), {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Accept': 'application/json',
@@ -87,12 +88,15 @@ export default function ProfileImageEditor({ currentImage, type, onUpdate }: Pro
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }
-        // Call onUpdate to refresh user data immediately
-        onUpdate?.()
-        // Also refresh router to ensure UI updates
-        setTimeout(() => {
-          router.refresh()
-        }, 100)
+        // Propagate the updated user directly so the UI reflects the new avatar/cover
+        // without waiting for a refetch round-trip.
+        onUpdate?.(data?.data?.user)
+        // Notify other parts of the app (e.g. TopHeader ProfileDropdown) to refresh.
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('profile:updated', { detail: { user: data?.data?.user } })
+          )
+        }
       } else {
         showNotification({ message: data.message || 'فشل تحديث الصورة', variant: 'danger' })
       }

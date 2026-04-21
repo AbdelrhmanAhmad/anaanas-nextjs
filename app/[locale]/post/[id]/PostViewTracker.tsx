@@ -1,18 +1,19 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
-import { sendAnalyticsEvent } from '@/lib/analytics/socket'
+import { ensureAnalyticsSocket, sendAnalyticsEvent } from '@/lib/analytics/socket'
 
 export default function PostViewTracker({
   postId,
-  postUserId,
 }: {
   postId: string | number
-  postUserId: string | number | null | undefined
+  postUserId?: string | number | null | undefined
 }) {
   const sentRef = useRef(false)
-  const { data: session } = useSession()
+
+  useEffect(() => {
+    ensureAnalyticsSocket()
+  }, [])
 
   useEffect(() => {
     if (sentRef.current) return
@@ -27,7 +28,7 @@ export default function PostViewTracker({
     }
 
     void sendAnalyticsEvent({ post_id: pid, event: 'post_view', meta })
-  }, [postId, session])
+  }, [postId])
 
   return null
 }

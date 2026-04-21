@@ -8,7 +8,10 @@ import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import SimpleListingCard from './SimpleListingCard'
 import styles from './postDetails.module.css'
-
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import FeedLayoutClient from '@/components/layout/FeedLayoutClient'
+import SideBar from '@/components/layout/SideBar'
+import { fetchSections } from '@/lib/api/sections'
 type ApiPostDetailsResponse = {
   success?: boolean
   data?: any
@@ -46,8 +49,11 @@ export async function generateMetadata({
   const { locale, id } = await params
   try {
     const json = (await callLaravel(`/api/posts/${id}?land=${locale}`, { method: 'GET' })) as ApiPostDetailsResponse
+    const post = json?.data ?? {}
+    const firstImage = resolveMediaUrl(post?.post_images?.[0]?.image_full_url || post?.post_images?.[0]?.image || post?.image || '')
+    const price = post?.price != null && post?.price !== '' ? ` - ${post.price}` : ''
     const title = json?.data?.title
-      ? `${json.data.title} | ANANAS`
+      ? `${json.data.title}${price} | ANANAS`
       : locale === 'ar'
         ? 'تفاصيل المنشور | ANANAS'
         : 'Post details | ANANAS'
@@ -61,8 +67,19 @@ export async function generateMetadata({
       title,
       description,
       alternates: { canonical },
-      openGraph: { title, description, type: 'article', url: canonical },
-      twitter: { card: 'summary_large_image', title, description },
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        url: canonical,
+        images: firstImage ? [{ url: firstImage, alt: post?.title || 'ANANAS post image' }] : undefined,
+      },
+      twitter: {
+        card: firstImage ? 'summary_large_image' : 'summary',
+        title,
+        description,
+        images: firstImage ? [firstImage] : undefined,
+      },
     }
   } catch {
     const fallbackTitle = locale === 'ar' ? 'تفاصيل المنشور | ANANAS' : 'Post details | ANANAS'
@@ -130,25 +147,95 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
 
   const safeLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE
   const isRtl = safeLocale === 'ar'
-
+  const cityName = pickLocalizedName(post?.city?.name, safeLocale)
+  const sectionName = pickLocalizedName(post?.section?.name, safeLocale)
+  const categoryName = pickLocalizedName(post?.category?.name, safeLocale)
+  const userName = post?.user?.name || (safeLocale === 'ar' ? 'صاحب الإعلان' : 'Publisher')
+  const userPhone = post?.user?.mobile ? String(post.user.mobile) : ''
+  const userEmail = post?.user?.email ? String(post.user.email) : ''
+  const hasPrice = post?.price != null && post?.price !== ''
+  const sections = await fetchSections(locale)
+const Banner2 = () => {
   return (
-    <main>
-      <PostViewTracker postId={id} postUserId={post?.user_id} />
-      <Container className="py-3 py-lg-4">
-        <Row className={`g-4 ${styles.layoutRow}`}>
-          <Col lg={8} xl={7}>
-            {postImages.length > 0 ? (
-              <Card className="card-body border-0 shadow-sm mb-3">
+   <>
+     {postImages.length > 0 ? (
+              <Card className={styles.galleryCard}>
                 <PostImagesGallery images={postImages} title={post?.title} isRtl={isRtl} />
               </Card>
             ) : null}
+   
+   </>
+  )
+}
+  return (
+    <main>
+      <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
+      <Col lg={9}>
+
+      <PostViewTracker postId={id} postUserId={post?.user_id} />
+          <Row className="g-3 align-items-stretch">
+            <Col lg={8}>
+              <Card className={styles.heroCard}>
+                <div className="card-body">
+                  <div className={styles.heroTopRow}>
+                    <div>
+                      <h1 className={styles.heroTitle}>{post?.title || `#${id}`}</h1>
+                      <p className={styles.heroDesc}>{post?.description || (safeLocale === 'ar' ? 'لا يوجد وصف' : 'No description')}</p>
+                    </div>
+                    {hasPrice && (
+                      <div className={styles.priceBadge}>
+                        <span className={styles.priceLabel}>{safeLocale === 'ar' ? 'السعر' : 'Price'}</span>
+                        <span className={styles.priceValue}>{String(post.price)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.metaPills}>
+                    {sectionName && <span className={styles.metaPill}>{sectionName}</span>}
+                    {categoryName && <span className={styles.metaPill}>{categoryName}</span>}
+                    {cityName && <span className={styles.metaPill}>{cityName}</span>}
+                  </div>
+                </div>
+              </Card>
+            </Col>
+            <Col lg={4}>
+              <Card className={styles.contactCard}>
+                <div className="card-body">
+                  <div className={styles.contactTitle}>{safeLocale === 'ar' ? 'معلومات المعلن' : 'Publisher Details'}</div>
+                  <div className={styles.contactName}>{userName}</div>
+                  <div className={styles.contactGrid}>
+                    <div className={styles.contactItem}>
+                      <span className={styles.contactItemLabel}>{safeLocale === 'ar' ? 'المدينة' : 'City'}</span>
+                      <span className={styles.contactItemValue}>{cityName || '-'}</span>
+                    </div>
+                    <div className={styles.contactItem}>
+                      <span className={styles.contactItemLabel}>{safeLocale === 'ar' ? 'الهاتف' : 'Phone'}</span>
+                      <span className={styles.contactItemValue}>{userPhone || '-'}</span>
+                    </div>
+                    <div className={styles.contactItem}>
+                      <span className={styles.contactItemLabel}>{safeLocale === 'ar' ? 'البريد' : 'Email'}</span>
+                      <span className={styles.contactItemValue}>{userEmail || '-'}</span>
+                    </div>
+                    <div className={styles.contactItem}>
+                      <span className={styles.contactItemLabel}>{safeLocale === 'ar' ? 'السعر' : 'Price'}</span>
+                      <span className={styles.contactItemValue}>{hasPrice ? String(post.price) : '-'}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+
+        <Row className={`g-4 ${styles.layoutRow}`}>
+          <Col lg={8} xl={8}>
+        
 
             <PostCard
               post={postForCard}
-              banner={null}
+              banner={<Banner2/>}
               attributesAndOptions={
-                <Card className="card-body border-0 shadow-sm mt-3">
-                  <h5 className="mb-3">{t('post.detailsTitle', safeLocale)}</h5>
+                <Card className={styles.detailsCard}>
+                  <div className="card-body">
+                  <h5 className={styles.detailsTitle}>{t('post.detailsTitle', safeLocale)}</h5>
 
                   {attributesAndOptions.length === 0 ? (
                     <div className="text-muted">{t('post.noAttributes', safeLocale)}</div>
@@ -184,12 +271,13 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
                       </Table>
                     </div>
                   )}
+                  </div>
                 </Card>
               }
             />
           </Col>
 
-          <Col lg={4} xl={5} className={`d-none d-lg-block ${styles.sidebarCol}`}>
+          <Col lg={4} xl={4} className={`d-none d-lg-block ${styles.sidebarCol}`}>
             <div className={styles.sidebarTitle}>{t('post.similarTitle', safeLocale)}</div>
             {similarPosts.length === 0 ? (
               <p className="text-muted small mb-0">{t('post.noSimilar', safeLocale)}</p>
@@ -228,7 +316,10 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
             </div>
           )}
         </section>
-      </Container>
+        </Col>
+
+    </FeedLayoutClient>
+
     </main>
   )
 }

@@ -68,7 +68,7 @@ const Home = async ({
       <Col md={8} lg={6} className=" gap-4">
       <HomeBanner locale={uiLocale} />
 
-        <Row className={`g-3 ${homeDiscoveryStyles.discoveryRow}`}>
+        <Row className={`g-3 ${homeDiscoveryStyles.discoveryRow} d-md-none`}>
           <Col md={12} lg={5} className={homeDiscoveryStyles.discoveryAi}>
             <MobileAIDashboard locale={uiLocale === 'en' ? 'en' : 'ar'} className="h-100" />
           </Col>

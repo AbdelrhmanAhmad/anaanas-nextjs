@@ -58,7 +58,7 @@ const SectionSidebar = ({ categories }: SectionSidebarProps) => {
           </li>
           
           <li className="nav-item">
-              <Link className="nav-link" href={`/${currentLocale}/${sectionSlug}`}>
+              <Link className="nav-link" href={`/${currentLocale}/sections/${sectionSlug}`}>
                 <span> الكل</span>
               </Link>
           </li>
@@ -68,7 +68,7 @@ const SectionSidebar = ({ categories }: SectionSidebarProps) => {
                 <Link
                   className="nav-link"
                   // يمكن لاحقًا تعديل الـ URL بناءً على شكل روابط التصنيفات المطلوب
-                  href={`/${currentLocale}/${sectionSlug}/${category.slug}`}>
+                  href={`/${currentLocale}/sections/${sectionSlug}/${category.slug}`}>
                   {category.icon && (
                     <Image
                       src={category.icon}

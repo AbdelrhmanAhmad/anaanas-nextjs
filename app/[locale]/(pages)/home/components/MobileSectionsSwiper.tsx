@@ -70,7 +70,7 @@ const MobileSectionsSwiper = ({ sections, locale }: MobileSectionsSwiperProps) =
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Link href={`/${locale}/${section.slug}`} className={styles.card}>
+                <Link href={`/${locale}/sections/${section.slug}`} className={styles.card}>
                   <div className={styles.cardTop}>
                     <span className={styles.iconWrap}>
                       {iconSrc ? (

@@ -157,9 +157,9 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
                   <Link
                     className={clsx(styles.menuLink, {
                       [styles.menuLinkActive]:
-                        normalizedPath?.startsWith(`/${currentLocale}/${section.slug}`) ?? false,
+                        normalizedPath?.startsWith(`/${currentLocale}/sections/${section.slug}`) ?? false,
                     })}
-                    href={`/${currentLocale}/${section.slug}`}
+                    href={`/${currentLocale}/sections/${section.slug}`}
                   >
                     <span className={styles.menuIcon}>
                       {section.icon ? (

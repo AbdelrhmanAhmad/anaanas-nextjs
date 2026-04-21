@@ -10,7 +10,9 @@ import * as yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-import avatar3 from '@/assets/images/avatar/03.jpg'
+import defaultUserAvatar from '@/assets/images/avatar/user-default.svg'
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import { useCurrentUser } from '@/context/useCurrentUser'
 import Link from 'next/link'
 import Select from 'react-select'
 import { useRouter } from 'next/navigation'
@@ -89,7 +91,7 @@ function buildWizardSelectStyles(hasError: boolean) {
         : state.isFocused
           ? 'rgba(254, 203, 1, 0.82)'
           : 'rgba(21, 21, 21, 0.08)',
-      backgroundColor: '#faf9f7',
+      backgroundColor: '#fff',
       boxShadow: state.isFocused && !hasError ? '0 0 0 3px rgba(254, 203, 1, 0.2)' : 'none',
       '&:hover': {
         borderColor: hasError ? '#e8a0a0' : 'rgba(21, 21, 21, 0.12)',
@@ -119,6 +121,9 @@ const CreatePostCard = ({ mode = 'create', initialPost, postId, locale: localePr
   // الحصول على الجلسة أولاً
   const { data: session, status } = useSession()
   const [showLoginAlert, setShowLoginAlert] = useState(false)
+  // Current user avatar comes from the shared CurrentUserProvider — one fetch, global state.
+  const { user: _currentUser, avatarUrl: _resolvedAvatarUrl } = useCurrentUser()
+  const currentUserAvatar = _currentUser ? _resolvedAvatarUrl : null
   const [postSuccessOpen, setPostSuccessOpen] = useState(false)
   const [postSuccessMeta, setPostSuccessMeta] = useState<{ id?: number | string; title?: string } | null>(null)
   const router = useRouter()
@@ -175,6 +180,8 @@ const [step, setStep] = useState(1)
       isArray: Array.isArray(cities),
     })
   }, [cities, loadingCities, selectedCountry])
+
+  // Note: currentUserAvatar is now provided by CurrentUserProvider (see top of file).
 
   const [selectedSection, setSelectedSection] = useState<Section | null>(null)
   const [sectionCategories, setSectionCategories] = useState<Category[]>([])
@@ -1164,8 +1171,23 @@ const [step, setStep] = useState(1)
         <div className={styles.smartRow}>
           <div className="avatar avatar-xs">
             <span role="button">
-              {' '}
-              <Image className="avatar-img rounded-circle" src={avatar3} alt="avatar3" />{' '}
+              {currentUserAvatar ? (
+                <Image
+                  key={currentUserAvatar}
+                  className="avatar-img rounded-circle"
+                  src={currentUserAvatar}
+                  alt={session?.user?.name || 'avatar'}
+                  width={32}
+                  height={32}
+                  unoptimized
+                />
+              ) : (
+                <Image
+                  className="avatar-img rounded-circle"
+                  src={defaultUserAvatar}
+                  alt={session?.user?.name || 'avatar'}
+                />
+              )}
             </span>
           </div>
 
@@ -1208,9 +1230,7 @@ const [step, setStep] = useState(1)
 {
   step === 1 && (
     <motion.div key="w-1" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
-                  <p className={styles.wizardLead}>
-                    {t('createPost.wizard.lead', locale as any)}
-                  </p>
+              
 
                   <div className={styles.wizardFieldGroup}>
                     <label className={styles.wizardLabel} htmlFor="create-post-title">
@@ -1233,10 +1253,15 @@ const [step, setStep] = useState(1)
                     )}
                   </div>
 
-                  {title.trim().length > 0 && <SmartChipsComingSoonTeaser />}
+                  {title.trim().length > 0 && 
+                    <>
+                    
+                    
+                      <p className={styles.wizardLead}>
+                      {t('createPost.wizard.lead', locale as any)}
+                    </p>
 
-                  {title.trim().length > 0 && (
-                    <div className={styles.wizardFieldGroup}>
+     <div className={styles.wizardFieldGroup}>
                       <label className={styles.wizardLabel} htmlFor="create-post-description">
                         وصف الإعلان
                         <span className={styles.wizardRequired}>*</span>
@@ -1258,8 +1283,11 @@ const [step, setStep] = useState(1)
                         <div className="text-danger small mt-1">{errors.description.message as string}</div>
                       )}
                     </div>
-                  )}
 
+
+
+                    <SmartChipsComingSoonTeaser />
+                    
                   <div className={styles.wizardNavRow}>
                     <span aria-hidden="true" />
                     <button
@@ -1279,6 +1307,10 @@ const [step, setStep] = useState(1)
                       </span>
                     </button>
                   </div>
+                    </>
+                  }
+
+
     </motion.div>
   )
 }

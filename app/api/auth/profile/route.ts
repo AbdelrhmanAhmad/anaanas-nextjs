@@ -2,7 +2,7 @@ import { callLaravel } from '@/lib/laravelClient'
 import { NextRequest, NextResponse } from 'next/server'
 import FormDataNode from 'form-data'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const data = await callLaravel('/api/auth/me', {
       method: 'GET',
@@ -16,55 +16,83 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Append a scalar (string/number/boolean/null) to a FormData instance.
+ * Arrays/objects are JSON-encoded so Laravel can still read them as strings
+ * (Laravel accepts booleans as "true"/"false"/"1"/"0" in multipart payloads).
+ */
+function appendScalar(fd: FormDataNode, key: string, value: any) {
+  if (value === undefined) return
+  if (value === null) {
+    fd.append(key, '')
+    return
+  }
+  if (typeof value === 'boolean') {
+    fd.append(key, value ? '1' : '0')
+    return
+  }
+  if (typeof value === 'object') {
+    fd.append(key, JSON.stringify(value))
+    return
+  }
+  fd.append(key, String(value))
+}
+
 export async function PUT(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    
-    // Build request body - handle both JSON fields and files
-    const body: Record<string, any> = {}
-    
-    // Copy all non-file fields
-    for (const [key, value] of formData.entries()) {
-      if (key !== 'avatar_file' && key !== 'cover_image_file') {
-        body[key] = value
-      }
-    }
-
-    // Prepare FormData for Laravel using form-data package
+    const contentType = (request.headers.get('content-type') || '').toLowerCase()
     const laravelFormData = new FormDataNode()
-    
-    // Add JSON fields
-    Object.keys(body).forEach(key => {
-      if (body[key] !== null && body[key] !== undefined) {
-        laravelFormData.append(key, String(body[key]))
+    // Method spoofing for Laravel: PHP does not auto-populate $_FILES on PUT
+    // multipart requests, so we always POST to Laravel with _method=PUT.
+    laravelFormData.append('_method', 'PUT')
+
+    if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
+      // Multipart / URL-encoded path: copy scalar fields and forward files verbatim.
+      const formData = await request.formData()
+
+      for (const [key, value] of formData.entries()) {
+        if (key === 'avatar_file' || key === 'cover_image_file') continue
+        // `value` is either a string (scalar) or File — but File is only used for avatar/cover.
+        if (typeof value === 'string') {
+          appendScalar(laravelFormData, key, value)
+        }
       }
-    })
 
-    // Add files if present
-    const avatarFile = formData.get('avatar_file') as File | null
-    const coverFile = formData.get('cover_image_file') as File | null
-    
-    if (avatarFile && avatarFile.size > 0) {
-      // Convert File to Buffer for Node.js
-      const arrayBuffer = await avatarFile.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      laravelFormData.append('avatar_file', buffer, {
-        filename: avatarFile.name,
-        contentType: avatarFile.type,
+      const avatarFile = formData.get('avatar_file') as File | null
+      if (avatarFile && avatarFile.size > 0) {
+        const buffer = Buffer.from(await avatarFile.arrayBuffer())
+        laravelFormData.append('avatar_file', buffer, {
+          filename: avatarFile.name,
+          contentType: avatarFile.type,
+        })
+      }
+
+      const coverFile = formData.get('cover_image_file') as File | null
+      if (coverFile && coverFile.size > 0) {
+        const buffer = Buffer.from(await coverFile.arrayBuffer())
+        laravelFormData.append('cover_image_file', buffer, {
+          filename: coverFile.name,
+          contentType: coverFile.type,
+        })
+      }
+    } else {
+      // Treat anything else (including application/json) as JSON.
+      // Laravel expects multipart because the controller uses `hasFile()` — we translate.
+      let json: Record<string, any> = {}
+      try {
+        json = await request.json()
+      } catch {
+        // allow empty bodies without crashing
+        json = {}
+      }
+
+      Object.keys(json || {}).forEach((key) => {
+        // No file uploads in the JSON path — files must use multipart.
+        if (key === 'avatar_file' || key === 'cover_image_file') return
+        appendScalar(laravelFormData, key, (json as any)[key])
       })
     }
-    
-    if (coverFile && coverFile.size > 0) {
-      // Convert File to Buffer for Node.js
-      const arrayBuffer = await coverFile.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      laravelFormData.append('cover_image_file', buffer, {
-        filename: coverFile.name,
-        contentType: coverFile.type,
-      })
-    }
 
-    // Get session for auth token
     const { getServerSession } = await import('next-auth')
     const { authOptions } = await import('@/auth')
     const session = await getServerSession(authOptions)
@@ -74,24 +102,28 @@ export async function PUT(request: NextRequest) {
       Accept: 'application/json',
       ...laravelFormData.getHeaders(),
     }
-
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`
     }
 
     const { getApiUrl } = await import('@/lib/api/config')
     const res = await fetch(getApiUrl('/api/auth/profile'), {
-      method: 'PUT',
+      method: 'POST',
       headers,
       body: laravelFormData as any,
     })
 
+    const data = await res.json().catch(() => ({}))
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}))
-      throw new Error(errorData.message || `Failed to update profile: ${res.status}`)
+      return NextResponse.json(
+        {
+          success: false,
+          message: (data as any)?.message || `Failed to update profile: ${res.status}`,
+          errors: (data as any)?.errors,
+        },
+        { status: res.status },
+      )
     }
-
-    const data = await res.json()
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('Error updating profile:', error)

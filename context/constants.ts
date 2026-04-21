@@ -14,4 +14,4 @@ export const buyLink = ''
 
 export const basePath = ''
 
-export const DEFAULT_PAGE_TITLE = 'Social Nextjs | Network, Community and Event Theme'
+export const DEFAULT_PAGE_TITLE = 'منصة أناناس للاعلانات الرقمية والتسويق والتجارة الالكترونية  '

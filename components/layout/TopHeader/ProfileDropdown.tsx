@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import Image from "next/image";
 import {
+  BsBoxArrowInRight,
   BsCardText,
   BsCircleHalf,
   BsGear,
@@ -25,9 +26,10 @@ import { useState } from "react";
 
 import type { ThemeType } from "@/types/context";
 
-import avatar7 from "@/assets/images/avatar/07.jpg";
+import defaultUserAvatar from "@/assets/images/avatar/user-default.svg";
 import { toSentenceCase } from "@/utils/change-casing";
 import { useLayoutContext } from "@/context/useLayoutContext";
+import { useCurrentUser } from "@/context/useCurrentUser";
 import clsx from "clsx";
 import { developedByLink } from "@/context/constants";
 import Link from "next/link";
@@ -42,6 +44,9 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const { user: currentUser, avatarUrl: resolvedAvatarUrl } = useCurrentUser();
+  // Only use the resolved avatar when we actually have user data (not the fallback default)
+  const avatarUrl = currentUser ? resolvedAvatarUrl : null;
   
   const translations = {
     ar: {
@@ -106,11 +111,68 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
   // Show login button if not authenticated
   if (status === 'unauthenticated') {
     return (
-      <li className="nav-item ms-2">
-        <Link className="nav-link btn btn-primary btn-sm" href={`/${locale}/auth/sign-in`}>
-          {t.login}
+      <>
+        {/* Desktop: full-text pill button */}
+        <Link
+          className="topHeader__loginBtn d-none d-sm-inline-flex"
+          href={`/${locale}/auth/sign-in`}
+        >
+          <BsBoxArrowInRight size={14} />
+          <span>{t.login}</span>
         </Link>
-      </li>
+
+        {/* Mobile: compact icon-only button that matches the rest of the cluster */}
+        <Link
+          className="topHeader__loginIcon d-inline-flex d-sm-none"
+          href={`/${locale}/auth/sign-in`}
+          aria-label={t.login}
+          title={t.login}
+        >
+          <BsBoxArrowInRight size={16} />
+        </Link>
+
+        <style jsx global>{`
+          .topHeader__loginBtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 38px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(120deg, #ff7a18 0%, #ff006e 100%);
+            text-decoration: none;
+            box-shadow: 0 6px 16px rgba(255, 0, 110, 0.25);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            white-space: nowrap;
+          }
+          .topHeader__loginBtn:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+            box-shadow: 0 10px 22px rgba(255, 0, 110, 0.32);
+          }
+          .topHeader__loginIcon {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(120deg, #ff7a18 0%, #ff006e 100%);
+            box-shadow: 0 6px 14px rgba(255, 0, 110, 0.28);
+            text-decoration: none;
+            transition: transform 0.18s ease, filter 0.18s ease;
+          }
+          .topHeader__loginIcon:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+          }
+        `}</style>
+      </>
     );
   }
 
@@ -128,7 +190,18 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        <Image className="avatar-img rounded-2" src={avatar7} alt="avatar" />
+        {avatarUrl ? (
+          <Image
+            className="avatar-img rounded-2"
+            src={avatarUrl}
+            alt={session?.user?.name || t.user}
+            width={40}
+            height={40}
+            unoptimized
+          />
+        ) : (
+          <Image className="avatar-img rounded-2" src={defaultUserAvatar} alt={session?.user?.name || t.user} />
+        )}
       </DropdownToggle>
       <DropdownMenu
         className="dropdown-animation dropdown-menu-end pt-3 small me-md-n3"
@@ -136,11 +209,22 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
       >
         <div className="d-flex align-items-center gap-2 position-relative px-3 blackText">
           <div className="avatar me-3">
-            <Image
-              className="avatar-img rounded-circle"
-              src={avatar7}
-              alt="avatar"
-            />
+            {avatarUrl ? (
+              <Image
+                className="avatar-img rounded-circle"
+                src={avatarUrl}
+                alt={session?.user?.name || t.user}
+                width={48}
+                height={48}
+                unoptimized
+              />
+            ) : (
+              <Image
+                className="avatar-img rounded-circle"
+                src={defaultUserAvatar}
+                alt={session?.user?.name || t.user}
+              />
+            )}
           </div>
           <div className="text-start ">
             <Link className="h6 stretched-link" href={`/${locale}/profile/feed`}>
@@ -182,7 +266,7 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
           <BsPower className="fa-fw me-2" />
           {loggingOut ? 'Signing out...' : 'Sign Out'}
         </DropdownItem>{" "} */}
-        <DropdownDivider />
+        {/* <DropdownDivider />
         <div className="modeswitch-item theme-icon-active d-flex justify-content-center gap-3 align-items-center p-2 pb-0">
           <span>{t.mode}</span>
 
@@ -211,7 +295,7 @@ const ProfileDropdown = ({ locale = 'ar' }: { locale?: SupportedLocale }) => {
               </OverlayTrigger>
             );
           })}
-        </div>
+        </div> */}
       </DropdownMenu>
     </Dropdown>
   );

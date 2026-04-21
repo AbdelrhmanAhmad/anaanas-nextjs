@@ -1,12 +1,13 @@
 import LoadContentButton from '@/components/LoadContentButton'
 import type { CommentType } from '@/types/data'
 import { timeSince } from '@/utils/date'
-import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Card } from 'react-bootstrap'
 import { t } from '@/lib/translations'
 import type { SupportedLocale } from '@/lib/localization'
+import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import defaultUserAvatar from '@/assets/images/avatar/user-default.svg'
+import styles from './CommentItem.module.css'
 
 type CommentItemProps = CommentType & {
   locale?: SupportedLocale
@@ -44,71 +45,86 @@ const CommentItem = ({
   onLoadMoreReplies,
   locale = 'ar',
 }: CommentItemProps) => {
+  // Raw backend paths (e.g. "upload/profiles/...webp") must be normalized before
+  // hitting next/image — otherwise `new URL(src)` throws "Invalid URL".
+  const avatarSrc = (socialUser?.avatar && resolveMediaUrl(socialUser.avatar)) || defaultUserAvatar.src
+  const attachmentSrc = image ? resolveMediaUrl(image) : ''
   return (
-    <li className="comment-item">
+    <li className={styles.item}>
       {socialUser && (
         <>
-          <div className="d-flex position-relative">
-            <div className={clsx('avatar avatar-xs', { 'avatar-story': socialUser.isStory })}>
+          <div className={styles.row}>
+            <div>
               <span role="button">
-                <Image className="avatar-img rounded-circle" src={socialUser.avatar} alt={socialUser.name + '-avatar'} />
+                <Image
+                  className={styles.avatar}
+                  src={avatarSrc}
+                  alt={(socialUser?.name || 'user') + '-avatar'}
+                  width={30}
+                  height={30}
+                  unoptimized
+                />
               </span>
             </div>
-            <div className="ms-2">
-              <div className="bg-light rounded-start-top-0 p-3 rounded">
-                <div className="d-flex justify-content-between">
-                  <h6 className="mb-1">
-                    {' '}
-                    <Link href="#"> {socialUser.name} </Link>
-                  </h6>
-                  <small className="ms-2">{timeSince(createdAt)}</small>
-                </div>
-                <p className="small mb-0">{comment}</p>
-                {image && (
-                  <Card className="p-2 border border-2 rounded mt-2 shadow-none">
-                    <Image width={172} height={277} src={image} alt="" />
-                  </Card>
+            <div className="w-100">
+              <div className={styles.bubble}>
+                <h6 className={styles.name}>
+                  <Link href="#" className="text-decoration-none text-reset">
+                    {socialUser.name}
+                  </Link>
+                </h6>
+                <p className={styles.comment}>{comment}</p>
+                {attachmentSrc && (
+                  <Image
+                    width={172}
+                    height={277}
+                    src={attachmentSrc}
+                    alt=""
+                    className="rounded mt-2 border"
+                    unoptimized
+                  />
                 )}
               </div>
 
-              <ul className="nav nav-divider py-2 small">
-                <li className="nav-item">
+              <div className={styles.actions}>
+                <small>{timeSince(createdAt)}</small>
+                <span>·</span>
+                <span>
                   <button
                     type="button"
-                    className="nav-link btn btn-link p-0"
+                    className={styles.actionBtn}
                     onClick={() => onToggleLike?.(String(id))}
                   >
-                    {' '}
                     {likedByMe ? t('post.unlike', locale) : t('post.likeComment', locale)} ({likesCount})
                   </button>
-                </li>
-                <li className="nav-item">
+                </span>
+                <span>·</span>
+                <span>
                   <button
                     type="button"
-                    className="nav-link btn btn-link p-0"
+                    className={styles.actionBtn}
                     onClick={() => onReplyClick?.(String(id))}
                   >
-                    {' '}
                     {t('post.reply', locale)}
                   </button>
-                </li>
+                </span>
                 {((repliesCount ?? 0) > 0 || (children?.length ?? 0) > 0) && (
-                  <li className="nav-item">
+                  <>
+                    <span>·</span>
                     <button
                       type="button"
-                      className="nav-link btn btn-link p-0"
+                      className={styles.actionBtn}
                       onClick={() => onViewRepliesClick?.(String(id))}
                       disabled={loadingReplies}
                     >
-                      {' '}
                       {t('post.viewReplies', locale)} ({repliesCount ?? children?.length ?? 0})
                     </button>
-                  </li>
+                  </>
                 )}
-              </ul>
+              </div>
 
               {showReplyBox && (
-                <div className="mb-2">
+                <div className={styles.replyWrap}>
                   <div className="d-flex gap-2">
                     <input
                       className="form-control form-control-sm"
@@ -130,7 +146,7 @@ const CommentItem = ({
             </div>
           </div>
 
-          <ul className="comment-item-nested list-unstyled">
+          <ul className={styles.nested}>
             {children?.map((childComment) => (
               <CommentItem
                 key={childComment.id}
