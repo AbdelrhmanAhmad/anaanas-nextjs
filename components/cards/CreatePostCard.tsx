@@ -1169,7 +1169,7 @@ const [step, setStep] = useState(1)
     <>
       <Card ref={cardRef} className={`card-body ${styles.smartCard} ${styles.wizardCard}`}>
         <div className={styles.smartRow}>
-          <div className="avatar avatar-xs">
+          <div className="avatar avatar-xs d-none d-md-block">
             <span role="button">
               {currentUserAvatar ? (
                 <Image

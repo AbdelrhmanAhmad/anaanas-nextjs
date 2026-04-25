@@ -86,22 +86,34 @@ export type ChatType = {
   post?: {
     id: number | string
     title: string
-  }
+    image?: string | null
+    price?: number | string | null
+  } | null
   other_user?: {
     id: number | string
     name: string
+    username?: string | null
     email?: string
     avatar?: string | null
-  }
+  } | null
   unread_count: number
   last_message?: {
     id: IdType
     body: string
     sent_at?: string
     sender_id?: number | string
-  }
-  last_message_at?: string
+  } | null
+  last_message_at?: string | null
   created_at?: string
+  // moderation flags
+  is_closed?: boolean
+  closed_by?: number | null
+  closed_at?: string | null
+  i_blocked_them?: boolean
+  they_blocked_me?: boolean
+  is_blocked?: boolean
+  cleared_at?: string | null
+  reports_count?: number
 }
 
 export type EventType = {

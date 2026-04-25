@@ -6,7 +6,7 @@ export type Country = {
   iso2?: string
   iso_code?: string
   flag?: string
-  flag_full_oath?: string
+  flag_full_path?: string
   is_active?: string
   banner?: string
   created_at?: string

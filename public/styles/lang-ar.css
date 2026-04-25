@@ -29,7 +29,7 @@ html[dir='rtl'] body {
 .navbar-brand {
   margin-left: var(--bs-navbar-brand-margin-end);
   padding-right: 0;
-}
+} 
 
 .flex-centered {
   margin-left: 0 !important;

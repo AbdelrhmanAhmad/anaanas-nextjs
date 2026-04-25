@@ -86,9 +86,9 @@ export default async function SelectCountryPage({
                         className="position-relative overflow-hidden"
                         style={{ height: 160, backgroundColor: "#f7f7f7" }}
                       >
-                        {country.flag_full_oath ? (
+                        {country.flag_full_path ? (
                           <img
-                            src={country.flag_full_oath}
+                            src={country.flag_full_path}
                             alt={country.name}
                             className="w-100 h-100"
                             style={{ objectFit: "cover", transition: "transform 0.3s ease" }}

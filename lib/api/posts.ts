@@ -402,3 +402,26 @@ export async function fetchMyImages(params: { page?: number; perPage?: number } 
     data: images,
   }
 }
+
+/**
+ * Fetch a single post by id (CSR — used by realtime "new post" handler).
+ */
+export async function fetchPostById(
+  postId: number | string,
+  params: { land?: string } = {},
+): Promise<PostRecord | null> {
+  const qs = new URLSearchParams()
+  if (params.land) qs.set('land', params.land)
+  const url = `/api/posts/${encodeURIComponent(String(postId))}${qs.toString() ? `?${qs.toString()}` : ''}`
+  try {
+    const res = await fetch(url, { cache: 'no-store', credentials: 'include' })
+    if (!res.ok) return null
+    const json = (await res.json().catch(() => null)) as
+      | { success?: boolean; data?: PostRecord }
+      | null
+    if (!json || json.success === false) return null
+    return (json.data ?? null) as PostRecord | null
+  } catch {
+    return null
+  }
+}

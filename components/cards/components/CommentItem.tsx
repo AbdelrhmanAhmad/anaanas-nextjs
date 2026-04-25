@@ -45,13 +45,24 @@ const CommentItem = ({
   onLoadMoreReplies,
   locale = 'ar',
 }: CommentItemProps) => {
-  // Raw backend paths (e.g. "upload/profiles/...webp") must be normalized before
-  // hitting next/image — otherwise `new URL(src)` throws "Invalid URL".
-  // Note: the legacy `CommentType.socialUser.avatar` is typed as `StaticImageData` but at
-  // runtime the API returns a string URL, so cast defensively to `string | undefined`.
+  // The parent (`PostCard`/`UserComments`) already passes a fully-resolved
+  // avatar URL — either a CDN/API URL or the default static SVG path
+  // (`/_next/static/media/user-default.*.svg`).  Calling `resolveMediaUrl`
+  // again here would mistakenly rewrite the `/_next/...` path to the Laravel
+  // host.  We only resolve when we genuinely receive a raw API path (no
+  // leading slash, no protocol) — that path comes through if a caller forgot
+  // to map the comment.  The `image` attachment, on the other hand, is still
+  // raw from the API and must always be normalised.
+  // Note: legacy `CommentType.socialUser.avatar` is typed as `StaticImageData`
+  // but at runtime the API returns a string, so cast defensively.
   const rawAvatar = (socialUser?.avatar as unknown as string | undefined) ?? undefined
   const rawImage = (image as unknown as string | undefined) ?? undefined
-  const avatarSrc = (rawAvatar && resolveMediaUrl(rawAvatar)) || defaultUserAvatar.src
+
+  let avatarSrc = defaultUserAvatar.src
+  if (rawAvatar) {
+    const looksAbsolute = /^(https?:|data:|blob:|\/)/i.test(rawAvatar)
+    avatarSrc = looksAbsolute ? rawAvatar : resolveMediaUrl(rawAvatar) || defaultUserAvatar.src
+  }
   const attachmentSrc = rawImage ? resolveMediaUrl(rawImage) : ''
   return (
     <li className={styles.item}>

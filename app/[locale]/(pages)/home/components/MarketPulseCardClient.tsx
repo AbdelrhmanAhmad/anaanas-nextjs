@@ -8,12 +8,7 @@ import styles from './MarketPulseCardClient.module.css'
 
 const RANK_BADGES = ['🚗', '🏠', '📱', '💼', '📦', '⭐']
 
-function iconUrl(item: SectionMomentumItem) {
-  if (!item.icon) return null
-  if (item.icon.startsWith('http') || item.icon.startsWith('//')) return item.icon
-  return `https://eg.anaanas.com/content/uploads/${String(item.icon).replace(/^\//, '')}`
-}
-
+ 
 export default function MarketPulseCardClient({
   items,
   locale,
@@ -48,7 +43,7 @@ export default function MarketPulseCardClient({
         <div className={styles.rows}>
           {items.map((item, index) => {
             const barPct = Math.min(100, Math.max(0, item.growth_percent))
-            const src = iconUrl(item)
+            const src =item.icon_full_path || null ;
             return (
               <div key={item.section_id} className={styles.row}>
                 <div className={styles.left}>

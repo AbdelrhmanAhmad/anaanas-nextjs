@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useState, type FormEvent } from 'react'
-import { BsChatLeftTextFill, BsGearFill, BsSearch } from 'react-icons/bs'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { BsChatLeftTextFill, BsSearch, BsXLg } from 'react-icons/bs'
 
 import LogoBox from '@/components/LogoBox'
 import NotificationsBell from './NotificationsBell'
@@ -12,6 +13,7 @@ import ProfileDropdown from './ProfileDropdown'
 import StyledHeader from './StyledHeader'
 import MobileSectionsDrawer from './MobileSectionsDrawer'
 import CountryDropdown from './CountryDropdown'
+import LocaleDropdown from './LocaleDropdown'
 import BetaBadge from './BetaBadge'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
@@ -21,6 +23,8 @@ const TopHeader = () => {
   const params = useParams<{ locale?: string }>()
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const mobileInputRef = useRef<HTMLInputElement | null>(null)
 
   const locale: SupportedLocale = (() => {
     const localeFromParams = Array.isArray(params?.locale) ? params.locale[0] : params?.locale
@@ -33,15 +37,43 @@ const TopHeader = () => {
   const isArabic = locale === 'ar'
   const isAuthed = status === 'authenticated'
 
+  const closeMobileSearch = useCallback(() => setMobileSearchOpen(false), [])
+
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const trimmed = query.trim()
+    closeMobileSearch()
     router.push(
       trimmed ? `/${locale}/search?q=${encodeURIComponent(trimmed)}` : `/${locale}/search`,
     )
   }
 
   const searchPlaceholder = isArabic ? 'ابحث في المنشورات...' : 'Search listings...'
+  const openSearchAria = isArabic ? 'فتح البحث' : 'Open search'
+  const closeSearchAria = isArabic ? 'إغلاق البحث' : 'Close search'
+
+  // Auto-focus the popup input when it opens, and lock the page from scrolling
+  // beneath the overlay backdrop.
+  useEffect(() => {
+    if (!mobileSearchOpen) return
+    const t = window.setTimeout(() => mobileInputRef.current?.focus(), 80)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.clearTimeout(t)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mobileSearchOpen])
+
+  // ESC closes the popup.
+  useEffect(() => {
+    if (!mobileSearchOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMobileSearch()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileSearchOpen, closeMobileSearch])
 
   return (
     <StyledHeader>
@@ -52,7 +84,7 @@ const TopHeader = () => {
           <LogoBox />
           <BetaBadge locale={locale} className="d-none d-sm-inline-flex" />
         </div>
-
+ 
         {/* ==================== DESKTOP SEARCH (center) ==================== */}
         <form
           className="topHeader__search d-none d-lg-flex"
@@ -75,6 +107,19 @@ const TopHeader = () => {
 
         {/* ==================== END CLUSTER (actions) ==================== */}
         <div className="topHeader__end">
+          {/* Mobile search trigger — opens the popup search overlay */}
+          <button
+            type="button"
+            className="topHeader__iconBtn d-lg-none"
+            aria-label={openSearchAria}
+            title={openSearchAria}
+            aria-expanded={mobileSearchOpen}
+            aria-controls="topHeaderMobileSearch"
+            onClick={() => setMobileSearchOpen(true)}
+          >
+            <BsSearch size={15} />
+          </button>
+
           {/* Country picker — full on desktop, compact on mobile */}
           <div className="d-none d-lg-inline-flex">
             <CountryDropdown locale={locale} />
@@ -83,7 +128,16 @@ const TopHeader = () => {
             <CountryDropdown locale={locale} compact />
           </div>
 
-          {/* Messaging (desktop only) */}
+          {/* Language picker — full on desktop, compact on mobile */}
+          <div className="d-none d-lg-inline-flex">
+            <LocaleDropdown />
+          </div>
+          <div className="d-lg-none">
+            <LocaleDropdown compact />
+          </div>
+
+          {/* Messaging (desktop only) — Settings is accessible from the
+              ProfileDropdown menu, so we no longer need a standalone icon. */}
           {isAuthed && (
             <Link
               className="topHeader__iconBtn d-none d-lg-inline-flex"
@@ -95,18 +149,6 @@ const TopHeader = () => {
             </Link>
           )}
 
-          {/* Settings (desktop only) */}
-          {isAuthed && (
-            <Link
-              className="topHeader__iconBtn d-none d-lg-inline-flex"
-              href={`/${locale}/settings/account`}
-              aria-label={isArabic ? 'الإعدادات' : 'Settings'}
-              title={isArabic ? 'الإعدادات' : 'Settings'}
-            >
-              <BsGearFill size={15} />
-            </Link>
-          )}
-
           {/* Notifications */}
           {isAuthed && <NotificationsBell locale={locale} />}
 
@@ -114,26 +156,68 @@ const TopHeader = () => {
           <ProfileDropdown locale={locale} />
         </div>
 
-        {/* ==================== MOBILE SEARCH (wraps to new row) ==================== */}
-        <form
-          className="topHeader__searchMobile d-lg-none"
-          role="search"
-          onSubmit={handleSearch}
-        >
-          <div className="topHeader__searchField">
-            <BsSearch className="topHeader__searchIcon" aria-hidden />
-            <input
-              className="form-control"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={searchPlaceholder}
-              aria-label={searchPlaceholder}
-              autoComplete="off"
-            />
-          </div>
-        </form>
+ 
       </div>
+
+      {/* ==================== MOBILE SEARCH POPUP (≤991.98px) ==================== */}
+      <AnimatePresence>
+        {mobileSearchOpen && (
+          <motion.div
+            key="mobileSearchOverlay"
+            className="topHeader__mobileSearchOverlay d-lg-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={closeMobileSearch}
+            aria-hidden
+          />
+        )}
+        {mobileSearchOpen && (
+          <motion.div
+            key="mobileSearchPanel"
+            id="topHeaderMobileSearch"
+            className="topHeader__mobileSearchPanel d-lg-none"
+            role="dialog"
+            aria-modal="true"
+            aria-label={searchPlaceholder}
+            dir={isArabic ? 'rtl' : 'ltr'}
+            initial={{ y: -24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -24, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+          >
+            <form
+              className="topHeader__mobileSearchForm"
+              role="search"
+              onSubmit={handleSearch}
+            >
+              <div className="topHeader__searchField topHeader__searchField--popup">
+                <BsSearch className="topHeader__searchIcon" aria-hidden />
+                <input
+                  ref={mobileInputRef}
+                  className="form-control"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  aria-label={searchPlaceholder}
+                  autoComplete="off"
+                />
+              </div>
+              <button
+                type="button"
+                className="topHeader__mobileSearchClose"
+                aria-label={closeSearchAria}
+                title={closeSearchAria}
+                onClick={closeMobileSearch}
+              >
+                <BsXLg size={14} />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
         /* ----- Header wrapper polish ----- */
@@ -168,9 +252,9 @@ const TopHeader = () => {
 
         /* Logo sizing per breakpoint */
         .topNav .navbar-brand-item {
-          width: 56px !important;
-          height: 56px !important;
           object-fit: contain;
+          width: auto;
+          height: 45px;
         }
 
         /* ----- End cluster (actions) ----- */
@@ -223,27 +307,110 @@ const TopHeader = () => {
           pointer-events: none;
         }
 
-        /* ----- Mobile search: full width row below the top cluster ----- */
-        .topHeader__searchMobile {
-          flex: 1 1 100%;
-          order: 99;
-          /* Subtle separator to visually split the two rows */
-          margin-top: 4px;
-          padding-top: 6px;
-          border-top: 1px solid rgba(0, 0, 0, 0.04);
+        /* ----- Mobile search popup (overlay + panel) ----- */
+        .topHeader__mobileSearchOverlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.42);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 1040;
         }
 
-        .topHeader__searchMobile .form-control {
-          height: 38px;
-          font-size: 0.88rem;
+        .topHeader__mobileSearchPanel {
+          position: fixed;
+          top: 0;
+          inset-inline-start: 0;
+          inset-inline-end: 0;
+          z-index: 1050;
+          background: linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #ffffff 88%,
+            rgba(255, 255, 255, 0.92) 100%
+          );
+          padding: 14px 16px 18px;
+          border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+          box-shadow: 0 18px 48px -22px rgba(15, 23, 42, 0.35);
+          /* Soft accent bar at the bottom for a polished, modern feel */
+        }
+        .topHeader__mobileSearchPanel::after {
+          content: '';
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 0;
+          height: 2px;
+          border-radius: 999px;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 193, 7, 0) 0%,
+            rgba(255, 193, 7, 0.55) 30%,
+            rgba(118, 75, 162, 0.5) 70%,
+            rgba(118, 75, 162, 0) 100%
+          );
         }
 
-        .topHeader__searchMobile .topHeader__searchField .form-control {
-          padding-inline: 40px 14px;
+        .topHeader__mobileSearchForm {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
         }
 
-        .topHeader__searchMobile .topHeader__searchIcon {
-          inset-inline-start: 14px;
+        /* Popup variant of the search field — slightly larger & more rounded
+           so it feels distinct from the desktop pill input. */
+        .topHeader__searchField--popup {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+
+        .topHeader__searchField--popup .form-control {
+          background: #f4f5f8;
+          border: 1px solid transparent;
+          border-radius: 14px;
+          height: 44px;
+          font-size: 0.95rem;
+          padding-inline: 44px 16px;
+          transition: background-color 0.18s ease, border-color 0.18s ease,
+            box-shadow 0.18s ease;
+        }
+
+        .topHeader__searchField--popup .form-control:focus {
+          background: #ffffff;
+          border-color: rgba(255, 193, 7, 0.45);
+          box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.14);
+          outline: none;
+        }
+
+        .topHeader__searchField--popup .topHeader__searchIcon {
+          inset-inline-start: 16px;
+          font-size: 15px;
+        }
+
+        .topHeader__mobileSearchClose {
+          flex: 0 0 auto;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          border: 0;
+          background: rgba(15, 23, 42, 0.06);
+          color: #475569;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background-color 0.18s ease, color 0.18s ease,
+            transform 0.18s ease;
+        }
+        .topHeader__mobileSearchClose:hover {
+          background: rgba(15, 23, 42, 0.1);
+          color: #0f172a;
+          transform: rotate(90deg);
+        }
+        .topHeader__mobileSearchClose:focus-visible {
+          outline: 2px solid rgba(255, 193, 7, 0.55);
+          outline-offset: 2px;
         }
 
         /* ----- Generic icon button (used for chat/settings/etc) ----- */
@@ -308,8 +475,6 @@ const TopHeader = () => {
             padding-bottom: 0.35rem;
           }
           .topNav .navbar-brand-item {
-            width: 40px !important;
-            height: 40px !important;
           }
           .topHeader__end {
             gap: 0.3rem;
@@ -328,8 +493,6 @@ const TopHeader = () => {
             gap: 0.4rem;
           }
           .topNav .navbar-brand-item {
-            width: 34px !important;
-            height: 34px !important;
           }
         }
       `}</style>

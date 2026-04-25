@@ -8,10 +8,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const page = searchParams.get('page') || '1'
     const perPage = searchParams.get('per_page') || '50'
     const beforeId = searchParams.get('before_id')
+    const afterAt = searchParams.get('after_at')
 
     let url = `/api/chats/${chatId}/messages?page=${page}&per_page=${perPage}`
     if (beforeId) {
       url += `&before_id=${beforeId}`
+    }
+    if (afterAt) {
+      url += `&after_at=${encodeURIComponent(afterAt)}`
     }
 
     const data = await callLaravel(url, {

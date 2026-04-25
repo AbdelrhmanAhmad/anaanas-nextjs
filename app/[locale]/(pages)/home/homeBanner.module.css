@@ -1,7 +1,9 @@
 .bannerWrap {
   position: relative;
   width: 100%;
-  min-height: 180px;
+  /* Aspect-ratio driven so we don't depend on min-height to lay out the slide */
+  aspect-ratio: 16 / 6;
+  min-height: 160px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
@@ -13,25 +15,221 @@
   object-fit: cover;
 }
 
-.bannerText {
+.bannerPicture {
   position: absolute;
   inset: 0;
+  display: block;
+}
+
+.bannerSliderWrap {
+  /* Allow Swiper navigation buttons & pagination to render outside the inner radius */
+  background: transparent;
+}
+
+.bannerSwiper {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.bannerSlide {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.4s ease;
+}
+
+.bannerSlide:hover .bannerImg {
+  transform: scale(1.02);
+}
+
+/* ----- Skeleton state while we wait for the API ----- */
+.bannerSkeleton {
+  background: linear-gradient(120deg, #eef2f7 0%, #f8fafc 50%, #eef2f7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.bannerSkeletonShine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: bannerSkeletonShine 1.6s ease-in-out infinite;
+}
+
+@keyframes bannerSkeletonShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Adapt heights per breakpoint while preserving aspect ratio */
+@media (max-width: 991.98px) {
+  .bannerWrap {
+    aspect-ratio: 4 / 3;
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .bannerWrap {
+    aspect-ratio: 4 / 3;
+    border-radius: 14px;
+  }
+}
+
+/* ===== Pagination ===== */
+.bannerSliderWrap :global(.swiper-pagination) {
+  bottom: 12px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: 14px;
-  text-align: center;
-  pointer-events: none;
+  gap: 6px;
+  z-index: 4;
 }
 
-.greeting {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+.bannerSliderWrap :global(.swiper-pagination-bullet) {
+  width: 7px;
+  height: 7px;
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 1;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: width 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.bannerSliderWrap :global(.swiper-pagination-bullet:hover) {
+  background: rgba(255, 255, 255, 0.85);
+  transform: scale(1.15);
+}
+
+.bannerSliderWrap :global(.swiper-pagination-bullet-active) {
+  width: 26px;
+  background: linear-gradient(90deg, #feca01 0%, #ffb700 100%);
+  border-color: rgba(255, 255, 255, 0.95);
   border-radius: 999px;
-  padding: 8px 16px;
-  font-weight: 900;
-  color: #0f172a;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 12px rgba(254, 202, 1, 0.55);
 }
 
+/* ===== Custom navigation arrows ===== */
+.bannerNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0.92);
+  z-index: 5;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.12)),
+    rgba(15, 23, 42, 0.42);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Reveal arrows on hover/focus, but always show on touch devices */
+.bannerWrap:hover .bannerNav,
+.bannerNav:focus-visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+@media (hover: none) {
+  .bannerNav {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+.bannerNav:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.18)),
+    rgba(15, 23, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-50%) scale(1.06);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.bannerNav:active {
+  transform: translateY(-50%) scale(0.97);
+}
+
+.bannerNav:focus-visible {
+  outline: 2px solid #feca01;
+  outline-offset: 3px;
+}
+
+.bannerNav svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  /* Subtle drop-shadow to keep the chevron readable on bright slides */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+/* Position with logical properties for automatic RTL flip */
+.bannerNavPrev {
+  inset-inline-start: 14px;
+}
+
+.bannerNavNext {
+  inset-inline-end: 14px;
+}
+
+@media (max-width: 575.98px) {
+  .bannerNav {
+    width: 38px;
+    height: 38px;
+  }
+  .bannerNav svg {
+    width: 16px;
+    height: 16px;
+  }
+  .bannerNavPrev {
+    inset-inline-start: 8px;
+  }
+  .bannerNavNext {
+    inset-inline-end: 8px;
+  }
+}

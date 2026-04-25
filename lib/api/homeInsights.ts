@@ -5,6 +5,7 @@ export type SectionMomentumItem = {
   slug: string
   name: string
   icon: string | null
+  icon_full_path: string | null
   current_count: number
   previous_count: number
   growth_percent: number

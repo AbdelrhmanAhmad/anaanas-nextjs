@@ -429,6 +429,113 @@ type TranslationKey =
   | 'auctionPosts.live.col1.v'
   | 'auctionPosts.live.col2.k'
   | 'auctionPosts.live.col2.v'
+  | 'notifications.title'
+  | 'notifications.subtitle'
+  | 'notifications.empty'
+  | 'notifications.emptyHint'
+  | 'notifications.viewAll'
+  | 'notifications.markAll'
+  | 'notifications.markAllShort'
+  | 'notifications.unreadOne'
+  | 'notifications.unreadFew'
+  | 'notifications.allCaughtUp'
+  | 'notifications.loading'
+  | 'notifications.justNow'
+  | 'notifications.openBell'
+  | 'notifications.closeBell'
+  | 'notifications.newBadge'
+  | 'realtime.newPost.title'
+  | 'realtime.newPost.subtitle'
+  | 'realtime.newPost.viewNow'
+  | 'realtime.newPost.dismiss'
+  | 'realtime.newPost.disable'
+  | 'realtime.newPost.disabledHint'
+  | 'realtime.newPost.enable'
+  | 'realtime.newPost.justNow'
+  | 'realtime.newPost.byAuthor'
+  | 'realtime.newPost.pushedBadge'
+  | 'realtime.newPost.justArrived'
+  // Messaging / Chat
+  | 'messaging.title'
+  | 'messaging.searchPlaceholder'
+  | 'messaging.empty'
+  | 'messaging.emptyHint'
+  | 'messaging.noConversations'
+  | 'messaging.startConversation'
+  | 'messaging.selectConversation'
+  | 'messaging.selectConversationHint'
+  | 'messaging.online'
+  | 'messaging.offline'
+  | 'messaging.typing'
+  | 'messaging.you'
+  | 'messaging.justNow'
+  | 'messaging.minutesAgo'
+  | 'messaging.hoursAgo'
+  | 'messaging.daysAgo'
+  | 'messaging.yesterday'
+  | 'messaging.today'
+  | 'messaging.composerPlaceholder'
+  | 'messaging.send'
+  | 'messaging.attach'
+  | 'messaging.emoji'
+  | 'messaging.composerDisabledClosed'
+  | 'messaging.composerDisabledBlocked'
+  | 'messaging.viewPost'
+  | 'messaging.linkedPost'
+  | 'messaging.postId'
+  | 'messaging.menu'
+  | 'messaging.actions.markRead'
+  | 'messaging.actions.viewProfile'
+  | 'messaging.actions.viewPost'
+  | 'messaging.actions.clear'
+  | 'messaging.actions.close'
+  | 'messaging.actions.reopen'
+  | 'messaging.actions.block'
+  | 'messaging.actions.unblock'
+  | 'messaging.actions.report'
+  | 'messaging.actions.delete'
+  | 'messaging.confirm.clearTitle'
+  | 'messaging.confirm.clearBody'
+  | 'messaging.confirm.closeTitle'
+  | 'messaging.confirm.closeBody'
+  | 'messaging.confirm.blockTitle'
+  | 'messaging.confirm.blockBody'
+  | 'messaging.confirm.deleteTitle'
+  | 'messaging.confirm.deleteBody'
+  | 'messaging.confirm.confirm'
+  | 'messaging.confirm.cancel'
+  | 'messaging.report.title'
+  | 'messaging.report.subtitle'
+  | 'messaging.report.categoryLabel'
+  | 'messaging.report.category.spam'
+  | 'messaging.report.category.harassment'
+  | 'messaging.report.category.scam'
+  | 'messaging.report.category.inappropriate'
+  | 'messaging.report.category.other'
+  | 'messaging.report.reasonLabel'
+  | 'messaging.report.reasonPlaceholder'
+  | 'messaging.report.descriptionLabel'
+  | 'messaging.report.descriptionPlaceholder'
+  | 'messaging.report.submit'
+  | 'messaging.report.submitting'
+  | 'messaging.report.success'
+  | 'messaging.report.error'
+  | 'messaging.banner.closed'
+  | 'messaging.banner.blockedByYou'
+  | 'messaging.banner.blockedByOther'
+  | 'messaging.banner.cleared'
+  | 'messaging.banner.connecting'
+  | 'messaging.banner.live'
+  | 'messaging.banner.polling'
+  | 'messaging.errors.send'
+  | 'messaging.errors.load'
+  | 'messaging.unread'
+  | 'messaging.delivered'
+  | 'messaging.seen'
+  | 'messaging.sent'
+  | 'messaging.sending'
+  | 'messaging.failed'
+  | 'messaging.retry'
 
 const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
   ar: {
@@ -862,6 +969,114 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auctionPosts.live.col1.v': '$0.35',
     'auctionPosts.live.col2.k': 'rotordemse',
     'auctionPosts.live.col2.v': 'sflove',
+    'notifications.title': 'الإشعارات',
+    'notifications.subtitle': 'كل ما يخصّك في مكان واحد',
+    'notifications.empty': 'لا توجد إشعارات بعد',
+    'notifications.emptyHint': 'سنخبرك هنا فور وصول رسالة، تعليق، أو تحديث على حسابك.',
+    'notifications.viewAll': 'عرض الكل',
+    'notifications.markAll': 'تحديد الكل كمقروء',
+    'notifications.markAllShort': 'تعليم الكل',
+    'notifications.unreadOne': 'إشعار واحد غير مقروء',
+    'notifications.unreadFew': 'إشعارات غير مقروءة',
+    'notifications.allCaughtUp': 'لقد اطّلعت على كل شيء',
+    'notifications.loading': 'جارٍ التحميل…',
+    'notifications.justNow': 'الآن',
+    'notifications.openBell': 'فتح الإشعارات',
+    'notifications.closeBell': 'إغلاق الإشعارات',
+    'notifications.newBadge': 'جديد',
+    'realtime.newPost.title': 'إعلان جديد للتو',
+    'realtime.newPost.subtitle': 'تم نشر إعلان جديد على منصة اناناس',
+    'realtime.newPost.viewNow': 'عرض الإعلان',
+    'realtime.newPost.dismiss': 'إغلاق',
+    'realtime.newPost.disable': 'إيقاف هذه التنبيهات',
+    'realtime.newPost.disabledHint': 'تم إيقاف تنبيهات الإعلانات الجديدة',
+    'realtime.newPost.enable': 'تفعيل التنبيهات',
+    'realtime.newPost.justNow': 'الآن',
+    'realtime.newPost.byAuthor': 'بواسطة',
+    'realtime.newPost.pushedBadge': 'جديد · بُثّ مباشر',
+    'realtime.newPost.justArrived': 'وصل للتو',
+
+    // Messaging
+    'messaging.title': 'المراسلات',
+    'messaging.searchPlaceholder': 'ابحث في المحادثات...',
+    'messaging.empty': 'لا توجد محادثات بعد',
+    'messaging.emptyHint': 'تواصل مع المعلنين عبر صفحات الإعلانات وستظهر محادثاتك هنا.',
+    'messaging.noConversations': 'لا توجد محادثات مطابقة',
+    'messaging.startConversation': 'ابدأ محادثة جديدة',
+    'messaging.selectConversation': 'اختر محادثة من القائمة',
+    'messaging.selectConversationHint': 'تواصل مباشرةً مع المعلنين، تابع رسائلك، وأدِر محادثاتك من مكان واحد.',
+    'messaging.online': 'متصل الآن',
+    'messaging.offline': 'غير متصل',
+    'messaging.typing': 'يكتب الآن...',
+    'messaging.you': 'أنت',
+    'messaging.justNow': 'الآن',
+    'messaging.minutesAgo': 'منذ {n} دقيقة',
+    'messaging.hoursAgo': 'منذ {n} ساعة',
+    'messaging.daysAgo': 'منذ {n} يوم',
+    'messaging.yesterday': 'الأمس',
+    'messaging.today': 'اليوم',
+    'messaging.composerPlaceholder': 'اكتب رسالة...',
+    'messaging.send': 'إرسال',
+    'messaging.attach': 'إرفاق ملف',
+    'messaging.emoji': 'إيموجي',
+    'messaging.composerDisabledClosed': 'هذه المحادثة مغلقة — لم يعد بالإمكان إرسال رسائل.',
+    'messaging.composerDisabledBlocked': 'لم يعد بالإمكان إرسال رسائل في هذه المحادثة.',
+    'messaging.viewPost': 'عرض الإعلان',
+    'messaging.linkedPost': 'الإعلان المرتبط',
+    'messaging.postId': 'إعلان رقم',
+    'messaging.menu': 'القائمة',
+    'messaging.actions.markRead': 'تحديد كمقروء',
+    'messaging.actions.viewProfile': 'عرض الملف الشخصي',
+    'messaging.actions.viewPost': 'الانتقال للإعلان',
+    'messaging.actions.clear': 'مسح المحادثة',
+    'messaging.actions.close': 'إغلاق المحادثة',
+    'messaging.actions.reopen': 'إعادة فتح المحادثة',
+    'messaging.actions.block': 'حظر المستخدم',
+    'messaging.actions.unblock': 'إلغاء الحظر',
+    'messaging.actions.report': 'الإبلاغ عن المحادثة',
+    'messaging.actions.delete': 'حذف المحادثة',
+    'messaging.confirm.clearTitle': 'مسح هذه المحادثة؟',
+    'messaging.confirm.clearBody': 'سيتم إخفاء جميع الرسائل من نسختك. الطرف الآخر سيظل يرى محادثته.',
+    'messaging.confirm.closeTitle': 'إغلاق المحادثة؟',
+    'messaging.confirm.closeBody': 'لن يتمكن أي من الطرفين من إرسال رسائل جديدة بعد الإغلاق.',
+    'messaging.confirm.blockTitle': 'حظر هذا المستخدم؟',
+    'messaging.confirm.blockBody': 'لن يتمكن من إرسال رسائل لك في هذه المحادثة.',
+    'messaging.confirm.deleteTitle': 'حذف المحادثة؟',
+    'messaging.confirm.deleteBody': 'سيتم إخفاء المحادثة من قائمتك. الطرف الآخر سيستمر بالوصول إليها.',
+    'messaging.confirm.confirm': 'تأكيد',
+    'messaging.confirm.cancel': 'إلغاء',
+    'messaging.report.title': 'الإبلاغ عن المحادثة',
+    'messaging.report.subtitle': 'سيتم مراجعة بلاغك من فريق الإشراف. شكراً لمساعدتنا في الحفاظ على بيئة آمنة.',
+    'messaging.report.categoryLabel': 'تصنيف البلاغ',
+    'messaging.report.category.spam': 'سبام / إعلانات مزعجة',
+    'messaging.report.category.harassment': 'تحرّش / مضايقة',
+    'messaging.report.category.scam': 'احتيال',
+    'messaging.report.category.inappropriate': 'محتوى غير لائق',
+    'messaging.report.category.other': 'سبب آخر',
+    'messaging.report.reasonLabel': 'سبب البلاغ',
+    'messaging.report.reasonPlaceholder': 'اكتب سبب البلاغ بإيجاز...',
+    'messaging.report.descriptionLabel': 'تفاصيل إضافية (اختياري)',
+    'messaging.report.descriptionPlaceholder': 'أضف أي تفاصيل تساعدنا في فهم الموقف...',
+    'messaging.report.submit': 'إرسال البلاغ',
+    'messaging.report.submitting': 'جارٍ الإرسال...',
+    'messaging.report.success': 'تم استلام البلاغ. سيقوم الفريق بمراجعته.',
+    'messaging.report.error': 'تعذّر إرسال البلاغ. حاول مرة أخرى.',
+    'messaging.banner.closed': 'المحادثة مغلقة',
+    'messaging.banner.blockedByYou': 'لقد قمت بحظر هذا المستخدم',
+    'messaging.banner.blockedByOther': 'لم يعد بالإمكان إرسال رسائل في هذه المحادثة',
+    'messaging.banner.cleared': 'تم مسح هذه المحادثة من نسختك',
+    'messaging.banner.connecting': 'جارٍ الاتصال...',
+    'messaging.banner.live': 'مباشر',
+    'messaging.banner.polling': 'وضع المزامنة الدورية',
+    'messaging.errors.send': 'تعذّر إرسال الرسالة',
+    'messaging.errors.load': 'تعذّر تحميل المحادثات',
+    'messaging.unread': 'جديدة',
+    'messaging.delivered': 'تم التسليم',
+    'messaging.seen': 'تمت القراءة',
+    'messaging.sent': 'مُرسَلة',
+    'messaging.sending': 'جارٍ الإرسال...',
+    'messaging.failed': 'فشل الإرسال',
+    'messaging.retry': 'إعادة المحاولة',
   },
   en: {
     'home.noSections': 'No sections available at the moment',
@@ -1294,6 +1509,114 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'auctionPosts.live.col1.v': '$0.35',
     'auctionPosts.live.col2.k': 'rotordemse',
     'auctionPosts.live.col2.v': 'sflove',
+    'notifications.title': 'Notifications',
+    'notifications.subtitle': 'Everything that matters, in one place',
+    'notifications.empty': 'No notifications yet',
+    'notifications.emptyHint': 'We’ll let you know here when something new happens.',
+    'notifications.viewAll': 'View all',
+    'notifications.markAll': 'Mark all as read',
+    'notifications.markAllShort': 'Mark all',
+    'notifications.unreadOne': '1 unread notification',
+    'notifications.unreadFew': 'unread notifications',
+    'notifications.allCaughtUp': 'You’re all caught up',
+    'notifications.loading': 'Loading…',
+    'notifications.justNow': 'just now',
+    'notifications.openBell': 'Open notifications',
+    'notifications.closeBell': 'Close notifications',
+    'notifications.newBadge': 'New',
+    'realtime.newPost.title': 'New post just dropped',
+    'realtime.newPost.subtitle': 'A new listing was just published on ANANAS',
+    'realtime.newPost.viewNow': 'View post',
+    'realtime.newPost.dismiss': 'Dismiss',
+    'realtime.newPost.disable': 'Stop these alerts',
+    'realtime.newPost.disabledHint': 'New-post alerts are off',
+    'realtime.newPost.enable': 'Turn alerts back on',
+    'realtime.newPost.justNow': 'just now',
+    'realtime.newPost.byAuthor': 'by',
+    'realtime.newPost.pushedBadge': 'NEW · LIVE',
+    'realtime.newPost.justArrived': 'Just arrived',
+
+    // Messaging
+    'messaging.title': 'Messaging',
+    'messaging.searchPlaceholder': 'Search conversations...',
+    'messaging.empty': 'No conversations yet',
+    'messaging.emptyHint': 'Start chatting with sellers from any post and your conversations will appear here.',
+    'messaging.noConversations': 'No conversations match your search',
+    'messaging.startConversation': 'Start a new conversation',
+    'messaging.selectConversation': 'Select a conversation',
+    'messaging.selectConversationHint': 'Pick a conversation from the list to view messages, or start a new one from any post.',
+    'messaging.online': 'Online',
+    'messaging.offline': 'Offline',
+    'messaging.typing': 'typing...',
+    'messaging.you': 'You',
+    'messaging.justNow': 'Just now',
+    'messaging.minutesAgo': '{n} min ago',
+    'messaging.hoursAgo': '{n}h ago',
+    'messaging.daysAgo': '{n}d ago',
+    'messaging.yesterday': 'Yesterday',
+    'messaging.today': 'Today',
+    'messaging.composerPlaceholder': 'Write a message...',
+    'messaging.send': 'Send',
+    'messaging.attach': 'Attach',
+    'messaging.emoji': 'Emoji',
+    'messaging.composerDisabledClosed': 'This conversation is closed — sending is disabled.',
+    'messaging.composerDisabledBlocked': 'You can no longer send messages in this conversation.',
+    'messaging.viewPost': 'View post',
+    'messaging.linkedPost': 'Linked post',
+    'messaging.postId': 'Post #',
+    'messaging.menu': 'Menu',
+    'messaging.actions.markRead': 'Mark as read',
+    'messaging.actions.viewProfile': 'View profile',
+    'messaging.actions.viewPost': 'Open post',
+    'messaging.actions.clear': 'Clear conversation',
+    'messaging.actions.close': 'Close conversation',
+    'messaging.actions.reopen': 'Reopen conversation',
+    'messaging.actions.block': 'Block user',
+    'messaging.actions.unblock': 'Unblock user',
+    'messaging.actions.report': 'Report conversation',
+    'messaging.actions.delete': 'Delete chat',
+    'messaging.confirm.clearTitle': 'Clear this conversation?',
+    'messaging.confirm.clearBody': 'All messages will be hidden from your view. The other side keeps their copy.',
+    'messaging.confirm.closeTitle': 'Close this conversation?',
+    'messaging.confirm.closeBody': 'Neither side will be able to send new messages once closed.',
+    'messaging.confirm.blockTitle': 'Block this user?',
+    'messaging.confirm.blockBody': 'They will no longer be able to message you in this conversation.',
+    'messaging.confirm.deleteTitle': 'Delete chat?',
+    'messaging.confirm.deleteBody': 'The chat will be hidden from your list. The other side still has access.',
+    'messaging.confirm.confirm': 'Confirm',
+    'messaging.confirm.cancel': 'Cancel',
+    'messaging.report.title': 'Report this conversation',
+    'messaging.report.subtitle': 'Our moderation team will review your report. Thanks for helping keep the community safe.',
+    'messaging.report.categoryLabel': 'Report type',
+    'messaging.report.category.spam': 'Spam',
+    'messaging.report.category.harassment': 'Harassment',
+    'messaging.report.category.scam': 'Scam',
+    'messaging.report.category.inappropriate': 'Inappropriate content',
+    'messaging.report.category.other': 'Other',
+    'messaging.report.reasonLabel': 'Reason',
+    'messaging.report.reasonPlaceholder': 'Briefly describe the issue...',
+    'messaging.report.descriptionLabel': 'Additional details (optional)',
+    'messaging.report.descriptionPlaceholder': 'Anything else that helps us understand the situation...',
+    'messaging.report.submit': 'Submit report',
+    'messaging.report.submitting': 'Submitting...',
+    'messaging.report.success': 'Report received. The team will review it.',
+    'messaging.report.error': 'Could not submit your report. Please try again.',
+    'messaging.banner.closed': 'Conversation closed',
+    'messaging.banner.blockedByYou': 'You blocked this user',
+    'messaging.banner.blockedByOther': 'Messaging disabled in this conversation',
+    'messaging.banner.cleared': 'Your view of this conversation was cleared',
+    'messaging.banner.connecting': 'Connecting...',
+    'messaging.banner.live': 'Live',
+    'messaging.banner.polling': 'Sync mode',
+    'messaging.errors.send': 'Failed to send message',
+    'messaging.errors.load': 'Failed to load conversations',
+    'messaging.unread': 'New',
+    'messaging.delivered': 'Delivered',
+    'messaging.seen': 'Seen',
+    'messaging.sent': 'Sent',
+    'messaging.sending': 'Sending...',
+    'messaging.failed': 'Failed',
+    'messaging.retry': 'Retry',
   },
 }
 

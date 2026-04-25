@@ -45,7 +45,6 @@ import LoginRequiredDialog from '@/components/dialogs/LoginRequiredDialog'
 import type { CommentType } from '@/types/data'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import SharePostModal from '@/components/share/SharePostModal'
-import { useLayoutContext } from '@/context/useLayoutContext'
 import { deletePost } from '@/lib/api/posts'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 import { useCurrentUser } from '@/context/useCurrentUser'
@@ -259,7 +258,6 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const pathname = usePathname()
   const params = useParams<{ locale?: string }>()
   const router = useRouter()
-  const { messagingOffcanvas } = useLayoutContext()
   const localeFromParams = Array.isArray(params?.locale) ? params.locale[0] : params?.locale
   const locale: SupportedLocale = (localeFromParams && isSupportedLocale(localeFromParams)) ? localeFromParams : DEFAULT_LOCALE
   
@@ -786,13 +784,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
       const locale = localeFromParams || 'ar'
 
-      // Open messaging offcanvas and navigate to chat
-      messagingOffcanvas.toggle()
-      
-      // Navigate to messaging page with chat ID
-      setTimeout(() => {
-        router.push(`/${locale}/messaging?chat=${chatId}`)
-      }, 100)
+      router.push(`/${locale}/messaging?chat=${encodeURIComponent(String(chatId))}`)
     } catch (error) {
       console.error('Failed to open chat:', error)
       const errorMessage = error instanceof Error ? error.message : t('post.failedToOpenChat', locale)

@@ -107,9 +107,9 @@ const MobileSectionsDrawer = ({ locale = 'ar' }: Props) => {
             </div>
           )}
 
-          <ul className="list-unstyled d-flex flex-column gap-2 m-0">
+          <ul className="list-unstyled d-flex flex-column gap-2 m-0 px-0">
             {sections.map((s, idx) => {
-              const href = `/${locale}/${s.slug}`
+              const href = `/${locale}/sections/${s.slug}`
               const iconSrc = s.icon ? resolveMediaUrl(s.icon) : ''
               return (
                 <li key={s.id}>

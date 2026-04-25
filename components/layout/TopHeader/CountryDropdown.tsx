@@ -59,8 +59,9 @@ const CountryDropdown = ({ locale = 'ar', compact = false }: Props) => {
   const labelAll = isArabic ? 'اختر دولة' : 'Select country'
   const loadingLabel = isArabic ? 'جاري التحميل...' : 'Loading...'
 
-  const activeFlag = activeCountry?.flag_full_oath || activeCountry?.flag || ''
   const activeIso = (activeCountry?.iso2 || activeCountry?.iso_code || '').toUpperCase()
+  const activeFlag = activeCountry?.flag_full_path || `/assets/flags/32x32/${activeIso.toLowerCase()}.png`
+
   const activeName = activeCountry?.name || labelAll
 
   const available = countries.filter((c) => c.iso2 || c.iso_code)
@@ -128,8 +129,9 @@ const CountryDropdown = ({ locale = 'ar', compact = false }: Props) => {
           const iso = (country.iso2 || country.iso_code || '').toUpperCase()
           const isActive = activeIso === iso
           const href = buildCountryUrl(country)
-          const flag = country.flag_full_oath || country.flag
+          const flag = country.flag_full_path   || `/assets/flags/32x32/${iso.toLowerCase()}.png`
 
+          
           return (
             <DropdownItem
               key={country.id}

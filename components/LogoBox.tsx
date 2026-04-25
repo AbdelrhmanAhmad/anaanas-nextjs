@@ -7,7 +7,7 @@ import { useLayoutContext } from '@/context/useLayoutContext'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 
-import logo from '@/assets/images/logo/logo_png1.png'
+import logo from '@/assets/images/logo/logo500.png'
 
 const LogoBox = () => {
   const { theme } = useLayoutContext()
@@ -25,9 +25,9 @@ const LogoBox = () => {
   return (
     <Link className="navbar-brand" href={`/${locale}`}>
       {theme === 'dark' ? (
-        <Image src={logo} alt="logo" height={80} width={80} className="navbar-brand-item" />
+        <Image src={logo} alt="logo"  className="navbar-brand-item" />
       ) : (
-        <Image src={logo} alt="logo" height={80} width={80} className="navbar-brand-item" />
+        <Image src={logo} alt="logo"  className="navbar-brand-item" />
       )}
     </Link>
   )

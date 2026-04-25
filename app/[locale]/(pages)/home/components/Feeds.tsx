@@ -666,7 +666,19 @@ const Feeds = async ({
         <>
           {/* PostsList is a client component that stores posts in local state.
               Key forces remount when page/filters change (SEO pagination mode). */}
-          <PostsList key={resetKey} initialPosts={posts} />
+          <PostsList
+            key={resetKey}
+            initialPosts={posts}
+            filters={{
+              sort: filters?.sort,
+              sectionSlug: filters?.sectionSlug,
+              categorySlug: filters?.categorySlug,
+              cityId: filters?.cityId,
+              priceMin: filters?.priceMin,
+              priceMax: filters?.priceMax,
+              hasImages: filters?.hasImages,
+            }}
+          />
           {(() => {
             const currentPage = (postsResponse as any)?.current_page ? Number((postsResponse as any).current_page) : (page ?? 1)
             const lastPage = (postsResponse as any)?.last_page ? Number((postsResponse as any).last_page) : currentPage
