@@ -46,7 +46,7 @@ function getWsUrl() {
   const host = window.location.hostname
   const port = Number(process.env.NEXT_PUBLIC_WS_PORT ?? '6001')
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  return `${proto}://${host}/ws`
+  return `${proto}://${host}/ws/`
   return `${proto}://${host}:${port}`
 }
 
