@@ -26,6 +26,8 @@ import FutureRoadmapCard from './home/components/FutureRoadmapCard'
 import MobileSectionsSwiper from './home/components/MobileSectionsSwiper'
 import MobileAIDashboard from './home/components/MobileAIDashboard'
 import homeDiscoveryStyles from './homeDiscovery.module.css'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
 
 export async function generateMetadata({
   params,
@@ -49,6 +51,9 @@ export async function generateMetadata({
   }
 }
 
+/** Mobile AI discovery block is visible only for this account (preview). */
+const MOBILE_AI_PREVIEW_USER_ID = '28775'
+
 const Home = async ({
   params,
   searchParams,
@@ -58,6 +63,8 @@ const Home = async ({
 }) => {
   const { locale } = await params
   const uiLocale: SupportedLocale = isSupportedLocale(locale) ? locale : 'ar'
+  const session = await getServerSession(authOptions)
+  const showMobileAiDashboard = session?.user?.id === MOBILE_AI_PREVIEW_USER_ID
   const sections = await fetchSections(locale)
   const sp = (await searchParams) ?? {}
   const pageRaw = sp.page ? (Array.isArray(sp.page) ? sp.page[0] : sp.page) : undefined
@@ -69,10 +76,12 @@ const Home = async ({
       <HomeBanner locale={uiLocale} />
 
         <Row className={`g-3 ${homeDiscoveryStyles.discoveryRow} d-md-none`}>
-          <Col md={12} lg={5} className={homeDiscoveryStyles.discoveryAi}>
-            <MobileAIDashboard locale={uiLocale === 'en' ? 'en' : 'ar'} className="h-100" />
-          </Col>
-          <Col md={12} lg={7} className={homeDiscoveryStyles.discoverySections}>
+          {showMobileAiDashboard ? (
+            <Col md={12} lg={5} className={homeDiscoveryStyles.discoveryAi}>
+              <MobileAIDashboard locale={uiLocale === 'en' ? 'en' : 'ar'} className="h-100" />
+            </Col>
+          ) : null}
+          <Col md={12} lg={showMobileAiDashboard ? 7 : 12} className={homeDiscoveryStyles.discoverySections}>
             <MobileSectionsSwiper sections={sections} locale={uiLocale} />
           </Col>
         </Row>

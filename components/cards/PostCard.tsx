@@ -263,7 +263,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   
   const user = (post?.user as Record<string, any>) ?? {}
   const userName = user?.name || t('post.user', locale)
-  const createdAt = post?.created_at || post?.createdAt
+  const createdAt = (post as any)?.publish_date || post?.created_at || post?.createdAt
   const createdAtDate = createdAt ? new Date(createdAt) : null
   const isOwner =
     status === 'authenticated' &&

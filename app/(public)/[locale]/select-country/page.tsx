@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { parseHost } from "@/lib/domain";
+import { getBaseDomainForCountryLinks, parseHost } from "@/lib/domain";
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
@@ -39,6 +39,8 @@ export default async function SelectCountryPage({
   // معلومات الـ host لبناء الروابط (SSR)
   const headersList = await headers();
   const hostInfo = parseHost(headersList.get("host"));
+  /** Prefer `NEXT_PUBLIC_BASE_DOMAIN` so apex hosts (e.g. anaanas.com) do not build `iso` + wrong TLD. */
+  const linkBaseDomain = getBaseDomainForCountryLinks(hostInfo);
   const proto = headersList.get("x-forwarded-proto") ?? "http";
 
   const initialLocale = SUPPORTED_LOCALES.includes(
@@ -69,7 +71,7 @@ export default async function SelectCountryPage({
               const isoCode = (country.iso2 || country.iso_code || "").toLowerCase();
               const countryHost = buildCountryHost(
                 isoCode,
-                hostInfo.baseDomain,
+                linkBaseDomain,
                 hostInfo.port
               );
               const countryUrl = `${proto}://${countryHost}/${initialLocale}`;
