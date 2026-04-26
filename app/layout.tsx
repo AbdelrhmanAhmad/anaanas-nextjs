@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
 import type { ReactNode } from 'react'
+import Script from "next/script";
 
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isSupportedLocale } from '@/lib/localization'
@@ -56,6 +57,25 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
         <link rel="stylesheet" href={localeStylesheet} />
       </head>
       <body className={`${inter.className} ${localeClassName}`} data-locale={locale} data-dir={direction} suppressHydrationWarning>
+
+      <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-J0WJ2TCK23"
+          strategy="afterInteractive"
+        />
+
+
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+             window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J0WJ2TCK23');
+          `}
+        </Script>
+
+
         <div id="splash-screen" aria-hidden="true">
           <div className="splash-gradient" />
           <div className="splash-orb splash-orb--a" />
