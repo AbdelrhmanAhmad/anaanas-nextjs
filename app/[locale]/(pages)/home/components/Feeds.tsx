@@ -44,10 +44,11 @@ import PostsList from './PostsList'
 import Link from 'next/link'
 import LoadMoreButton from './LoadMoreButton'
 import SuggestedStories from './SuggestedStories'
-import { getCountryByCode } from '@/lib/api/countries'
+import { getCountryByCodeCached } from '@/lib/server/getCountryByCodeCached'
 import { fetchPosts } from '@/lib/api/posts'
 import PaginatedPosts from './PaginatedPosts'
 import type { Metadata } from 'next'
+import paginationStyles from './FeedsPagination.module.css'
 
 const ActionMenu = ({ name }: { name?: string }) => {
   return (
@@ -527,6 +528,8 @@ const Post3 = () => {
 type FeedsFilters = {
   sectionSlug?: string
   categorySlug?: string
+  /** Free-text filter (section listings / search-in-section). */
+  q?: string
   cityId?: number
   priceMin?: number
   priceMax?: number
@@ -542,6 +545,7 @@ function buildFiltersSearchParams(filters?: FeedsFilters) {
   const sp = new URLSearchParams()
   if (!filters) return sp
 
+  if (filters.q && filters.q.trim() !== '') sp.set('q', filters.q.trim())
   if (filters.cityId) sp.set('city_id', String(filters.cityId))
   if (filters.priceMin != null) sp.set('price_min', String(filters.priceMin))
   if (filters.priceMax != null) sp.set('price_max', String(filters.priceMax))
@@ -586,7 +590,7 @@ const Feeds = async ({
   let countryId: number | undefined
   if (countryCode) {
     try {
-      const country = await getCountryByCode(countryCode)
+      const country = await getCountryByCodeCached(countryCode)
       countryId = country?.id
     } catch (error) {
       console.error('Error resolving country from code:', error)
@@ -600,6 +604,7 @@ const Feeds = async ({
     land: locale,
     sectionSlug: filters?.sectionSlug,
     categorySlug: filters?.categorySlug,
+    q: filters?.q,
     cityId: filters?.cityId,
     priceMin: filters?.priceMin,
     priceMax: filters?.priceMax,
@@ -631,6 +636,7 @@ const Feeds = async ({
     land: locale ?? null,
     sectionSlug: filters?.sectionSlug ?? null,
     categorySlug: filters?.categorySlug ?? null,
+    q: filters?.q ?? null,
     cityId: filters?.cityId ?? null,
     priceMin: filters?.priceMin ?? null,
     priceMax: filters?.priceMax ?? null,
@@ -652,6 +658,7 @@ const Feeds = async ({
             land: locale,
             sectionSlug: filters?.sectionSlug,
             categorySlug: filters?.categorySlug,
+            q: filters?.q,
             cityId: filters?.cityId,
             priceMin: filters?.priceMin,
             priceMax: filters?.priceMax,
@@ -724,35 +731,39 @@ const Feeds = async ({
             if (end < lastPage - 1) pages.push('...')
             if (lastPage > 1) pushPage(lastPage)
 
+            const pl = (locale ?? 'ar') === 'en'
+            const labelPrev = pl ? 'Previous' : 'السابق'
+            const labelNext = pl ? 'Next' : 'التالي'
+
             return (
-              <nav className="mt-3 d-flex justify-content-center" aria-label="Pagination">
-                <div className="d-flex flex-wrap justify-content-center gap-2">
-                {hasPrev && (
-                  <Link href={makeHref(Math.max(1, currentPage - 1))} className="btn btn-outline-primary">
-                    السابق
-                  </Link>
-                )}
-                {pages.map((p, idx) =>
-                  p === '...' ? (
-                    <span key={`dots-${idx}`} className="btn btn-light disabled">
-                      …
-                    </span>
-                  ) : (
-                    <Link
-                      key={`p-${p}`}
-                      href={makeHref(p)}
-                      className={p === currentPage ? 'btn btn-primary disabled' : 'btn btn-outline-primary'}
-                      aria-current={p === currentPage ? 'page' : undefined}
-                    >
-                      {p}
+              <nav className={paginationStyles.root} aria-label={pl ? 'Pagination' : 'ترقيم الصفحات'}>
+                <div className={paginationStyles.inner}>
+                  {hasPrev && (
+                    <Link href={makeHref(Math.max(1, currentPage - 1))} className={paginationStyles.prevNext} rel="prev">
+                      {labelPrev}
                     </Link>
-                  )
-                )}
-                {hasNext && (
-                  <Link href={makeHref(currentPage + 1)} className="btn btn-primary">
-                    التالي
-                  </Link>
-                )}
+                  )}
+                  {pages.map((p, idx) =>
+                    p === '...' ? (
+                      <span key={`dots-${idx}`} className={paginationStyles.dots} aria-hidden>
+                        …
+                      </span>
+                    ) : (
+                      <Link
+                        key={`p-${p}`}
+                        href={makeHref(p)}
+                        className={p === currentPage ? paginationStyles.pageActive : paginationStyles.pageNum}
+                        aria-current={p === currentPage ? 'page' : undefined}
+                      >
+                        {p}
+                      </Link>
+                    ),
+                  )}
+                  {hasNext && (
+                    <Link href={makeHref(currentPage + 1)} className={paginationStyles.nextPrimary} rel="next">
+                      {labelNext}
+                    </Link>
+                  )}
                 </div>
               </nav>
             )

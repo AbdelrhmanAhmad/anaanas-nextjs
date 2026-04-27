@@ -23,9 +23,11 @@ export type TrendingPostItem = {
   category_name?: string | null
 }
 
+const HOME_INSIGHTS_REVALIDATE_SEC = 120
+
 async function fetchJson<T>(path: string): Promise<T | null> {
   const url = getApiUrl(path)
-  const res = await fetch(url, { cache: 'no-store' })
+  const res = await fetch(url, { next: { revalidate: HOME_INSIGHTS_REVALIDATE_SEC } })
   if (!res.ok) return null
   return (await res.json()) as T
 }

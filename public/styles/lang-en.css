@@ -170,11 +170,6 @@ a.nav-link.bg-light.icon-md.btn.btn-light{
   margin-right: auto;
 }
 
-@media (min-width: 1400px) {
-  .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
-      max-width: 1605px;
-  }
-}
 main {
   background-color: #f3edef;
 }

@@ -1,8 +1,71 @@
 .smartCard {
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(243, 237, 239, 0.45) 0%, rgba(255, 255, 255, 0.98) 42%, #fff 100%);
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  box-shadow:
+    0 18px 40px rgba(21, 21, 21, 0.08),
+    0 0 0 1px rgba(254, 203, 1, 0.07) inset;
+}
+
+.smartCardTight {
+  padding-block: 0.55rem !important;
+}
+
+/* بطاقة إنشاء المنشور — غلاف شفاف + طبقة داخلية متناسقة مع نبض السوق */
+.composerCard.card-body {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* بدون صندوق خارجي: لا خلفية ولا حد ولا ظل — الصف الداخلي (الكبسولة) يحمل المظهر */
+.composerCardAtmosphere {
+  position: relative;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  padding: 0;
+}
+
+.composerSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.composerInputLead {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b45309;
+  font-size: 1.05rem;
+  margin-inline-end: 0.3rem;
+  opacity: 0.92;
+}
+
+.composerLaunchIcon {
+  flex-shrink: 0;
+  font-size: 1.02rem;
+}
+
+.composerLaunchText {
+  line-height: 1.2;
+}
+
+.wizardScrollComposer {
+  padding-inline: clamp(0.3rem, 2vw, 0.65rem) !important;
+  padding-top: 0.1rem !important;
+  padding-bottom: 0.3rem !important;
 }
 
 .smartHeader {
@@ -26,11 +89,191 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.smartRowComposer {
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* بعد الخطوة 1: إخفاء الأفاتار على الجوال يمنع خروجه عن الحاوية في RTL */
+@media (max-width: 767.98px) {
+  .composerAvatarHideWhenWizard {
+    display: none !important;
+  }
+
+  .smartRow {
+    overflow-x: hidden;
+  }
+}
+
+/* صف المنشور: أيقونة + حقل + زر (سطر واحد) */
+.composerAvatar {
+  flex-shrink: 0;
+}
+
+.composerAvatarImg {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(254, 203, 1, 0.38);
+  box-shadow: 0 4px 14px rgba(21, 21, 21, 0.08);
+}
+
+.composerTitleSection {
+  margin-bottom: 0.1rem;
+  width: 100%;
+}
+
+.composerFieldRow {
+  width: 100%;
+}
+
+/* صف ثابت: أفاتار + حقل + زر — دائماً سطر واحد؛ الحقول الأخرى تظهر تحت (.composerExpandedBody) */
+.composerFieldRowCompact {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.composerInlineShell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid rgba(21, 21, 21, 0.07);
+  border-radius: 999px;
+  padding: 0 0.85rem;
+  min-height: 44px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.85);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.composerInlineShell:focus-within {
+  border-color: rgba(254, 203, 1, 0.78);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    0 0 0 3px rgba(254, 203, 1, 0.2);
+  background: #fffefb;
+}
+
+.composerInlineShellInvalid {
+  border-color: #e8a0a0 !important;
+  background: #fff8f8 !important;
+}
+
+.composerInlineField {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  border: none !important;
+  background: transparent !important;
+  padding: 0.4rem 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #1f1f1f;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.composerInlineField::placeholder {
+  color: rgba(21, 21, 21, 0.34);
+}
+
+.composerInlineField:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.composerInputExpandedHold {
+  width: 100%;
+}
+
+.composerLaunchChip {
+  flex: 0 0 auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.48rem 0.85rem;
+  font-weight: 800;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #151515;
+  background: linear-gradient(145deg, #fecb01 0%, #f0a512 100%);
+  border: 1px solid rgba(21, 21, 21, 0.11);
+  box-shadow:
+    0 2px 0 rgba(21, 21, 21, 0.11),
+    0 10px 24px rgba(254, 203, 1, 0.32);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.composerLaunchChip:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow:
+    0 3px 0 rgba(21, 21, 21, 0.13),
+    0 14px 30px rgba(254, 203, 1, 0.4);
+}
+
+.composerLaunchChip:active {
+  transform: translateY(1px);
+}
+
+.composerExpandedBody {
+  overflow: hidden;
+  width: 100%;
+  margin-top: 0.45rem;
+}
+
+/* موبايل/تاب صغير: إخفاء زر الانطلاق — يبقى أفاتار + الحقل على نفس السطر */
+@media (max-width: 767.98px) {
+  .composerLaunchChip {
+    display: none !important;
+  }
+
+  .composerInlineShell {
+    padding-inline: 0.6rem;
+    min-height: 42px;
+  }
+
+  .composerInlineField {
+    font-size: 0.88rem;
+  }
+
+  .composerAvatarImg {
+    width: 36px !important;
+    height: 36px !important;
+  }
 }
 
 .smartContent {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .smartTitle {
@@ -41,13 +284,32 @@
 }
 
 .smartBtn {
-  border: 0;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 900;
-  background: linear-gradient(180deg, #ffc83d, #ffb300);
-  color: #111827;
-  box-shadow: 0 10px 18px rgba(255, 170, 0, 0.22);
+  border: 1px solid rgba(21, 21, 21, 0.1);
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-weight: 800;
+  font-size: 0.78rem;
+  background: linear-gradient(145deg, #fecb01 0%, #f0a512 100%);
+  color: #151515;
+  box-shadow:
+    0 2px 0 rgba(21, 21, 21, 0.1),
+    0 8px 20px rgba(254, 203, 1, 0.28);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.smartBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow:
+    0 3px 0 rgba(21, 21, 21, 0.12),
+    0 12px 26px rgba(254, 203, 1, 0.38);
+}
+
+.smartBtn:active {
+  transform: translateY(1px);
 }
 
 .smartInputWrap {
@@ -166,18 +428,9 @@
   position: relative;
   background: linear-gradient(180deg, rgba(243, 237, 239, 0.45) 0%, rgba(255, 255, 255, 0.98) 42%, #fff 100%);
   border: 1px solid rgba(21, 21, 21, 0.08);
-  box-shadow: 0 22px 48px rgba(21, 21, 21, 0.1);
-}
-
-.wizardCard::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #151515 0%, #fecb01 55%, #151515 100%);
-  z-index: 1;
-  pointer-events: none;
+  box-shadow:
+    0 22px 48px rgba(21, 21, 21, 0.1),
+    0 0 0 1px rgba(254, 203, 1, 0.07) inset;
 }
 
 .wizardCard .smartTitle {
@@ -205,6 +458,10 @@
 
 .wizardScroll:focus-within {
   outline: none;
+}
+
+.wizardScrollTight {
+  padding-top: 0.2rem;
 }
 
 .wizardStepSurface {
@@ -352,6 +609,69 @@
   color: rgba(21, 21, 21, 0.5);
   margin: 0 0 1rem;
   line-height: 1.55;
+}
+
+.wizardPickStep {
+  margin-bottom: 0.15rem;
+}
+
+.wizardSectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.wizardSectionHeadIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, rgba(254, 203, 1, 0.35), rgba(255, 237, 160, 0.45));
+  border: 1px solid rgba(254, 203, 1, 0.42);
+  color: #92400e;
+  box-shadow: 0 4px 14px rgba(21, 21, 21, 0.06);
+}
+
+.wizardSectionHeadText {
+  flex: 1;
+  min-width: 0;
+}
+
+.wizardSectionHeadText .wizardSectionTitle {
+  margin: 0 0 0.2rem;
+}
+
+.wizardSectionHeadText .wizardSectionHint {
+  margin: 0;
+}
+
+.wizardLabelOptional {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(21, 21, 21, 0.45);
+}
+
+@media (max-width: 576px) {
+  .wizardPickGridStackMobile {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.55rem !important;
+    margin-top: 0.65rem;
+  }
+}
+
+.wizardPickCardComfortable {
+  min-height: 4.85rem;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 0.75rem !important;
 }
 
 .wizardBadgeSoft {
@@ -545,37 +865,36 @@
 }
 
 .wizardBtnSecondary {
-  background: transparent;
-  border-color: rgba(21, 21, 21, 0.12);
-  border-style: dashed;
-  color: rgba(21, 21, 21, 0.65);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(254, 203, 1, 0.42);
+  border-style: solid;
+  color: rgba(21, 21, 21, 0.68);
 }
 
 .wizardBtnSecondary:hover {
-  background: rgba(243, 237, 239, 0.55);
-  border-style: solid;
-  border-color: rgba(21, 21, 21, 0.22);
+  background: rgba(254, 203, 1, 0.14);
+  border-color: rgba(254, 203, 1, 0.62);
   color: #151515;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(21, 21, 21, 0.06);
+  box-shadow: 0 10px 24px rgba(254, 203, 1, 0.18);
 }
 
 .wizardBtnPrimary {
-  background: linear-gradient(145deg, #151515 0%, #2a2a2a 100%);
-  border-color: rgba(21, 21, 21, 0.5);
-  color: #fecb01;
+  background: linear-gradient(145deg, #fecb01 0%, #e8a317 100%);
+  border-color: rgba(21, 21, 21, 0.14);
+  color: #151515;
   box-shadow:
-    0 3px 0 #fecb01,
-    0 14px 32px rgba(21, 21, 21, 0.18);
+    0 3px 0 rgba(21, 21, 21, 0.15),
+    0 14px 32px rgba(254, 203, 1, 0.32);
 }
 
 .wizardBtnPrimary:hover:not(:disabled) {
-  background: linear-gradient(145deg, #222 0%, #333 100%);
-  color: #ffe066;
+  background: linear-gradient(145deg, #ffd32a 0%, #fecb01 100%);
+  color: #151515;
   transform: translateY(-2px);
   box-shadow:
-    0 3px 0 #fecb01,
-    0 18px 36px rgba(21, 21, 21, 0.22);
+    0 3px 0 rgba(21, 21, 21, 0.17),
+    0 18px 38px rgba(254, 203, 1, 0.42);
 }
 
 .wizardBtnPrimary:disabled {
@@ -583,13 +902,15 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-  color: rgba(254, 203, 1, 0.55);
+  color: rgba(21, 21, 21, 0.45);
 }
 
 .wizardBtnPrimary:active:not(:disabled),
 .wizardBtnSecondary:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 0 #fecb01, 0 8px 18px rgba(21, 21, 21, 0.14);
+  box-shadow:
+    0 2px 0 rgba(21, 21, 21, 0.12),
+    0 8px 20px rgba(254, 203, 1, 0.28);
 }
 
 .wizardPickTile {

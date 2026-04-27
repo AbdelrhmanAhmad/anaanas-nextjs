@@ -90,7 +90,7 @@ export default function MessagingClient({ locale }: Props) {
   const router = useRouter()
   const search = useSearchParams()
   const initialChatId = search.get('chat')
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const { user: currentUser } = useCurrentUser()
   const currentUserId = currentUser?.id ?? (session as { user?: { id?: string } })?.user?.id
   /** Use NextAuth id immediately for WS `user:{id}`; profile `/api/auth/profile` can load later. */
@@ -129,6 +129,10 @@ export default function MessagingClient({ locale }: Props) {
 
   // ─── Load chat list ───────────────────────────────────────────────────
   const refreshChats = useCallback(async () => {
+    if (sessionStatus !== 'authenticated') {
+      setChatsLoading(false)
+      return
+    }
     try {
       const res = await fetch('/api/chats?per_page=100', {
         headers: { Accept: 'application/json' },
@@ -143,11 +147,17 @@ export default function MessagingClient({ locale }: Props) {
     } finally {
       setChatsLoading(false)
     }
-  }, [])
+  }, [sessionStatus])
 
   useEffect(() => {
+    if (sessionStatus === 'loading') return
+    if (sessionStatus !== 'authenticated') {
+      setChatsLoading(false)
+      setChats([])
+      return
+    }
     void refreshChats()
-  }, [refreshChats])
+  }, [sessionStatus, refreshChats])
 
   // When the session user id becomes available, realign sides (stale `is_mine` from early REST/WS).
   useEffect(() => {
@@ -433,6 +443,7 @@ export default function MessagingClient({ locale }: Props) {
 
   // Polling fallback for chat list
   useEffect(() => {
+    if (sessionStatus !== 'authenticated') return
     let cancelled = false
     const id = window.setInterval(() => {
       if (cancelled) return
@@ -442,7 +453,7 @@ export default function MessagingClient({ locale }: Props) {
       cancelled = true
       window.clearInterval(id)
     }
-  }, [refreshChats])
+  }, [sessionStatus, refreshChats])
 
   // ─── Selecting a chat (also updates the URL) ──────────────────────────
   const selectChat = useCallback(

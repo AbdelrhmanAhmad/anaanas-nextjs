@@ -17,7 +17,15 @@ import Link from 'next/link'
 import Select from 'react-select'
 import { useRouter } from 'next/navigation'
 
-import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  startTransition,
+  type ReactNode,
+} from 'react'
 import { fetchCategoriesBySectionId, type Category } from '@/lib/api/categories'
 import { fetchFields, fetchSubFields, type Field, type SubField, type AttributeOption } from '@/lib/api/fields'
 import { useAppData } from '@/context/AppDataContext'
@@ -36,7 +44,11 @@ import {
   BsChevronRight,
   BsCurrencyDollar,
   BsGraphUp,
+  BsGrid3X3Gap,
+  BsPencilSquare,
   BsPeople,
+  BsRocketTakeoff,
+  BsTags,
 } from 'react-icons/bs'
 import { useParams } from 'next/navigation'
 import { t } from '@/lib/translations'
@@ -54,6 +66,11 @@ type CreatePostCardProps = {
 
 const SMART_CHIP_COMING_ICONS = [BsGraphUp, BsBullseye, BsPeople, BsCurrencyDollar] as const
 const SMART_CHIP_COMING_MIN_WIDTHS = [88, 108, 96, 92] as const
+
+/** غلاف بسيط بدون صندوق خارجي — المظهر من الكبسولة الداخلية فقط */
+function ComposerCardAtmosphere({ children }: { children: ReactNode }) {
+  return <div className={styles.composerCardAtmosphere}>{children}</div>
+}
 
 /** اقتراحات ذكية «قريباً»: أيقونة واضحة + شريط نص مموّه بدون نص في DOM */
 function SmartChipsComingSoonTeaser() {
@@ -292,6 +309,7 @@ const [step, setStep] = useState(1)
 
   // مرجع للمكون الرئيسي لعمل scroll to top
   const cardRef = useRef<HTMLDivElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   // إنشاء schema ديناميكي للـ validation
   const validationSchema = useMemo(() => {
@@ -356,15 +374,17 @@ const [step, setStep] = useState(1)
       })
     }
 
-    // Step 6: validation للمدينة والسعر
+    // Step 6: المدينة مطلوبة — السعر اختياري
     if (step === 6) {
       schema.city = yup.string().required('يرجى اختيار المدينة').nullable()
       schema.price = yup
         .number()
-        .typeError('يرجى إدخال رقم صحيح')
-        .min(0, 'السعر يجب أن يكون أكبر من أو يساوي 0')
-        .required('يرجى إدخال السعر')
         .nullable()
+        .optional()
+        .transform((value, originalValue) =>
+          originalValue === '' || originalValue == null ? undefined : value,
+        )
+        .min(0, 'السعر يجب أن يكون أكبر من أو يساوي 0')
     }
 
     return yup.object(schema)
@@ -738,8 +758,8 @@ const [step, setStep] = useState(1)
       return
     }
 
-    if (!formValues.city || !formValues.price) {
-      setSubmitError('يرجى اختيار المدينة وإدخال السعر')
+    if (!formValues.city) {
+      setSubmitError('يرجى اختيار المدينة')
       return
     }
 
@@ -824,15 +844,21 @@ const [step, setStep] = useState(1)
         return
       }
 
+      const priceRaw = formValues.price
+      const priceParsed =
+        priceRaw !== undefined && priceRaw !== null && String(priceRaw).trim() !== ''
+          ? parseFloat(String(priceRaw))
+          : undefined
+
       const postData: CreatePostData = {
         section_id: selectedSection.id,
         category_id: selectedCategory.id,
-        city_id: parseInt(formValues.city),
+        city_id: parseInt(formValues.city, 10),
         country_id: selectedCountry.id,
-        price: parseFloat(formValues.price),
         description: description || undefined,
         title: title || undefined,
         attributes,
+        ...(priceParsed != null && !Number.isNaN(priceParsed) ? { price: priceParsed } : {}),
       }
 
       console.log('Sending post data:', postData)
@@ -1135,25 +1161,58 @@ const [step, setStep] = useState(1)
   if (status === 'unauthenticated') {
     return (
       <>
-        <Card className={`card-body ${styles.smartCard}`} onClick={() => setShowLoginAlert(true)}>
-          <div className={styles.smartHeader}>
-            <h5 className={styles.smartTitle}>{smartCopy.title}</h5>
-            <button type="button" className={styles.smartBtn}>
-              {smartCopy.launch}
-            </button>
-          </div>
-
-          <div className={styles.smartInputWrap}>
-            <input
-              onClick={() => setShowLoginAlert(true)}
-              className={`form-control ${styles.smartInput}`}
-              disabled
-              placeholder={smartCopy.placeholder}
-              defaultValue={''}
-            />
-          </div>
-
-          <SmartChipsComingSoonTeaser />
+        <Card className={clsx('card-body', 'w-100', styles.composerCard)}>
+          <ComposerCardAtmosphere>
+            <div className={clsx(styles.smartRow, styles.smartRowComposer)}>
+              <div className={styles.composerAvatar}>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setShowLoginAlert(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setShowLoginAlert(true)
+                    }
+                  }}
+                >
+                  <Image
+                    className={styles.composerAvatarImg}
+                    src={defaultUserAvatar}
+                    alt=""
+                    width={40}
+                    height={40}
+                  />
+                </span>
+              </div>
+              <div className={styles.smartContent}>
+                <div className={clsx(styles.composerFieldRow, styles.composerFieldRowCompact)}>
+                  <div className={styles.composerInlineShell}>
+                    <span className={styles.composerInputLead} aria-hidden>
+                      <BsPencilSquare size={18} />
+                    </span>
+                    <input
+                      readOnly
+                      onClick={() => setShowLoginAlert(true)}
+                      onFocus={(e) => e.target.blur()}
+                      className={styles.composerInlineField}
+                      placeholder={smartCopy.placeholder}
+                      aria-label={smartCopy.placeholder}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.composerLaunchChip}
+                    onClick={() => setShowLoginAlert(true)}
+                    title={smartCopy.launch}
+                  >
+                    <BsRocketTakeoff className={styles.composerLaunchIcon} size={17} aria-hidden />
+                    <span className={styles.composerLaunchText}>{smartCopy.launch}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ComposerCardAtmosphere>
         </Card>
 
         <LoginRequiredDialog
@@ -1167,25 +1226,36 @@ const [step, setStep] = useState(1)
 
   return (
     <>
-      <Card ref={cardRef} className={`card-body ${styles.smartCard} ${styles.wizardCard}`}>
-        <div className={styles.smartRow}>
-          <div className="avatar avatar-xs d-none d-md-block">
+      <Card
+        ref={cardRef}
+        className={clsx('card-body', 'w-100', styles.composerCard)}
+      >
+        <ComposerCardAtmosphere>
+        <div className={clsx(styles.smartRow, step === 1 && styles.smartRowComposer)}>
+          <div
+            className={clsx(
+              styles.composerAvatar,
+              step !== 1 && styles.composerAvatarHideWhenWizard,
+            )}
+          >
             <span role="button">
               {currentUserAvatar ? (
                 <Image
                   key={currentUserAvatar}
-                  className="avatar-img rounded-circle"
+                  className={styles.composerAvatarImg}
                   src={currentUserAvatar}
                   alt={session?.user?.name || 'avatar'}
-                  width={32}
-                  height={32}
+                  width={40}
+                  height={40}
                   unoptimized
                 />
               ) : (
                 <Image
-                  className="avatar-img rounded-circle"
+                  className={styles.composerAvatarImg}
                   src={defaultUserAvatar}
                   alt={session?.user?.name || 'avatar'}
+                  width={40}
+                  height={40}
                 />
               )}
             </span>
@@ -1195,12 +1265,6 @@ const [step, setStep] = useState(1)
             className={styles.smartContent}
             dir={isWizardRtl ? 'rtl' : 'ltr'}
           >
-            <div className={styles.smartHeaderInline}>
-              <h5 className={styles.smartTitle}>{smartCopy.title}</h5>
-              <button type="button" className={styles.smartBtn} onClick={() => setStep(1)}>
-                {smartCopy.launch}
-              </button>
-            </div>
 {/* 
           <AnimatePresence initial={false}>
             {showWizardStepper && (
@@ -1224,92 +1288,121 @@ const [step, setStep] = useState(1)
             )}
           </AnimatePresence> */}
 
-          <div className={styles.wizardScroll}>
+          <div className={clsx(styles.wizardScroll, styles.wizardScrollComposer)}>
           <form className="w-100">
           <AnimatePresence mode="wait">
 {
   step === 1 && (
     <motion.div key="w-1" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
-              
-
-                  <div className={styles.wizardFieldGroup}>
-                    <label className={styles.wizardLabel} htmlFor="create-post-title">
+                  <div className={styles.composerTitleSection}>
+                    <label className={styles.composerSrOnly} htmlFor="create-post-title">
                       عنوان الإعلان
                       <span className={styles.wizardRequired}>*</span>
                     </label>
-                    <input
-                      id="create-post-title"
-                      className={clsx(styles.wizardInput, errors.title && 'is-invalid')}
-                      name="title"
-                      placeholder={smartCopy.placeholder}
-                      value={title || ''}
-                      onChange={(e) => {
-                        setTitle(e.target.value)
-                        setValue('title', e.target.value, { shouldValidate: true })
-                      }}
-                    />
+                    <div className={clsx(styles.composerFieldRow, styles.composerFieldRowCompact)}>
+                      <div
+                        className={clsx(
+                          styles.composerInlineShell,
+                          errors.title && styles.composerInlineShellInvalid,
+                        )}
+                      >
+                        <span className={styles.composerInputLead} aria-hidden>
+                          <BsPencilSquare size={18} />
+                        </span>
+                        <input
+                          ref={titleInputRef}
+                          id="create-post-title"
+                          className={clsx(styles.composerInlineField, errors.title && 'is-invalid')}
+                          name="title"
+                          placeholder={smartCopy.placeholder}
+                          value={title || ''}
+                          onChange={(e) => {
+                            setTitle(e.target.value)
+                            setValue('title', e.target.value, { shouldValidate: true })
+                          }}
+                          autoComplete="off"
+                        />
+                      </div>
+                      {title.trim().length === 0 ? (
+                        <button
+                          type="button"
+                          className={styles.composerLaunchChip}
+                          onClick={() => titleInputRef.current?.focus()}
+                          title={smartCopy.launch}
+                        >
+                          <BsRocketTakeoff className={styles.composerLaunchIcon} size={17} aria-hidden />
+                          <span className={styles.composerLaunchText}>{smartCopy.launch}</span>
+                        </button>
+                      ) : null}
+                    </div>
                     {errors.title && (
                       <div className="text-danger small mt-1">{errors.title.message as string}</div>
                     )}
                   </div>
 
-                  {title.trim().length > 0 && 
-                    <>
-                    
-                    
-                      <p className={styles.wizardLead}>
-                      {t('createPost.wizard.lead', locale as any)}
-                    </p>
+                  <AnimatePresence initial={false}>
+                    {title.trim().length > 0 ? (
+                      <motion.div
+                        key="step1-body"
+                        className={styles.composerExpandedBody}
+                        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={reduceMotion ? undefined : { opacity: 0, y: 6 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <p className={styles.wizardLead}>
+                          {t('createPost.wizard.lead', locale as any)}
+                        </p>
 
-     <div className={styles.wizardFieldGroup}>
-                      <label className={styles.wizardLabel} htmlFor="create-post-description">
-                        وصف الإعلان
-                        <span className={styles.wizardRequired}>*</span>
-                      </label>
-                      <textarea
-                        id="create-post-description"
-                        className={clsx(styles.wizardTextarea, errors.description && 'is-invalid')}
-                        rows={4}
-                        name="description"
-                        placeholder="اكتب وصفاً يوضّح الحالة، المواصفات، وما يميّز إعلانك"
-                        value={description || ''}
-                        onChange={(e) => {
-                          setDescription(e.target.value)
-                          setValue('description', e.target.value, { shouldValidate: true })
-                        }}
-                        required
-                      />
-                      {errors.description && (
-                        <div className="text-danger small mt-1">{errors.description.message as string}</div>
-                      )}
-                    </div>
+                        <div className={styles.wizardFieldGroup}>
+                          <label className={styles.wizardLabel} htmlFor="create-post-description">
+                            وصف الإعلان
+                            <span className={styles.wizardRequired}>*</span>
+                          </label>
+                          <textarea
+                            id="create-post-description"
+                            className={clsx(styles.wizardTextarea, errors.description && 'is-invalid')}
+                            rows={4}
+                            name="description"
+                            placeholder="اكتب وصفاً يوضّح الحالة، المواصفات، وما يميّز إعلانك"
+                            value={description || ''}
+                            onChange={(e) => {
+                              setDescription(e.target.value)
+                              setValue('description', e.target.value, { shouldValidate: true })
+                            }}
+                            required
+                          />
+                          {errors.description && (
+                            <div className="text-danger small mt-1">
+                              {errors.description.message as string}
+                            </div>
+                          )}
+                        </div>
 
+                        <SmartChipsComingSoonTeaser />
 
-
-                    <SmartChipsComingSoonTeaser />
-                    
-                  <div className={styles.wizardNavRow}>
-                    <span aria-hidden="true" />
-                    <button
-                      type="button"
-                      className={styles.wizardBtnPrimary}
-                      onClick={async () => {
-                        const titleValid = await trigger('title')
-                        const descriptionValid = await trigger('description')
-                        if (titleValid && descriptionValid) {
-                          setStep(step + 1)
-                        }
-                      }}
-                    >
-                      <span className={styles.wizardBtnInner}>
-                        {wizardNav.next}
-                        {navNextIcon}
-                      </span>
-                    </button>
-                  </div>
-                    </>
-                  }
-
+                        <div className={styles.wizardNavRow}>
+                          <span aria-hidden="true" />
+                          <button
+                            type="button"
+                            className={styles.wizardBtnPrimary}
+                            onClick={async () => {
+                              const titleValid = await trigger('title')
+                              const descriptionValid = await trigger('description')
+                              if (titleValid && descriptionValid) {
+                                setStep(step + 1)
+                              }
+                            }}
+                          >
+                            <span className={styles.wizardBtnInner}>
+                              {wizardNav.next}
+                              {navNextIcon}
+                            </span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
 
     </motion.div>
   )
@@ -1364,13 +1457,20 @@ const [step, setStep] = useState(1)
   step === 3 && (
     <motion.div key="w-3" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
 <Row className="position-relative">
-          <Col xl={12} lg={11} className="mx-auto">
-                      <section className={styles.wizardSection}>
-                      <h3 className={styles.wizardSectionTitle}>اختر القسم</h3>
-                      <p className={styles.wizardSectionHint}>
-                        القسم يحدد أين يظهر إعلانك ضمن أقسام المنصة المبوبة.
-                      </p>
-                      </section>
+          <Col xl={12} lg={11} className="mx-auto px-1 px-sm-2">
+                      <div className={styles.wizardPickStep}>
+                        <div className={styles.wizardSectionHead}>
+                          <span className={styles.wizardSectionHeadIcon} aria-hidden>
+                            <BsGrid3X3Gap size={22} />
+                          </span>
+                          <div className={styles.wizardSectionHeadText}>
+                            <h3 className={styles.wizardSectionTitle}>اختر القسم</h3>
+                            <p className={styles.wizardSectionHint}>
+                              القسم يحدد أين يظهر إعلانك ضمن أقسام المنصة المبوبة.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                       {errors.section_id && (
                         <div className="alert alert-danger">
                           {errors.section_id.message as string}
@@ -1384,7 +1484,7 @@ const [step, setStep] = useState(1)
                       ) : loadingSections ? (
                         <div className="text-center py-4">جاري التحميل...</div>
                       ) : (
-                        <div className={styles.wizardPickGrid}>
+                        <div className={clsx(styles.wizardPickGrid, styles.wizardPickGridStackMobile)}>
                           {sections.map((sectionItem) => (
                             <div
                               key={sectionItem.id}
@@ -1397,7 +1497,7 @@ const [step, setStep] = useState(1)
                                   setStep(4)
                                 }
                               }}
-                              className={`card card-body mb-0 p-3 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${selectedSection?.id === sectionItem.id ? styles.wizardPickCardActive : ''
+                              className={`card card-body mb-0 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${styles.wizardPickCardComfortable} ${selectedSection?.id === sectionItem.id ? styles.wizardPickCardActive : ''
                                 }`}
                             >
                               {sectionItem.icon && (
@@ -1459,13 +1559,20 @@ const [step, setStep] = useState(1)
               step === 4 && (
     <motion.div key="w-4" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
                   <Row className="position-relative">
-                    <Col xl={12} lg={11} className="mx-auto">
-                      <section className={styles.wizardSection}>
-                        <h3 className={styles.wizardSectionTitle}>اختر الفئة</h3>
-                        <p className={styles.wizardSectionHint}>
-                          الفئة تساعد المشترين على العثور على إعلانك بسرعة.
-                        </p>
-                      </section>
+                    <Col xl={12} lg={11} className="mx-auto px-1 px-sm-2">
+                      <div className={styles.wizardPickStep}>
+                        <div className={styles.wizardSectionHead}>
+                          <span className={styles.wizardSectionHeadIcon} aria-hidden>
+                            <BsTags size={22} />
+                          </span>
+                          <div className={styles.wizardSectionHeadText}>
+                            <h3 className={styles.wizardSectionTitle}>اختر الفئة</h3>
+                            <p className={styles.wizardSectionHint}>
+                              الفئة تساعد المشترين على العثور على إعلانك بسرعة.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                       {errors.category_id && (
                         <div className="alert alert-danger">
                           {errors.category_id.message as string}
@@ -1488,7 +1595,7 @@ const [step, setStep] = useState(1)
                               <p className={styles.wizardSummaryPickTitle}>{selectedSection.name}</p>
                             </div>
                           )}
-                          <div className={styles.wizardPickGrid}>
+                          <div className={clsx(styles.wizardPickGrid, styles.wizardPickGridStackMobile)}>
                             {sectionCategories.map((category) => (
                               <div
                   key={category.id}
@@ -1501,7 +1608,7 @@ const [step, setStep] = useState(1)
                                     setStep(5)
                                   }
                                 }}
-                                className={`card card-body mb-0 p-3 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${selectedCategory?.id === category.id ? styles.wizardPickCardActive : ''
+                                className={`card card-body mb-0 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${styles.wizardPickCardComfortable} ${selectedCategory?.id === category.id ? styles.wizardPickCardActive : ''
                                   }`}
                 >
                   {category.icon && (
@@ -1643,7 +1750,7 @@ const [step, setStep] = useState(1)
                             <div className={styles.wizardFieldGroup}>
                               <label className={styles.wizardLabel}>
                                 السعر
-                                <span className={styles.wizardRequired}>*</span>
+                                <span className={styles.wizardLabelOptional}> (اختياري)</span>
                               </label>
                               <div className={styles.wizardInputGroup}>
                                 <input
@@ -1665,7 +1772,7 @@ const [step, setStep] = useState(1)
                                 <div className="text-danger small mt-1">{errors.price.message as string}</div>
                               )}
                               <small className="form-text text-muted">
-                                يرجى إدخال السعر بالعملة المحلية
+                                اتركه فارغاً إن لم يكن السعر مناسباً لإعلانك؛ يمكنك تحديثه لاحقاً.
                               </small>
                             </div>
 
@@ -1699,10 +1806,9 @@ const [step, setStep] = useState(1)
                                 className={styles.wizardBtnPrimary}
                                 disabled={isSubmitting}
                                 onClick={async () => {
-                                  // التحقق من city و price قبل الإرسال
                                   const cityValid = await trigger('city')
-                                  const priceValid = await trigger('price')
-                                  if (cityValid && priceValid) {
+                                  await trigger('price')
+                                  if (cityValid) {
                                     handleSubmit(onSubmit)()
                                   } else {
                                     setSubmitError('يرجى تصحيح الأخطاء قبل الإرسال')
@@ -1894,7 +2000,7 @@ const [step, setStep] = useState(1)
         </div>
 
         </div>
-
+        </ComposerCardAtmosphere>
 
       </Card>
 

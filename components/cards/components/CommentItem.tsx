@@ -75,16 +75,16 @@ const CommentItem = ({
                   className={styles.avatar}
                   src={avatarSrc}
                   alt={(socialUser?.name || 'user') + '-avatar'}
-                  width={30}
-                  height={30}
+                  width={34}
+                  height={34}
                   unoptimized
                 />
               </span>
             </div>
-            <div className="w-100">
+            <div className={styles.body}>
               <div className={styles.bubble}>
                 <h6 className={styles.name}>
-                  <Link href="#" className="text-decoration-none text-reset">
+                  <Link href="#" className={styles.nameLink}>
                     {socialUser.name}
                   </Link>
                 </h6>
@@ -95,37 +95,39 @@ const CommentItem = ({
                     height={277}
                     src={attachmentSrc}
                     alt=""
-                    className="rounded mt-2 border"
+                    className={styles.attachmentImg}
                     unoptimized
                   />
                 )}
               </div>
 
               <div className={styles.actions}>
-                <small>{timeSince(createdAt)}</small>
-                <span>·</span>
-                <span>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    onClick={() => onToggleLike?.(String(id))}
-                  >
-                    {likedByMe ? t('post.unlike', locale) : t('post.likeComment', locale)} ({likesCount})
-                  </button>
+                <span className={styles.time}>{timeSince(createdAt)}</span>
+                <span className={styles.actionSep} aria-hidden>
+                  ·
                 </span>
-                <span>·</span>
-                <span>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    onClick={() => onReplyClick?.(String(id))}
-                  >
-                    {t('post.reply', locale)}
-                  </button>
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  onClick={() => onToggleLike?.(String(id))}
+                >
+                  {likedByMe ? t('post.unlike', locale) : t('post.likeComment', locale)} ({likesCount})
+                </button>
+                <span className={styles.actionSep} aria-hidden>
+                  ·
                 </span>
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  onClick={() => onReplyClick?.(String(id))}
+                >
+                  {t('post.reply', locale)}
+                </button>
                 {((repliesCount ?? 0) > 0 || (children?.length ?? 0) > 0) && (
                   <>
-                    <span>·</span>
+                    <span className={styles.actionSep} aria-hidden>
+                      ·
+                    </span>
                     <button
                       type="button"
                       className={styles.actionBtn}
@@ -140,16 +142,16 @@ const CommentItem = ({
 
               {showReplyBox && (
                 <div className={styles.replyWrap}>
-                  <div className="d-flex gap-2">
+                  <div className={styles.replyRow}>
                     <input
-                      className="form-control form-control-sm"
+                      className={styles.replyInput}
                       placeholder={t('post.writeReply', locale)}
                       value={replyValue ?? ''}
                       onChange={(e) => onReplyValueChange?.(String(id), e.target.value)}
                     />
                     <button
                       type="button"
-                      className="btn btn-sm btn-primary"
+                      className={styles.replySend}
                       disabled={!replyValue?.trim()}
                       onClick={() => onSubmitReply?.(String(id))}
                     >
@@ -177,7 +179,7 @@ const CommentItem = ({
           {(hasMoreReplies || children?.length === 2) && (
             <LoadContentButton
               name={loadingReplies ? t('post.loadingReplies', locale) : t('post.loadMoreReplies', locale)}
-              className="mb-3 ms-5"
+              className={styles.loadMoreNested}
               onClick={() => onLoadMoreReplies?.(String(id))}
             />
           )}

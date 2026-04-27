@@ -1,5 +1,6 @@
 'use client'
 import { createContext, use, useCallback, useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 import type { ChatContextType, ChatOffcanvasStatesType, OffcanvasControlType } from '@/types/context'
 import type { ChatType } from '@/types/data'
@@ -16,6 +17,7 @@ export const useChatContext = () => {
 }
 
 export const ChatProvider = ({ children }: ChildrenType) => {
+  const { status } = useSession()
   const [activeChat, setActiveChat] = useState<ChatType>()
   const [chats, setChats] = useState<ChatType[]>([])
   const [offcanvasStates, setOffcanvasStates] = useState<ChatOffcanvasStatesType>({
@@ -24,6 +26,7 @@ export const ChatProvider = ({ children }: ChildrenType) => {
   })
 
   const changeActiveChat = useCallback(async (chatId: ChatType['id']) => {
+    if (status !== 'authenticated') return
     try {
       const id = encodeURIComponent(String(chatId))
       const res = await fetch(`/api/chats/${id}`, {
@@ -37,9 +40,10 @@ export const ChatProvider = ({ children }: ChildrenType) => {
     } catch (error) {
       console.error('Error fetching chat:', error)
     }
-  }, [])
+  }, [status])
 
   const refreshChats = useCallback(async () => {
+    if (status !== 'authenticated') return
     try {
       const res = await fetch('/api/chats?per_page=50', {
         method: 'GET',
@@ -52,7 +56,7 @@ export const ChatProvider = ({ children }: ChildrenType) => {
     } catch (error) {
       console.error('Error fetching chats:', error)
     }
-  }, [])
+  }, [status])
 
   const toggleChatList: OffcanvasControlType['toggle'] = () => {
     setOffcanvasStates({ ...offcanvasStates, showChatList: !offcanvasStates.showChatList })
@@ -73,8 +77,14 @@ export const ChatProvider = ({ children }: ChildrenType) => {
   }
 
   useEffect(() => {
+    if (status === 'loading') return
+    if (status !== 'authenticated') {
+      setChats([])
+      setActiveChat(undefined)
+      return
+    }
     void refreshChats()
-  }, [refreshChats])
+  }, [status, refreshChats])
 
   return (
     <ChatContext.Provider

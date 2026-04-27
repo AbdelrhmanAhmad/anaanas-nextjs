@@ -432,6 +432,9 @@ const SearchClient = ({ locale, sections }: Props) => {
         ? copy.resultsCountMany(posts.length)
         : ''
 
+  const showResultsSkeleton =
+    posts.length === 0 && (loading || !hasSearched)
+
   /* ------------------------------------------------------------------
      Render
      ------------------------------------------------------------------ */
@@ -668,7 +671,13 @@ const SearchClient = ({ locale, sections }: Props) => {
         <div className={styles.summaryBar}>
           <BsFilterCircle aria-hidden />
           <span>
-            {loading ? copy.loading : <span className={styles.summaryCount}>{resultsCountLabel}</span>}
+            {showResultsSkeleton ? (
+              <span className={styles.summaryLoading} aria-busy="true">
+                {copy.loading}
+              </span>
+            ) : (
+              <span className={styles.summaryCount}>{resultsCountLabel}</span>
+            )}
           </span>
 
           <div className={styles.sortSelectWrap}>
@@ -692,10 +701,14 @@ const SearchClient = ({ locale, sections }: Props) => {
 
         {/* ---------- Results ---------- */}
         <div className={styles.resultsStack}>
-          {loading && posts.length === 0 ? (
+          {showResultsSkeleton ? (
             <>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={`skeleton-${i}`} className={styles.skeletonCard}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={`skeleton-${i}`}
+                  className={styles.skeletonCard}
+                  aria-hidden="true"
+                >
                   <div className={styles.skeletonRow} style={{ width: '45%' }} />
                   <div className={styles.skeletonRow} style={{ width: '80%' }} />
                   <div className={styles.skeletonBlock} />

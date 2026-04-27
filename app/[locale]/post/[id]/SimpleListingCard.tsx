@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 import type { SupportedLocale } from '@/lib/localization'
-import styles from './postDetails.module.css'
+import styles from './SimpleListingCard.module.css'
 
 export type SimpleListing = {
   id: number | string
@@ -36,27 +36,34 @@ export default function SimpleListingCard({ post, locale }: { post: SimpleListin
         ? post?.category?.name?.ar || post?.category?.name?.en || ''
         : post?.category?.name?.en || post?.category?.name?.ar || ''
 
+  const cta = locale === 'ar' ? 'عرض التفاصيل' : 'View details'
+  const arrow = locale === 'ar' ? '←' : '→'
+
   return (
-    <Link href={href} className={styles.simpleCard}>
-      <div className={styles.simpleThumb}>
+    <Link href={href} className={styles.card}>
+      <div className={styles.thumb}>
         {img ? (
-          <Image src={img} alt="" fill className={styles.simpleImg} sizes="(max-width: 576px) 45vw, 200px" unoptimized />
+          <Image src={img} alt="" fill className={styles.img} sizes="(max-width: 576px) 46vw, 220px" unoptimized />
         ) : (
-          <span className={styles.simplePlaceholder} aria-hidden>
+          <span className={styles.placeholder} aria-hidden>
             📷
           </span>
         )}
-        {post.price != null && post.price !== '' && <span className={styles.simplePriceBadge}>{String(post.price)}</span>}
+        {post.price != null && post.price !== '' ? (
+          <span className={styles.priceBadge}>{String(post.price)}</span>
+        ) : null}
       </div>
-      <div className={styles.simpleBody}>
-        <div className={styles.simpleTitle}>{post.title || `#${post.id}`}</div>
-        <div className={styles.simpleMeta}>
-          {categoryName && <span className={styles.simpleChip}>{categoryName}</span>}
-          {cityName && <span className={styles.simpleChip}>{cityName}</span>}
+      <div className={styles.body}>
+        <h3 className={styles.title}>{post.title || `#${post.id}`}</h3>
+        <div className={styles.meta}>
+          {categoryName ? <span className={styles.chip}>{categoryName}</span> : null}
+          {cityName ? <span className={styles.chipAccent}>{cityName}</span> : null}
         </div>
-        <div className={styles.simpleAction}>
-          {locale === 'ar' ? 'عرض التفاصيل' : 'View details'}
-          <span aria-hidden>{locale === 'ar' ? '←' : '→'}</span>
+        <div className={styles.cta}>
+          <span>{cta}</span>
+          <span className={styles.ctaIcon} aria-hidden>
+            {arrow}
+          </span>
         </div>
       </div>
     </Link>

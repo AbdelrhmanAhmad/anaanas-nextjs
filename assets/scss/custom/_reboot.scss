@@ -16,6 +16,19 @@ main{
   background-color: var(--#{$prefix}body-bg);
 }
 
+// Wide layout on xxl viewports — previously only in lang-ar.css / lang-en.css, which load
+// non-blocking; keeping this in the main bundle preserves the intended container width.
+@media (min-width: 1400px) {
+  .container-xxl,
+  .container-xl,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container {
+    max-width: 1605px;
+  }
+}
+
 header{
   position: relative;
   z-index: $zindex-header;

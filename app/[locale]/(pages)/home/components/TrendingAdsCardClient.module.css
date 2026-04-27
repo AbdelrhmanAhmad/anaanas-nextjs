@@ -1,24 +1,14 @@
-/* أفضل الإعلانات — ثيم فاتح + شريط علوي أناناس */
+/* أفضل الإعلانات — نفس هوية البطاقة مع نبض السوق والشريط الجانبي */
 .root {
   position: relative;
   border-radius: 22px;
   padding: 1rem 1.05rem 1.1rem;
-  padding-top: calc(1rem + 2px);
   overflow: hidden;
   background: linear-gradient(180deg, rgba(243, 237, 239, 0.55) 0%, rgba(255, 255, 255, 0.98) 42%, #fff 100%);
   border: 1px solid rgba(21, 21, 21, 0.08);
-  box-shadow: 0 18px 40px rgba(21, 21, 21, 0.08);
-}
-
-.root::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #151515 0%, #fecb01 55%, #151515 100%);
-  z-index: 2;
-  pointer-events: none;
+  box-shadow:
+    0 18px 40px rgba(21, 21, 21, 0.08),
+    0 0 0 1px rgba(254, 203, 1, 0.07) inset;
 }
 
 @media (prefers-reduced-motion: reduce) {

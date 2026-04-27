@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body: CreatePostData = await request.json()
 
     // التحقق من البيانات المطلوبة
-    if (!body.section_id || !body.category_id || !body.city_id || !body.price) {
+    if (!body.section_id || !body.category_id || !body.city_id || !body.country_id) {
       return NextResponse.json(
         { success: false, message: 'البيانات المطلوبة غير مكتملة' },
         { status: 400 }

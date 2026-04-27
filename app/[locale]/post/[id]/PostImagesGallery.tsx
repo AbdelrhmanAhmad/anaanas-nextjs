@@ -10,6 +10,7 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import 'glightbox/dist/css/glightbox.min.css'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import gstyles from './PostImagesGallery.module.css'
 
 export default function PostImagesGallery({
   images,
@@ -45,23 +46,36 @@ export default function PostImagesGallery({
 
   if (!Array.isArray(images) || images.length === 0) return null
 
+  const sizes = '(max-width: 576px) 100vw, (max-width: 1200px) 92vw, 860px'
+
   if (images.length === 1) {
     const img = images[0]
     const src = resolveMediaUrl(img.url)
     return (
       <a
         href={src}
-        className="glightbox"
+        className={`glightbox ${gstyles.anchor}`}
         data-glightbox-gallery={galleryId}
         data-gallery="post-images"
       >
-        <Image unoptimized className="card-img rounded" src={src} alt={img.alt ?? title ?? 'post image'} width={1400} height={900} />
+        <div className={gstyles.stage}>
+          <Image
+            fill
+            className={gstyles.img}
+            src={src}
+            alt={img.alt ?? title ?? 'post image'}
+            sizes={sizes}
+            priority
+            quality={82}
+            fetchPriority="high"
+          />
+        </div>
       </a>
     )
   }
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'} className="post-images-swiper">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className={`post-images-swiper ${gstyles.root}`}>
       <Swiper
         modules={[Navigation, Pagination, Keyboard]}
         navigation
@@ -77,11 +91,22 @@ export default function PostImagesGallery({
             <SwiperSlide key={`${img.url}-${idx}`}>
               <a
                 href={src}
-                className="glightbox"
+                className={`glightbox ${gstyles.anchor}`}
                 data-glightbox-gallery={galleryId}
                 data-gallery="post-images"
               >
-                <Image unoptimized className="card-img rounded" src={src} alt={img.alt ?? title ?? 'post image'} width={1400} height={900} />
+                <div className={gstyles.slideBox}>
+                  <Image
+                    fill
+                    className={gstyles.img}
+                    src={src}
+                    alt={img.alt ?? title ?? 'post image'}
+                    sizes={sizes}
+                    priority={idx === 0}
+                    quality={82}
+                    fetchPriority={idx === 0 ? 'high' : 'low'}
+                  />
+                </div>
               </a>
             </SwiperSlide>
           )
@@ -90,5 +115,3 @@ export default function PostImagesGallery({
     </div>
   )
 }
-
-

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
+/** No client providers here — public routes stay server-first for FCP/LCP. */
 const PublicLocaleLayout = ({ children }: { children: ReactNode }) => {
-  // Layout خفيف بدون أي تغليفات Client لضمان SSR كامل
   return <>{children}</>
 }
 

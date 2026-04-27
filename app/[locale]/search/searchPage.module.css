@@ -387,6 +387,11 @@
   color: #16202c;
 }
 
+.summaryLoading {
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .sortSelectWrap {
   margin-inline-start: auto;
   display: flex;

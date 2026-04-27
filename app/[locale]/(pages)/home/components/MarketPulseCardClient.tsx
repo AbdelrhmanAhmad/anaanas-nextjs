@@ -25,10 +25,10 @@ export default function MarketPulseCardClient({
       </div>
 
       <div className={styles.header}>
-        <h5 className={styles.title}>
+        <h2 className={styles.title}>
           <span className={styles.liveDot} aria-hidden />
           {t('home.marketPulse', locale)}
-        </h5>
+        </h2>
         <div className={styles.pulseStrip} aria-hidden>
           <span className={styles.pulseBar} />
           <span className={styles.pulseBar} />
@@ -50,7 +50,15 @@ export default function MarketPulseCardClient({
                   <div className={styles.iconWrap}>
                     {src ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={src} alt="" className={styles.iconImg} loading="lazy" />
+                      <img
+                        src={src}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className={styles.iconImg}
+                        loading="lazy"
+                        decoding="async"
+                      />
                     ) : (
                       <span aria-hidden>{RANK_BADGES[index % RANK_BADGES.length]}</span>
                     )}

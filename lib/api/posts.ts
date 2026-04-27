@@ -5,10 +5,40 @@ export type CreatePostData = {
   category_id: number
   city_id: number
   country_id: number
-  price: number
+  /** إن وُجد يُرسل للخادم؛ وإلا يُحذف من الطلب */
+  price?: number
   title?: string
   description?: string
   attributes: Array<{ attributeId: number; optionId: number | number[] }>
+}
+
+function appendCreatePostToFormData(formData: FormData, data: CreatePostData) {
+  formData.append('section_id', String(data.section_id))
+  formData.append('category_id', String(data.category_id))
+  formData.append('city_id', String(data.city_id))
+  formData.append('country_id', String(data.country_id))
+  if (data.price != null && !Number.isNaN(Number(data.price))) {
+    formData.append('price', String(data.price))
+  }
+  if (data.title) formData.append('title', data.title)
+  if (data.description) formData.append('description', data.description)
+  formData.append('attributes', JSON.stringify(data.attributes ?? []))
+}
+
+function createPostJsonBody(data: CreatePostData): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    section_id: data.section_id,
+    category_id: data.category_id,
+    city_id: data.city_id,
+    country_id: data.country_id,
+    attributes: data.attributes ?? [],
+  }
+  if (data.title) body.title = data.title
+  if (data.description) body.description = data.description
+  if (data.price != null && !Number.isNaN(Number(data.price))) {
+    body.price = Number(data.price)
+  }
+  return body
 }
 
 export type PostRecord = Record<string, any>
@@ -68,28 +98,16 @@ export async function createPost(data: CreatePostData, accessToken?: string, ima
 
   const hasImages = Array.isArray(images) && images.length > 0
 
-  const body: BodyInit =
-    hasImages
-      ? (() => {
-          const formData = new FormData()
-          formData.append('section_id', String(data.section_id))
-          formData.append('category_id', String(data.category_id))
-          formData.append('city_id', String(data.city_id))
-          formData.append('country_id', String(data.country_id))
-          formData.append('price', String(data.price))
-          if (data.title) formData.append('title', data.title)
-          if (data.description) formData.append('description', data.description)
-
-          // إرسال الخصائص كـ JSON لتبسيط التعامل في الـ backend
-          formData.append('attributes', JSON.stringify(data.attributes ?? []))
-
-          images?.forEach((file) => {
-            formData.append('images[]', file)
-          })
-
-          return formData
-        })()
-      : JSON.stringify(data)
+  const body: BodyInit = hasImages
+    ? (() => {
+        const formData = new FormData()
+        appendCreatePostToFormData(formData, data)
+        images?.forEach((file) => {
+          formData.append('images[]', file)
+        })
+        return formData
+      })()
+    : JSON.stringify(createPostJsonBody(data))
 
   // إضافة التوكن إذا كان متوفراً
   if (accessToken) {
@@ -128,7 +146,7 @@ export async function createPostViaServer(data: CreatePostData): Promise<CreateP
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(createPostJsonBody(data)),
   })
 
   if (!res.ok) {
@@ -155,28 +173,25 @@ export async function updatePost(
 
   const hasImages = Array.isArray(images) && images.length > 0
 
-  const body: BodyInit =
-    hasImages
-      ? (() => {
-          const formData = new FormData()
-          // Keep these for backend validation/consistency (backend must not allow changing them)
-          formData.append('section_id', String(data.section_id))
-          formData.append('category_id', String(data.category_id))
-
-          formData.append('city_id', String(data.city_id))
-          formData.append('country_id', String(data.country_id))
+  const body: BodyInit = hasImages
+    ? (() => {
+        const formData = new FormData()
+        formData.append('section_id', String(data.section_id))
+        formData.append('category_id', String(data.category_id))
+        formData.append('city_id', String(data.city_id))
+        formData.append('country_id', String(data.country_id))
+        if (data.price != null && !Number.isNaN(Number(data.price))) {
           formData.append('price', String(data.price))
-          if (data.title) formData.append('title', data.title)
-          if (data.description) formData.append('description', data.description)
-          formData.append('attributes', JSON.stringify(data.attributes ?? []))
-
-          images?.forEach((file) => {
-            formData.append('images[]', file)
-          })
-
-          return formData
-        })()
-      : JSON.stringify(data)
+        }
+        if (data.title) formData.append('title', data.title)
+        if (data.description) formData.append('description', data.description)
+        formData.append('attributes', JSON.stringify(data.attributes ?? []))
+        images?.forEach((file) => {
+          formData.append('images[]', file)
+        })
+        return formData
+      })()
+    : JSON.stringify(createPostJsonBody(data))
 
   if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`

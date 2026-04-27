@@ -34,7 +34,8 @@ const RESERVED_SUBDOMAINS = new Set([
   'en',
 ])
 
-function getBaseDomainFromEnv(): string | null {
+/** Registered site domain (e.g. `anaanas.com`) without subdomain — used for apex URLs. */
+export function getBaseDomainFromEnv(): string | null {
   const raw = process.env.NEXT_PUBLIC_BASE_DOMAIN?.trim()
   if (!raw) return null
   return raw

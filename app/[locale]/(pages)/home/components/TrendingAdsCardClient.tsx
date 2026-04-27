@@ -26,12 +26,12 @@ export default function TrendingAdsCardClient({
       </div>
 
       <div className={styles.header}>
-        <h5 className={styles.title}>
+        <h2 className={styles.title}>
           <span className={styles.flame} aria-hidden>
             🔥
           </span>
           {t('home.topPerformingAds', locale)}
-        </h5>
+        </h2>
         <p className={styles.hint}>{t('home.trendingEngagementHint', locale)}</p>
       </div>
 

@@ -1,7 +1,6 @@
 import type { ChildrenType } from '@/types/component'
 
-// Layout لمجموعة (pages) فقط يقوم بتمرير الأبناء كما هي
-// الـ sidebar وهيكل الصفحة يتم التحكم فيه من `page.tsx` و`[section]/layout.tsx`
+// Minimal pass-through: no extra wrappers (smaller DOM, less style recalc on route changes).
 
 const PagesLayout = ({ children }: ChildrenType) => {
   return <>{children}</>

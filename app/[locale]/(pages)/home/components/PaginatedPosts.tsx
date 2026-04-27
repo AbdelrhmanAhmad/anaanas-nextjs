@@ -14,6 +14,7 @@ type FetchParams = {
   land?: string
   sectionSlug?: string
   categorySlug?: string
+  q?: string
   cityId?: number
   priceMin?: number
   priceMax?: number
@@ -65,6 +66,7 @@ export default function PaginatedPosts({
     (post: PostRecord): boolean => {
       // newest sort is the only one that makes sense for prepend
       if (fetchParams.sort && fetchParams.sort !== 'newest') return false
+      if (fetchParams.q && fetchParams.q.trim() !== '') return false
 
       const sectionSlug = post?.section?.slug ?? post?.section_slug ?? null
       const categorySlug = post?.category?.slug ?? post?.category_slug ?? null
@@ -96,6 +98,7 @@ export default function PaginatedPosts({
     },
     [
       fetchParams.sort,
+      fetchParams.q,
       fetchParams.sectionSlug,
       fetchParams.categorySlug,
       fetchParams.cityId,
@@ -109,7 +112,8 @@ export default function PaginatedPosts({
   const shouldPrependSelfCreated =
     (fetchParams.sort === undefined || fetchParams.sort === 'newest') &&
     !fetchParams.sectionSlug &&
-    !fetchParams.categorySlug
+    !fetchParams.categorySlug &&
+    !(fetchParams.q && fetchParams.q.trim() !== '')
 
   const onPostCreated = useCallback(
     (ev: Event) => {

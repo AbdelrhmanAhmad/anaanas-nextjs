@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import { fetchSections, type Section } from '@/lib/api/sections'
-import { fetchCountries, getCountryByCode, type Country } from '@/lib/api/countries'
+import { fetchCountries, type Country } from '@/lib/api/countries'
 import { fetchCitiesByCountryId, type City } from '@/lib/api/cities'
 import { parseHost } from '@/lib/domain'
 

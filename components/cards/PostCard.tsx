@@ -47,7 +47,9 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import SharePostModal from '@/components/share/SharePostModal'
 import { deletePost } from '@/lib/api/posts'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
+import { linkifyPlainText } from '@/lib/text/linkify'
 import { useCurrentUser } from '@/context/useCurrentUser'
+import clsx from 'clsx'
 import styles from './PostCard.module.css'
 
 import defaultUserAvatar from '@/assets/images/avatar/user-default.svg'
@@ -300,6 +302,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
   const postDetailsHref = localeFromParams ? `/${localeFromParams}/post/${post?.id}` : `/post/${post?.id}`
 
   const cardRef = useRef<HTMLDivElement | null>(null)
+  const commentInputRef = useRef<HTMLTextAreaElement | null>(null)
   const impressionSentRef = useRef(false)
 
   // Current (logged-in) user avatar comes from the shared CurrentUserProvider,
@@ -432,7 +435,8 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
   const [showLoginAlert, setShowLoginAlert] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [showComments, setShowComments] = useState(false)
+  /** في الخلاصة تبقى مخفية حتى يضغط «تعليق»؛ في صفحة المنشور تُعرض مباشرة */
+  const [showComments, setShowComments] = useState(isDetailsPage)
   const [commentText, setCommentText] = useState('')
   const [sending, setSending] = useState(false)
   const [postLikesCount, setPostLikesCount] = useState<number>(Number(initialPostLikesCount) || 0)
@@ -984,64 +988,66 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
 
   return (
     <Card ref={cardRef as any}  className={styles.fbCard} style={{ cursor: isDetailsPage ? 'default' : 'pointer' }}>
-      <CardHeader className={styles.fbHeader}>
-        <div className="d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center">
-            <div className="me-2">
-              {avatarSrc ? (
-                <span role="button">
-                  <Image
-                    unoptimized
-                    width={44}
-                    height={44}
-                    className={styles.avatar}
-                    src={avatarSrc}
-                    alt={userName}
-                  />
-                </span>
-              ) : (
-                <div className={`${styles.avatar} bg-light d-flex align-items-center justify-content-center text-uppercase small`}>
-                  {userName?.slice(0, 1) || '?'}
-                </div>
-              )}
-            </div>
+      {!isDetailsPage && (
+        <CardHeader className={styles.fbHeader}>
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              <div className="me-2">
+                {avatarSrc ? (
+                  <span role="button">
+                    <Image
+                      unoptimized
+                      width={42}
+                      height={42}
+                      className={styles.avatar}
+                      src={avatarSrc}
+                      alt={userName}
+                    />
+                  </span>
+                ) : (
+                  <div className={`${styles.avatar} bg-light d-flex align-items-center justify-content-center text-uppercase small`}>
+                    {userName?.slice(0, 1) || '?'}
+                  </div>
+                )}
+              </div>
 
-            <div>
-              <h6 className={styles.userName}>
-                <span role="button">{userName}</span>
-              </h6>
-              <div className={styles.metaRow}>
-                {createdAtDate && <span>{timeSince(createdAtDate)}</span>}
+              <div>
+                <h6 className={styles.userName}>
+                  <span role="button">{userName}</span>
+                </h6>
+                <div className={styles.metaRow}>
+                  {createdAtDate && <span>{timeSince(createdAtDate)}</span>}
+                </div>
               </div>
             </div>
+
+            <ActionMenu
+              name={userName}
+              canEdit={canEdit}
+              editHref={postEditHref}
+              canDelete={canDelete}
+              onDelete={handleDelete}
+              locale={locale}
+            />
           </div>
-          
-          <ActionMenu 
-            name={userName} 
-            canEdit={canEdit} 
-            editHref={postEditHref}
-            canDelete={canDelete}
-            onDelete={handleDelete}
-            locale={locale}
-          />
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
 
 
-      {/* تفاصيل tags */}
-      {(sectionName || categoryName || cityName) && (
+      {/* تفاصيل tags — مخفية في صفحة المنشور لتفادي التكرار مع شريط العنوان فوق البطاقة */}
+      {!isDetailsPage && (sectionName || categoryName || cityName) && (
         <CardBody className={styles.tags}>
           <div className="d-flex flex-wrap gap-2">
             {sectionName && sectionSlug ? (
               <Link
                 href={localeFromParams ? `/${localeFromParams}/sections/${sectionSlug}` : `/sections/${sectionSlug}`}
-                className={`${styles.chip} bg-primary-subtle text-primary border-primary-subtle`}
+                className={clsx(styles.chip, styles.chipSection)}
               >
                 {sectionName}
               </Link>
             ) : (
               sectionName && (
-                <span className={`${styles.chip} bg-primary-subtle text-primary border-primary-subtle`}>
+                <span className={clsx(styles.chip, styles.chipSection)}>
                   {sectionName}
                 </span>
               )
@@ -1050,19 +1056,19 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
             {categoryName && sectionSlug && categorySlug ? (
               <Link
                 href={localeFromParams ? `/${localeFromParams}/sections/${sectionSlug}/${categorySlug}` : `/sections/${sectionSlug}/${categorySlug}`}
-                className={`${styles.chip} bg-success-subtle text-success border-success-subtle`}
+                className={clsx(styles.chip, styles.chipCategory)}
               >
                 {categoryName}
               </Link>
             ) : (
               categoryName && (
-                <span className={`${styles.chip} bg-success-subtle text-success border-success-subtle`}>
+                <span className={clsx(styles.chip, styles.chipCategory)}>
                   {categoryName}
                 </span>
               )
             )}
             {cityName && (
-              <span className={`${styles.chip} bg-warning-subtle text-dark border-warning-subtle`}>
+              <span className={clsx(styles.chip, styles.chipCity)}>
                 {cityName}
               </span>
             )}
@@ -1071,7 +1077,57 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       )}
 
       <CardBody className={styles.content}>
-        {title && (
+        {isDetailsPage && (
+          <div className={styles.detailsPageIntro}>
+            <div className={styles.detailsPageIntroTop}>
+              <h1 className={styles.detailH1} itemProp="name">
+                {title || (locale === 'ar' ? `إعلان ${post?.id}` : `Listing ${post?.id}`)}
+              </h1>
+              {(canEdit || canDelete) && (
+                <div className={styles.detailsPageActions}>
+                  <ActionMenu
+                    name={userName}
+                    canEdit={canEdit}
+                    editHref={postEditHref}
+                    canDelete={canDelete}
+                    onDelete={handleDelete}
+                    locale={locale}
+                  />
+                </div>
+              )}
+            </div>
+            {(sectionName || categoryName || cityName) && (
+              <div className={styles.detailsPageChips}>
+                {sectionName && sectionSlug ? (
+                  <Link
+                    href={localeFromParams ? `/${localeFromParams}/sections/${sectionSlug}` : `/sections/${sectionSlug}`}
+                    className={clsx(styles.chip, styles.chipSection)}
+                  >
+                    {sectionName}
+                  </Link>
+                ) : (
+                  sectionName && <span className={clsx(styles.chip, styles.chipSection)}>{sectionName}</span>
+                )}
+                {categoryName && sectionSlug && categorySlug ? (
+                  <Link
+                    href={
+                      localeFromParams
+                        ? `/${localeFromParams}/sections/${sectionSlug}/${categorySlug}`
+                        : `/sections/${sectionSlug}/${categorySlug}`
+                    }
+                    className={clsx(styles.chip, styles.chipCategory)}
+                  >
+                    {categoryName}
+                  </Link>
+                ) : (
+                  categoryName && <span className={clsx(styles.chip, styles.chipCategory)}>{categoryName}</span>
+                )}
+                {cityName && <span className={clsx(styles.chip, styles.chipCity)}>{cityName}</span>}
+              </div>
+            )}
+          </div>
+        )}
+        {!isDetailsPage && title && (
           <h6 className={styles.title}>
             <Link href={postDetailsHref} className="text-decoration-none text-reset">
               {title}
@@ -1079,8 +1135,11 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           </h6>
         )}
         {normalizedCaption && (
-          <p className={styles.caption}>
-            {shouldTruncateCaption ? shortCaption : normalizedCaption}{' '}
+          <p className={clsx(styles.caption, isDetailsPage && styles.captionDetails)}>
+            {linkifyPlainText(
+              shouldTruncateCaption ? shortCaption : normalizedCaption,
+              styles.captionLink,
+            )}{' '}
             {shouldTruncateCaption && hasLongCaption && (
               <Link href={postDetailsHref} className="ms-1">
                 {t('post.readMore', locale)}
@@ -1095,7 +1154,14 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         {image && !banner && (
           <Link href={postDetailsHref} className={`${styles.mediaLink} text-decoration-none`}>
             <div className={styles.mediaWrap}>
-              <Image unoptimized width={720} height={350} className={styles.mainImage} src={image} alt={title || 'Post'} />
+              <Image
+                unoptimized
+                fill
+                className={styles.mainImage}
+                src={image}
+                alt={title || 'Post'}
+                sizes="(max-width: 576px) 100vw, (max-width: 1200px) 92vw, 720px"
+              />
               {imageCount > 1 && (
                 <span className={styles.imageCount}>
                   +{imageCount}
@@ -1177,11 +1243,13 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           commentsCount={commentsCount}
           onShowComments={() => {
             setShowComments(true)
-            // Scroll to comments section after a brief delay to ensure it's rendered
-            setTimeout(() => {
-              const commentsSection = document.getElementById(`comments-${post?.id}`)
-              commentsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }, 100)
+            window.requestAnimationFrame(() => {
+              setTimeout(() => {
+                const el = document.getElementById(`comments-${post?.id}`)
+                el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                commentInputRef.current?.focus({ preventScroll: true })
+              }, 50)
+            })
           }}
           onShowShare={() => setShowShareModal(true)}
           onOpenChat={onOpenChat}
@@ -1204,11 +1272,13 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           title={title}
           defaultMessage={`${t('post.watchOnAnanas', locale)}: ${title || (locale === 'ar' ? 'منشور' : 'Post')}`}
         />
-      
-        <div id={`comments-${post?.id}`} className={styles.commentsComposer}>
-              <div>
+
+        {showComments && (
+          <div className={styles.commentsSection}>
+            <div id={`comments-${post?.id}`} className={styles.commentsComposer}>
+              <div className={styles.commentsAvatarWrap}>
                 <span role="button">
-              <Image
+                  <Image
                     key={currentUserAvatar || 'default'}
                     unoptimized
                     className={styles.commentsAvatar}
@@ -1218,65 +1288,69 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
                         defaultUserAvatar.src) as any
                     }
                     alt={(session as any)?.user?.name || 'avatar'}
-                    width={34}
-                    height={34}
+                    width={30}
+                    height={30}
                   />
                 </span>
               </div>
 
-          <form
-            className={styles.commentsFormWrap}
-            onSubmit={(e) => {
-              e.preventDefault()
-              void onSendComment()
-            }}
-          >
-            {status !== 'authenticated' && (
-              <div
-                className="cursor-pointer"
-                style={{ position: 'absolute', zIndex: 1, left: 0, right: 0, top: 0, bottom: 0 }}
-                onClick={() => setShowLoginAlert(true)}
-              />
-            )}
-            <textarea
-              data-autoresize
-              className={`form-control ${styles.commentsInput}`}
-              rows={1}
-              placeholder={status === 'authenticated' ? t('post.addComment', locale) : t('post.loginToComment', locale)}
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              disabled={status !== 'authenticated' || sending}
-            />
-            <button
-              className={styles.sendBtn}
-              type="submit"
-              disabled={status !== 'authenticated' || sending || !commentText.trim()}
-            >
-                  <BsSendFill />
+              <form
+                className={styles.commentsFormWrap}
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  void onSendComment()
+                }}
+              >
+                {status !== 'authenticated' && (
+                  <div
+                    className="cursor-pointer"
+                    style={{ position: 'absolute', zIndex: 1, left: 0, right: 0, top: 0, bottom: 0 }}
+                    onClick={() => setShowLoginAlert(true)}
+                  />
+                )}
+                <textarea
+                  ref={commentInputRef}
+                  data-autoresize
+                  className={styles.commentsInput}
+                  rows={1}
+                  placeholder={status === 'authenticated' ? t('post.addComment', locale) : t('post.loginToComment', locale)}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  disabled={status !== 'authenticated' || sending}
+                />
+                <button
+                  className={styles.sendBtn}
+                  type="submit"
+                  disabled={status !== 'authenticated' || sending || !commentText.trim()}
+                  aria-label={t('post.send', locale)}
+                >
+                  <BsSendFill size={14} />
                 </button>
               </form>
             </div>
 
-        {uiComments.length > 0 && (
-            <ul className={styles.commentsList}>
-            {uiComments.map((comment) => (
-              <CommentItem
-                {...(comment as any)}
-                key={comment.id}
-                onToggleLike={onToggleLikeComment}
-                onReplyClick={onReplyClick}
-                onViewRepliesClick={onViewRepliesClick}
-                onLoadMoreReplies={onLoadMoreReplies}
-                showReplyBox={openReplyForId === String(comment.id)}
-                replyValue={replyValueById[String(comment.id)] ?? ''}
-                onReplyValueChange={(id, value) => setReplyValueById((p) => ({ ...p, [id]: value }))}
-                onSubmitReply={onSubmitReply}
-                loadingReplies={loadingRepliesById[String(comment.id)] ?? false}
-                hasMoreReplies={hasMoreRepliesById[String(comment.id)] ?? false}
-                locale={locale}
-              />
-              ))}
-            </ul>
+            {uiComments.length > 0 && (
+              <ul className={styles.commentsList}>
+                {uiComments.map((comment) => (
+                  <CommentItem
+                    {...(comment as any)}
+                    key={comment.id}
+                    onToggleLike={onToggleLikeComment}
+                    onReplyClick={onReplyClick}
+                    onViewRepliesClick={onViewRepliesClick}
+                    onLoadMoreReplies={onLoadMoreReplies}
+                    showReplyBox={openReplyForId === String(comment.id)}
+                    replyValue={replyValueById[String(comment.id)] ?? ''}
+                    onReplyValueChange={(id, value) => setReplyValueById((p) => ({ ...p, [id]: value }))}
+                    onSubmitReply={onSubmitReply}
+                    loadingReplies={loadingRepliesById[String(comment.id)] ?? false}
+                    hasMoreReplies={hasMoreRepliesById[String(comment.id)] ?? false}
+                    locale={locale}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
         )}
 
         <LoginRequiredDialog
@@ -1287,10 +1361,10 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       </CardBody>
 
       <CardFooter className={styles.cardFooter}>
-        {hasMore && (
+        {showComments && hasMore && (
           <LoadContentButton
             name={isExpanded ? t('post.loadMoreComments', locale) : t('post.viewMoreComments', locale)}
-            className="p-0"
+            className={styles.loadMoreComments}
             onClick={() => void loadCommentsPage(isExpanded ? page + 1 : 1)}
           />
         )}

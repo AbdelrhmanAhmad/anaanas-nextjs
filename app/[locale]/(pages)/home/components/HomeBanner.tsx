@@ -226,7 +226,7 @@ function SlideMedia({
         alt={altText}
         fill
         priority={priority}
-        sizes="(max-width: 767px) 100vw, 800px"
+        sizes="(max-width: 767px) 100vw, min(800px, 100vw)"
         unoptimized
         className={styles.bannerImg}
       />

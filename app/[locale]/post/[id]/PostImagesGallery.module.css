@@ -1,0 +1,75 @@
+/* مرحلة عرض الصورة — عرض كامل بدون فراغات جانبية */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: min(72vh, 520px);
+  min-height: 200px;
+  background: linear-gradient(145deg, #f1f5f9 0%, #e8edf3 100%);
+  overflow: hidden;
+}
+
+.stageTall {
+  max-height: min(78vh, 580px);
+}
+
+.img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.anchor {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 0;
+}
+
+.slideBox {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: min(72vh, 520px);
+  min-height: 200px;
+  background: linear-gradient(145deg, #f1f5f9 0%, #e8edf3 100%);
+  overflow: hidden;
+}
+
+.root :global(.swiper) {
+  width: 100%;
+}
+
+.root :global(.swiper-slide) {
+  height: auto;
+}
+
+.root :global(.swiper-button-next),
+.root :global(.swiper-button-prev) {
+  color: #151515;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  border: 1px solid rgba(21, 21, 21, 0.1);
+  box-shadow: 0 4px 14px rgba(21, 21, 21, 0.12);
+}
+
+.root :global(.swiper-button-next::after),
+.root :global(.swiper-button-prev::after) {
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.root :global(.swiper-pagination-bullet-active) {
+  background: #fecb01;
+}
+
+@media (max-width: 575.98px) {
+  .stage,
+  .slideBox {
+    aspect-ratio: 4 / 3;
+    max-height: none;
+    min-height: 220px;
+  }
+}

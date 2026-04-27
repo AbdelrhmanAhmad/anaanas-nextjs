@@ -2,8 +2,11 @@ import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
     /* config options here */
+    compress: true,
     allowedDevOrigins: ['demo.anaanas.com', 'demo.localhost', 'localhost:3000', '127.0.0.1:3000'],
     images: {
+        formats: ['image/avif', 'image/webp'],
+        minimumCacheTTL: 60 * 60 * 24 * 7,
         // We only include SVGs that ship with the app (e.g. default user avatar).
         dangerouslyAllowSVG: true,
         contentDispositionType: 'attachment',
@@ -42,6 +45,23 @@ const nextConfig: NextConfig = {
                 pathname: '/**',
             },
         ],
+    },
+    async headers() {
+        return [
+            {
+                source: '/_next/static/:path*',
+                headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+            },
+            {
+                source: '/assets/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=86400, stale-while-revalidate=604800',
+                    },
+                ],
+            },
+        ]
     },
     // Transpile next-auth to avoid chunk generation issues
     transpilePackages: ['next-auth'],

@@ -14,18 +14,25 @@ type SectionsResponse = {
 
 export const SECTIONS_ENDPOINT = '/api/sections'
 
-export async function fetchSections(locale?: string): Promise<Section[]> {
+export type FetchSectionsOptions = {
+  /** Next.js `revalidate` (seconds). When omitted, uses `no-store`. */
+  revalidateSeconds?: number
+}
+
+export async function fetchSections(locale?: string, options?: FetchSectionsOptions): Promise<Section[]> {
   const searchParams = new URLSearchParams()
   if (locale) {
     searchParams.set('land', locale)
   }
   const query = searchParams.toString()
   const url = getApiUrl(`${SECTIONS_ENDPOINT}${query ? `?${query}` : ''}`)
-  
-  const res = await fetch(url, {
-    // Always fetch fresh data for now; adjust to `revalidate` if needed
-    cache: 'no-store',
-  })
+
+  const res = await fetch(
+    url,
+    options?.revalidateSeconds != null
+      ? { next: { revalidate: options.revalidateSeconds } }
+      : { cache: 'no-store' },
+  )
 
   if (!res.ok) {
     throw new Error(`Failed to fetch sections: ${res.status} ${res.statusText}`)

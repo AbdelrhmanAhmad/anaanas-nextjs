@@ -39,13 +39,21 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
  
 }
 
-export async function fetchCountries(): Promise<Country[]> {
+export type FetchCountriesOptions = {
+  /** Next.js `revalidate` (seconds). When omitted, uses `no-store` for always-fresh data. */
+  revalidateSeconds?: number
+}
+
+export async function fetchCountries(options?: FetchCountriesOptions): Promise<Country[]> {
   const url = getApiUrl('/api/countries')
   // //console.log('Fetching countries from:', url)
-  
-  const res = await fetch(url, {
-    cache: 'no-store',
-  })
+
+  const res = await fetch(
+    url,
+    options?.revalidateSeconds != null
+      ? { next: { revalidate: options.revalidateSeconds } }
+      : { cache: 'no-store' },
+  )
 
   if (!res.ok) {
     console.error('Failed to fetch countries:', res.status, res.statusText)
@@ -133,8 +141,11 @@ export async function fetchCountries(): Promise<Country[]> {
   })
 }
 
+/** Client or non-cached server use; prefer `getCountryByCodeCached` in RSC. */
 export async function getCountryByCode(code: string): Promise<Country | null> {
   const countries = await fetchCountries()
-  return countries.find((country) => (country.iso2 || country.iso_code || '').toLowerCase() === code.toLowerCase()) || null
+  return (
+    countries.find((country) => (country.iso2 || country.iso_code || '').toLowerCase() === code.toLowerCase()) || null
+  )
 }
 

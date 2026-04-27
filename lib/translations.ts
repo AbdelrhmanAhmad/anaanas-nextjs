@@ -11,6 +11,11 @@ type TranslationKey =
   | 'home.privacyTerms'
   | 'home.todaysNews'
   | 'home.viewAllLatestNews'
+  | 'home.seo.title'
+  | 'home.seo.description'
+  | 'home.seo.regionFallback'
+  | 'home.seo.keywords'
+  | 'home.a11y.visuallyHiddenTitle'
   | 'home.marketPulse'
   | 'home.marketPulseEmpty'
   | 'home.marketPulseGrowth'
@@ -72,6 +77,9 @@ type TranslationKey =
   | 'home.pro.b2'
   | 'home.pro.b3'
   | 'sidebar.noSections'
+  | 'sidebar.panelTitle'
+  | 'sidebar.panelHint'
+  | 'sidebar.sectionTeaser'
   | 'sidebar.viewProfile'
   | 'sidebar.aboutUs'
   | 'sidebar.settings'
@@ -536,6 +544,23 @@ type TranslationKey =
   | 'messaging.sending'
   | 'messaging.failed'
   | 'messaging.retry'
+  // Select country (public / SEO)
+  | 'selectCountry.metaTitle'
+  | 'selectCountry.metaDescription'
+  | 'selectCountry.h1'
+  | 'selectCountry.lead'
+  | 'selectCountry.intro'
+  | 'selectCountry.listTitle'
+  | 'selectCountry.cardCta'
+  | 'selectCountry.cardHint'
+  | 'selectCountry.isoLabel'
+  | 'selectCountry.empty'
+  | 'selectCountry.switchToEn'
+  | 'selectCountry.switchToAr'
+  | 'selectCountry.langSwitchAria'
+  | 'selectCountry.skipToList'
+  | 'selectCountry.breadcrumbHome'
+  | 'selectCountry.breadcrumbCurrent'
 
 const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
   ar: {
@@ -549,6 +574,13 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.privacyTerms': 'الخصوصية والشروط',
     'home.todaysNews': 'أخبار اليوم',
     'home.viewAllLatestNews': 'عرض جميع الأخبار',
+    'home.seo.title': 'منصة أناناس للإعلانات الرقمية والتسويق والتجارة الأولى في {{country}}',
+    'home.seo.description':
+      'اكتشف إعلانات ومنشورات وفرصاً في {{country}} على منصة أناناس: تصفّح الأقسام، تابع نبض السوق، وتواصل مع البائعين بأمان.',
+    'home.seo.regionFallback': 'منطقتك',
+    'home.seo.keywords':
+      'أناناس، إعلانات مبوبة، تسويق رقمي، تجارة إلكترونية، سوق، {{country}}، منشورات، بيع، شراء',
+    'home.a11y.visuallyHiddenTitle': 'الصفحة الرئيسية — منصة أناناس في {{country}}',
     'home.marketPulse': 'نبض السوق',
     'home.marketPulseEmpty': 'لا توجد أقسام بزيادة واضحة (+1٪) خلال آخر 30 يوماً مقارنة بالـ 30 يوماً السابقة.',
     'home.marketPulseGrowth': 'نمو',
@@ -610,6 +642,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.pro.b2': 'تعزيز VIP للظهور',
     'home.pro.b3': 'إدارة حسابات متعددة',
     'sidebar.noSections': 'لا توجد أقسام متاحة حاليًا',
+    'sidebar.panelTitle': 'أقسام الإعلانات',
+    'sidebar.panelHint': 'اختر القسم للوصول السريع إلى إعلاناتك المفضلة',
+    'sidebar.sectionTeaser': 'بتبحث عن «{{section}}»؟ اضغط هنا',
     'sidebar.viewProfile': 'عرض الملف الشخصي',
     'sidebar.aboutUs': 'من نحن',
     'sidebar.settings': 'الاعدادات',
@@ -1077,6 +1112,25 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'messaging.sending': 'جارٍ الإرسال...',
     'messaging.failed': 'فشل الإرسال',
     'messaging.retry': 'إعادة المحاولة',
+    'selectCountry.metaTitle': 'اختر دولتك | أناناس — إعلانات وتسويق ورقمية في الوطن العربي',
+    'selectCountry.metaDescription':
+      'اختر بلدك للانتقال إلى نسخة أناناس المحلية: إعلانات مبوبة، منشورات، ورسائل بأمانة السوق واللغة المناسبة. تصفح الأردن، مصر، السعودية، الإمارات والدول المتاحة.',
+    'selectCountry.h1': 'اختر دولتك للمتابعة على أناناس',
+    'selectCountry.lead':
+      'كل دولة لها نسخة مخصّصة من المنصة (محتوى محلي، عملة، ومدن). اختر بلدك من القائمة أدناه للانتقال مباشرة إلى الموقع الفرعي الصحيح.',
+    'selectCountry.intro':
+      'أناناس منصة إعلانات وتجارة رقمية في المنطقة. اختيار الدولة يضمن لك نتائج أقرب لموقعك وقوانين السوق المحلية.',
+    'selectCountry.listTitle': 'الدول المتاحة',
+    'selectCountry.cardCta': 'الدخول إلى نسخة الدولة',
+    'selectCountry.cardHint': 'يفتح الموقع الفرعي لهذه الدولة في نافذة التصفح الحالية.',
+    'selectCountry.isoLabel': 'رمز الدولة',
+    'selectCountry.empty': 'لا توجد دول متاحة حالياً. يرجى المحاولة لاحقاً.',
+    'selectCountry.switchToEn': 'English',
+    'selectCountry.switchToAr': 'العربية',
+    'selectCountry.langSwitchAria': 'تبديل لغة الصفحة',
+    'selectCountry.skipToList': 'تخطي إلى قائمة الدول',
+    'selectCountry.breadcrumbHome': 'الرئيسية',
+    'selectCountry.breadcrumbCurrent': 'اختيار الدولة',
   },
   en: {
     'home.noSections': 'No sections available at the moment',
@@ -1089,6 +1143,13 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.privacyTerms': 'Privacy & Terms',
     'home.todaysNews': "Today's News",
     'home.viewAllLatestNews': 'View all latest news',
+    'home.seo.title': 'ANANAS — digital classifieds, ads & commerce in {{country}}',
+    'home.seo.description':
+      'Discover listings, posts, and market activity in {{country}} on ANANAS. Browse sections, market pulse, and connect with sellers safely.',
+    'home.seo.regionFallback': 'your region',
+    'home.seo.keywords':
+      'ANANAS, classifieds, digital ads, e-commerce, marketplace, {{country}}, listings, buy, sell',
+    'home.a11y.visuallyHiddenTitle': 'Home — ANANAS in {{country}}',
     'home.marketPulse': 'Market Pulse',
     'home.marketPulseEmpty': 'No sections with at least +1% growth in the last 30 days vs the previous 30 days.',
     'home.marketPulseGrowth': 'Growth',
@@ -1150,6 +1211,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.pro.b2': 'VIP Exposure Engine',
     'home.pro.b3': 'Multi Account Business',
     'sidebar.noSections': 'No sections available at the moment',
+    'sidebar.panelTitle': 'Listing sections',
+    'sidebar.panelHint': 'Pick a section to jump into the listings you care about',
+    'sidebar.sectionTeaser': 'Looking for «{{section}}»? Tap here',
     'sidebar.viewProfile': 'View Profile',
     'sidebar.aboutUs': 'About Us',
     'sidebar.settings': 'Settings',
@@ -1617,6 +1681,25 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'messaging.sending': 'Sending...',
     'messaging.failed': 'Failed',
     'messaging.retry': 'Retry',
+    'selectCountry.metaTitle': 'Choose your country | ANANAS — classifieds & digital marketplace',
+    'selectCountry.metaDescription':
+      'Pick your country to open the right ANANAS experience: local listings, posts, and messaging in your market and language. Available for Jordan, Egypt, Saudi Arabia, UAE, and more.',
+    'selectCountry.h1': 'Choose your country to continue on ANANAS',
+    'selectCountry.lead':
+      'Each country has its own subdomain with local content, cities, and relevance. Select yours below to go to the correct regional site.',
+    'selectCountry.intro':
+      'ANANAS is a regional classifieds and digital commerce platform. Choosing a country helps show nearby results and the right local experience.',
+    'selectCountry.listTitle': 'Available countries',
+    'selectCountry.cardCta': 'Open country site',
+    'selectCountry.cardHint': 'Opens this country’s subdomain in the same browser tab.',
+    'selectCountry.isoLabel': 'Country code',
+    'selectCountry.empty': 'No countries are available right now. Please try again later.',
+    'selectCountry.switchToEn': 'English',
+    'selectCountry.switchToAr': 'العربية',
+    'selectCountry.langSwitchAria': 'Switch page language',
+    'selectCountry.skipToList': 'Skip to country list',
+    'selectCountry.breadcrumbHome': 'Home',
+    'selectCountry.breadcrumbCurrent': 'Choose country',
   },
 }
 

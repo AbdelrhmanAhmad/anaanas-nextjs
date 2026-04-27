@@ -5,6 +5,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'motion/react'
 import { BsSortDown } from 'react-icons/bs'
 
+import { formatCategoryResultsSubtitle, formatSectionResultsSubtitle } from '@/lib/sections/filterSummary'
+
 import styles from './filters.module.css'
 
 type SortKey = 'newest' | 'oldest' | 'price_asc' | 'price_desc'
@@ -15,18 +17,29 @@ type Props = {
   locale: Locale
   /** Optional label above the bar (e.g. category name or filtered summary). */
   heading?: string
-  /** Optional subtitle rendered next to the heading. */
+  /**
+   * Subtitle next to the heading. Omit to derive from the current URL (recommended for filter navigations).
+   * Pass an empty string to hide the subtitle.
+   */
   subtitle?: string
+  /** When set, empty-filter subtitle uses category wording. */
+  categoryName?: string
   /** Trailing action slot (e.g. mobile filters toggle). */
   trailing?: React.ReactNode
 }
 
 const SORTS: ReadonlyArray<SortKey> = ['newest', 'oldest', 'price_asc', 'price_desc']
 
-export default function ResultsSummaryBar({ locale, heading, subtitle, trailing }: Props) {
+export default function ResultsSummaryBar({ locale, heading, subtitle, categoryName, trailing }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const resolvedSubtitle = useMemo(() => {
+    if (subtitle !== undefined) return subtitle
+    if (categoryName) return formatCategoryResultsSubtitle(locale, searchParams, categoryName)
+    return formatSectionResultsSubtitle(locale, searchParams)
+  }, [subtitle, categoryName, locale, searchParams])
 
   const sortLabels: Record<SortKey, string> = useMemo(
     () =>
@@ -73,7 +86,7 @@ export default function ResultsSummaryBar({ locale, heading, subtitle, trailing 
     >
       <div className={styles.summaryBarLeft}>
         {heading && <div className={styles.summaryHeading}>{heading}</div>}
-        {subtitle && <div className={styles.summarySubtitle}>{subtitle}</div>}
+        {resolvedSubtitle ? <div className={styles.summarySubtitle}>{resolvedSubtitle}</div> : null}
       </div>
       <div className={styles.summaryBarRight}>
         <div className={styles.sortGroup} role="group" aria-label={locale === 'ar' ? 'ترتيب النتائج' : 'Sort results'}>
