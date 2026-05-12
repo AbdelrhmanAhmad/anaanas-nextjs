@@ -25,6 +25,9 @@ import {
   useRef,
   startTransition,
   type ReactNode,
+  type InputHTMLAttributes,
+  type ChangeEvent,
+  type RefObject,
 } from 'react'
 import { fetchCategoriesBySectionId, type Category } from '@/lib/api/categories'
 import { fetchFields, fetchSubFields, type Field, type SubField, type AttributeOption } from '@/lib/api/fields'
@@ -39,15 +42,19 @@ import WizardPostPhotosStep from './WizardPostPhotosStep'
 import clsx from 'clsx'
 import {
   BsBullseye,
+  BsBrush,
+  BsCamera,
   BsCheck2,
-  BsChevronLeft,
-  BsChevronRight,
+  BsArrowLeft,
+  BsArrowRight,
   BsCurrencyDollar,
   BsGraphUp,
   BsGrid3X3Gap,
   BsPencilSquare,
   BsPeople,
+  BsPlus,
   BsRocketTakeoff,
+  BsTag,
   BsTags,
 } from 'react-icons/bs'
 import { useParams } from 'next/navigation'
@@ -56,12 +63,37 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { CreatePostWizardStepper, wizardStepMotion } from './CreatePostWizardUI'
 import styles from './CreatePostCard.module.css'
 import { toast } from 'react-toastify'
+import { playWizardStepChime } from '@/lib/ui/wizardStepChime'
 
 type CreatePostCardProps = {
   mode?: 'create' | 'edit'
   initialPost?: any
   postId?: number | string
   locale?: string
+}
+
+const WIZARD_GLASS_TINT_CLASSES = [
+  styles.wizardGlassTint0,
+  styles.wizardGlassTint1,
+  styles.wizardGlassTint2,
+  styles.wizardGlassTint3,
+  styles.wizardGlassTint4,
+  styles.wizardGlassTint5,
+  styles.wizardGlassTint6,
+  styles.wizardGlassTint7,
+] as const
+
+function pickWizardGlassTintClass(id: number | string) {
+  let hash = 0
+  if (typeof id === 'number' && Number.isFinite(id)) {
+    hash = Math.abs(Math.trunc(id))
+  } else {
+    const s = String(id)
+    for (let i = 0; i < s.length; i++) {
+      hash = (hash * 31 + s.charCodeAt(i)) | 0
+    }
+  }
+  return WIZARD_GLASS_TINT_CLASSES[Math.abs(hash) % WIZARD_GLASS_TINT_CLASSES.length]
 }
 
 const SMART_CHIP_COMING_ICONS = [BsGraphUp, BsBullseye, BsPeople, BsCurrencyDollar] as const
@@ -91,6 +123,118 @@ function SmartChipsComingSoonTeaser() {
           </span>
         )
       })}
+    </div>
+  )
+}
+
+type CreatePostHeroShellProps = {
+  locale: string
+  isWizardRtl: boolean
+  title: string
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+  inputRef?: RefObject<HTMLInputElement | null>
+  inputProps: Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'className' | 'ref'>
+  errorText?: string | null
+  showTags: boolean
+  onAddAdClick: () => void
+}
+
+/** واجهة البطل الافتراضية (ضيف / عنوان فارغ) — تصميم موحّد للموبايل والشاشات العريضة */
+function CreatePostHeroShell({
+  locale,
+  isWizardRtl,
+  title,
+  onChange,
+  inputRef,
+  inputProps,
+  errorText,
+  showTags,
+  onAddAdClick,
+}: CreatePostHeroShellProps) {
+  const shellDir = isWizardRtl ? 'rtl' : 'ltr'
+  const rowDir = isWizardRtl ? 'rtl' : 'ltr'
+  const tagItems = [
+    { Icon: BsPencilSquare, label: t('createPost.heroTagTitle', locale as any) },
+    { Icon: BsBrush, label: t('createPost.heroTagDesc', locale as any) },
+    { Icon: BsTag, label: t('createPost.heroTagPrice', locale as any) },
+    { Icon: BsCamera, label: t('createPost.heroTagPhotos', locale as any) },
+  ] as const
+
+  return (
+    <div className={styles.composerHeroShell} dir={shellDir}>
+      <div className={styles.composerHeroDots} aria-hidden>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className={clsx(styles.composerHeroDot, i === 1 && styles.composerHeroDotActive)}
+          />
+        ))}
+      </div>
+
+      <div className={styles.composerHeroTop} dir={rowDir}>
+        <div className={styles.composerHeroCopy}>
+          <h2 className={styles.composerHeroHeading}>{t('createPost.heroTitle', locale as any)}</h2>
+          <p className={styles.composerHeroSub}>{t('createPost.heroSubtitle', locale as any)}</p>
+        </div>
+
+        <div className={styles.composerHeroFieldCol}>
+          <label className={styles.composerSrOnly} htmlFor={inputProps.id ?? 'create-post-hero-title'}>
+            {t('createPost.heroTitle', locale as any)}
+          </label>
+          <div
+            className={clsx(
+              styles.composerHeroInlineShell,
+              errorText ? styles.composerHeroInlineShellInvalid : undefined,
+            )}
+            dir={rowDir}
+          >
+            <input
+              {...inputProps}
+              ref={inputRef}
+              id={inputProps.id ?? 'create-post-hero-title'}
+              className={styles.composerHeroInlineField}
+              value={title}
+              onChange={onChange}
+              placeholder={t('createPost.heroPlaceholder', locale as any)}
+              aria-invalid={errorText ? true : undefined}
+              aria-describedby={errorText ? 'create-post-hero-title-err' : undefined}
+            />
+            <span
+              className={styles.composerHeroInlineAffix}
+              onClick={onAddAdClick}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return
+                e.preventDefault()
+                onAddAdClick()
+              }}
+              role="button"
+              tabIndex={0}
+              title={t('createPost.heroAddAd', locale as any)}
+            >
+              <BsPlus size={18} strokeWidth={1} aria-hidden />
+              <span>{t('createPost.heroAddAd', locale as any)}</span>
+            </span>
+          </div>
+          {errorText ? (
+            <div id="create-post-hero-title-err" className="text-danger small mt-1">
+              {errorText}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {showTags ? (
+        <div className={styles.composerHeroTags}>
+          {tagItems.map(({ Icon, label }) => (
+            <span key={label} className={styles.composerHeroTag}>
+              <span className={styles.composerHeroTagIcon}>
+                <Icon size={14} aria-hidden />
+              </span>
+              {label}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -254,6 +398,12 @@ const [step, setStep] = useState(1)
     (typeof title === 'string' && title.trim().length > 0) ||
     (typeof description === 'string' && description.trim().length > 0)
 
+  /** صف المعالج أسفل البطل: عند وجود عنوان أو تجاوز الخطوة 1، أو وضع التعديل */
+  const showComposerDock = isEdit || title.trim().length > 0 || step > 1
+
+  /** شارات المميزات أسفل البطل — فقط إنشاء جديد والخطوة 1 والعنوان فارغ */
+  const showHeroFeatureTags = !isEdit && step === 1 && title.trim() === ''
+
   const isWizardRtl = locale === 'ar'
 
   const wizardNav = useMemo(
@@ -267,14 +417,14 @@ const [step, setStep] = useState(1)
   )
 
   const navPrevIcon = isWizardRtl ? (
-    <BsChevronRight className={styles.wizardBtnIcon} aria-hidden />
+    <BsArrowRight className={styles.wizardBtnIcon} aria-hidden />
   ) : (
-    <BsChevronLeft className={styles.wizardBtnIcon} aria-hidden />
+    <BsArrowLeft className={styles.wizardBtnIcon} aria-hidden />
   )
   const navNextIcon = isWizardRtl ? (
-    <BsChevronLeft className={styles.wizardBtnIcon} aria-hidden />
+    <BsArrowLeft className={styles.wizardBtnIcon} aria-hidden />
   ) : (
-    <BsChevronRight className={styles.wizardBtnIcon} aria-hidden />
+    <BsArrowRight className={styles.wizardBtnIcon} aria-hidden />
   )
 
   const navSubmitIcon = (
@@ -315,9 +465,13 @@ const [step, setStep] = useState(1)
   const validationSchema = useMemo(() => {
     const schema: Record<string, any> = {}
 
-    // Step 1: validation للعنوان والوصف
+    schema.title = yup
+      .string()
+      .trim()
+      .required('يرجى إدخال عنوان الإعلان')
+      .min(1, 'يرجى إدخال عنوان الإعلان')
+
     if (step === 1) {
-      schema.title = yup.string().required('يرجى إدخال عنوان الإعلان')
       schema.description = yup.string().required('يرجى إدخال وصف الإعلان')
     }
 
@@ -479,10 +633,11 @@ const [step, setStep] = useState(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, initialPost, initialCategoryId, sectionCategories])
 
-  // إعادة تهيئة الأخطاء عند تغيير step
+  // إعادة تهيئة الأخطاء عند تغيير step + إبقاء التحقق من العنوان نشطاً في كل الخطوات
   useEffect(() => {
     clearErrors()
-  }, [step, clearErrors])
+    void trigger('title')
+  }, [step, clearErrors, trigger])
 
   // عمل scroll to top عند تغيير step
   useEffect(() => {
@@ -1163,55 +1318,20 @@ const [step, setStep] = useState(1)
       <>
         <Card className={clsx('card-body', 'w-100', styles.composerCard)}>
           <ComposerCardAtmosphere>
-            <div className={clsx(styles.smartRow, styles.smartRowComposer)}>
-              <div className={styles.composerAvatar}>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setShowLoginAlert(true)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setShowLoginAlert(true)
-                    }
-                  }}
-                >
-                  <Image
-                    className={styles.composerAvatarImg}
-                    src={defaultUserAvatar}
-                    alt=""
-                    width={40}
-                    height={40}
-                  />
-                </span>
-              </div>
-              <div className={styles.smartContent}>
-                <div className={clsx(styles.composerFieldRow, styles.composerFieldRowCompact)}>
-                  <div className={styles.composerInlineShell}>
-                    <span className={styles.composerInputLead} aria-hidden>
-                      <BsPencilSquare size={18} />
-                    </span>
-                    <input
-                      readOnly
-                      onClick={() => setShowLoginAlert(true)}
-                      onFocus={(e) => e.target.blur()}
-                      className={styles.composerInlineField}
-                      placeholder={smartCopy.placeholder}
-                      aria-label={smartCopy.placeholder}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.composerLaunchChip}
-                    onClick={() => setShowLoginAlert(true)}
-                    title={smartCopy.launch}
-                  >
-                    <BsRocketTakeoff className={styles.composerLaunchIcon} size={17} aria-hidden />
-                    <span className={styles.composerLaunchText}>{smartCopy.launch}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CreatePostHeroShell
+              locale={locale}
+              isWizardRtl={isWizardRtl}
+              title=""
+              onChange={() => {}}
+              inputProps={{
+                readOnly: true,
+                onClick: () => setShowLoginAlert(true),
+                onFocus: (e) => (e.target as HTMLInputElement).blur(),
+                id: 'create-post-hero-title-guest',
+              }}
+              showTags
+              onAddAdClick={() => setShowLoginAlert(true)}
+            />
           </ComposerCardAtmosphere>
         </Card>
 
@@ -1231,10 +1351,33 @@ const [step, setStep] = useState(1)
         className={clsx('card-body', 'w-100', styles.composerCard)}
       >
         <ComposerCardAtmosphere>
+          {!isEdit && step === 1 && (
+            <CreatePostHeroShell
+              locale={locale}
+              isWizardRtl={isWizardRtl}
+              title={title}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                setValue('title', e.target.value, { shouldValidate: true })
+              }}
+              inputRef={titleInputRef}
+              inputProps={{
+                id: 'create-post-title',
+                name: 'title',
+                autoComplete: 'off',
+              }}
+              errorText={(errors.title?.message as string | undefined) || null}
+              showTags={showHeroFeatureTags}
+              onAddAdClick={() => titleInputRef.current?.focus()}
+            />
+          )}
+          {(isEdit || showComposerDock) && (
+            <div className={clsx(!isEdit && styles.composerWizardDock)}>
         <div className={clsx(styles.smartRow, step === 1 && styles.smartRowComposer)}>
           <div
             className={clsx(
               styles.composerAvatar,
+              !isEdit && step === 1 && styles.composerHeroAvatarHidden,
               step !== 1 && styles.composerAvatarHideWhenWizard,
             )}
           >
@@ -1294,51 +1437,53 @@ const [step, setStep] = useState(1)
 {
   step === 1 && (
     <motion.div key="w-1" className={styles.wizardStepSurface} {...wizardStepMotion(reduceMotion)}>
-                  <div className={styles.composerTitleSection}>
-                    <label className={styles.composerSrOnly} htmlFor="create-post-title">
-                      عنوان الإعلان
-                      <span className={styles.wizardRequired}>*</span>
-                    </label>
-                    <div className={clsx(styles.composerFieldRow, styles.composerFieldRowCompact)}>
-                      <div
-                        className={clsx(
-                          styles.composerInlineShell,
-                          errors.title && styles.composerInlineShellInvalid,
-                        )}
-                      >
-                        <span className={styles.composerInputLead} aria-hidden>
-                          <BsPencilSquare size={18} />
-                        </span>
-                        <input
-                          ref={titleInputRef}
-                          id="create-post-title"
-                          className={clsx(styles.composerInlineField, errors.title && 'is-invalid')}
-                          name="title"
-                          placeholder={smartCopy.placeholder}
-                          value={title || ''}
-                          onChange={(e) => {
-                            setTitle(e.target.value)
-                            setValue('title', e.target.value, { shouldValidate: true })
-                          }}
-                          autoComplete="off"
-                        />
-                      </div>
-                      {title.trim().length === 0 ? (
-                        <button
-                          type="button"
-                          className={styles.composerLaunchChip}
-                          onClick={() => titleInputRef.current?.focus()}
-                          title={smartCopy.launch}
+                  {isEdit ? (
+                    <div className={styles.composerTitleSection}>
+                      <label className={styles.composerSrOnly} htmlFor="create-post-title">
+                        عنوان الإعلان
+                        <span className={styles.wizardRequired}>*</span>
+                      </label>
+                      <div className={clsx(styles.composerFieldRow, styles.composerFieldRowCompact)}>
+                        <div
+                          className={clsx(
+                            styles.composerInlineShell,
+                            errors.title && styles.composerInlineShellInvalid,
+                          )}
                         >
-                          <BsRocketTakeoff className={styles.composerLaunchIcon} size={17} aria-hidden />
-                          <span className={styles.composerLaunchText}>{smartCopy.launch}</span>
-                        </button>
-                      ) : null}
+                          <span className={styles.composerInputLead} aria-hidden>
+                            <BsPencilSquare size={18} />
+                          </span>
+                          <input
+                            ref={titleInputRef}
+                            id="create-post-title"
+                            className={clsx(styles.composerInlineField, errors.title && 'is-invalid')}
+                            name="title"
+                            placeholder={smartCopy.placeholder}
+                            value={title || ''}
+                            onChange={(e) => {
+                              setTitle(e.target.value)
+                              setValue('title', e.target.value, { shouldValidate: true })
+                            }}
+                            autoComplete="off"
+                          />
+                        </div>
+                        {title.trim().length === 0 ? (
+                          <button
+                            type="button"
+                            className={styles.composerLaunchChip}
+                            onClick={() => titleInputRef.current?.focus()}
+                            title={smartCopy.launch}
+                          >
+                            <BsRocketTakeoff className={styles.composerLaunchIcon} size={17} aria-hidden />
+                            <span className={styles.composerLaunchText}>{smartCopy.launch}</span>
+                          </button>
+                        ) : null}
+                      </div>
+                      {errors.title && (
+                        <div className="text-danger small mt-1">{errors.title.message as string}</div>
+                      )}
                     </div>
-                    {errors.title && (
-                      <div className="text-danger small mt-1">{errors.title.message as string}</div>
-                    )}
-                  </div>
+                  ) : null}
 
                   <AnimatePresence initial={false}>
                     {title.trim().length > 0 ? (
@@ -1350,9 +1495,10 @@ const [step, setStep] = useState(1)
                         exit={reduceMotion ? undefined : { opacity: 0, y: 6 }}
                         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                       >
-                        <p className={styles.wizardLead}>
+                        {/* <p className={styles.wizardLead}>
                           {t('createPost.wizard.lead', locale as any)}
-                        </p>
+                        </p> */} 
+                          
 
                         <div className={styles.wizardFieldGroup}>
                           <label className={styles.wizardLabel} htmlFor="create-post-description">
@@ -1387,6 +1533,7 @@ const [step, setStep] = useState(1)
                             type="button"
                             className={styles.wizardBtnPrimary}
                             onClick={async () => {
+                              playWizardStepChime()
                               const titleValid = await trigger('title')
                               const descriptionValid = await trigger('description')
                               if (titleValid && descriptionValid) {
@@ -1432,7 +1579,10 @@ const [step, setStep] = useState(1)
         <button
           type="button"
           className={styles.wizardBtnSecondary}
-          onClick={() => setStep(1)}
+          onClick={() => {
+            playWizardStepChime()
+            setStep(1)
+          }}
         >
           <span className={styles.wizardBtnInner}>
             {navPrevIcon}
@@ -1442,7 +1592,10 @@ const [step, setStep] = useState(1)
         <button
           type="button"
           className={styles.wizardBtnPrimary}
-          onClick={() => setStep(3)}
+          onClick={() => {
+            playWizardStepChime()
+            setStep(3)
+          }}
         >
           <span className={styles.wizardBtnInner}>
             {wizardNav.next}
@@ -1484,34 +1637,63 @@ const [step, setStep] = useState(1)
                       ) : loadingSections ? (
                         <div className="text-center py-4">جاري التحميل...</div>
                       ) : (
-                        <div className={clsx(styles.wizardPickGrid, styles.wizardPickGridStackMobile)}>
-                          {sections.map((sectionItem) => (
-                            <div
+                        <div className={styles.wizardPickGridShowcase}>
+                          {sections.map((sectionItem, idx) => (
+                            <motion.div
                               key={sectionItem.id}
-                              role="button"
-                              onClick={async () => {
-                                setSelectedSection(sectionItem)
-                                setValue('section_id', sectionItem.id, { shouldValidate: true })
-                                const isValid = await trigger('section_id')
-                                if (isValid) {
-                                  setStep(4)
-                                }
+                              className={styles.wizardPickCardMotion}
+                              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay: reduceMotion ? 0 : Math.min(idx * 0.04, 0.36),
+                                duration: 0.32,
+                                ease: [0.22, 1, 0.36, 1],
                               }}
-                              className={`card card-body mb-0 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${styles.wizardPickCardComfortable} ${selectedSection?.id === sectionItem.id ? styles.wizardPickCardActive : ''
-                                }`}
+                              whileHover={reduceMotion ? undefined : { y: -3, scale: 1.012 }}
+                              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
                             >
-                              {sectionItem.icon && (
-                                <Image
-                                  className="h-40px mb-3 mx-auto"
-                                  src={sectionItem.icon}
-                                  alt={sectionItem.name}
-                                  width={40}
-                                  height={40}
-                                  unoptimized
-                                />
-                              )}
-                              <h6 className="mb-0">{sectionItem.name}</h6>
-                            </div>
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key !== 'Enter' && e.key !== ' ') return
+                                  e.preventDefault()
+                                  ;(e.currentTarget as HTMLDivElement).click()
+                                }}
+                                onClick={async () => {
+                                  playWizardStepChime()
+                                  setSelectedSection(sectionItem)
+                                  setValue('section_id', sectionItem.id, { shouldValidate: true })
+                                  const isValid = await trigger('section_id')
+                                  if (isValid) {
+                                    setStep(4)
+                                  }
+                                }}
+                                  className={clsx(
+                                    'card card-body mb-0 text-center',
+                                    styles.wizardPickCard,
+                                    styles.wizardPickTile,
+                                    styles.wizardPickCardComfortable,
+                                    styles.wizardPickCardGlass,
+                                    pickWizardGlassTintClass(sectionItem.id),
+                                    selectedSection?.id === sectionItem.id && styles.wizardPickCardActive,
+                                  )}
+                                >
+                                  {sectionItem.icon ? (
+                                    <span className={styles.wizardPickIconWrap}>
+                                      <Image
+                                        className={clsx('d-block', styles.wizardPickThumb)}
+                                      src={sectionItem.icon}
+                                      alt={sectionItem.name}
+                                      width={40}
+                                      height={40}
+                                      unoptimized
+                                    />
+                                  </span>
+                                ) : null}
+                                <h6 className="mb-0">{sectionItem.name}</h6>
+                              </div>
+                            </motion.div>
                           ))}
                         </div>
                       )}
@@ -1519,7 +1701,10 @@ const [step, setStep] = useState(1)
                         <button
                           type="button"
                           className={styles.wizardBtnSecondary}
-                          onClick={() => setStep(step - 1)}
+                          onClick={() => {
+                            playWizardStepChime()
+                            setStep(step - 1)
+                          }}
                         >
                           <span className={styles.wizardBtnInner}>
                             {navPrevIcon}
@@ -1531,6 +1716,7 @@ const [step, setStep] = useState(1)
                             type="button"
                             className={styles.wizardBtnPrimary}
                             onClick={async () => {
+                              playWizardStepChime()
                               if (isEdit) {
                                 setStep(4)
                                 return
@@ -1595,34 +1781,63 @@ const [step, setStep] = useState(1)
                               <p className={styles.wizardSummaryPickTitle}>{selectedSection.name}</p>
                             </div>
                           )}
-                          <div className={clsx(styles.wizardPickGrid, styles.wizardPickGridStackMobile)}>
-                            {sectionCategories.map((category) => (
-                              <div
-                  key={category.id}
-                                role="button"
-                                onClick={async () => {
-                                  setSelectedCategory(category)
-                                  setValue('category_id', category.id, { shouldValidate: true })
-                                  const isValid = await trigger('category_id')
-                                  if (isValid) {
-                                    setStep(5)
-                                  }
+                          <div className={styles.wizardPickGridShowcase}>
+                            {sectionCategories.map((category, idx) => (
+                              <motion.div
+                                key={category.id}
+                                className={styles.wizardPickCardMotion}
+                                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                  delay: reduceMotion ? 0 : Math.min(idx * 0.04, 0.36),
+                                  duration: 0.32,
+                                  ease: [0.22, 1, 0.36, 1],
                                 }}
-                                className={`card card-body mb-0 text-center ${styles.wizardPickCard} ${styles.wizardPickTile} ${styles.wizardPickCardComfortable} ${selectedCategory?.id === category.id ? styles.wizardPickCardActive : ''
-                                  }`}
-                >
-                  {category.icon && (
-                    <Image
-                      className="h-40px mb-3 mx-auto"
-                      src={category.icon}
-                      alt={category.name}
-                      width={40}
-                      height={40}
-                      unoptimized
-                    />
-                  )}
-                  <h6 className="mb-0">{category.name}</h6>
-                              </div>
+                                whileHover={reduceMotion ? undefined : { y: -3, scale: 1.012 }}
+                                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+                              >
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key !== 'Enter' && e.key !== ' ') return
+                                    e.preventDefault()
+                                    ;(e.currentTarget as HTMLDivElement).click()
+                                  }}
+                                  onClick={async () => {
+                                    playWizardStepChime()
+                                    setSelectedCategory(category)
+                                    setValue('category_id', category.id, { shouldValidate: true })
+                                    const isValid = await trigger('category_id')
+                                    if (isValid) {
+                                      setStep(5)
+                                    }
+                                  }}
+                                  className={clsx(
+                                    'card card-body mb-0 text-center',
+                                    styles.wizardPickCard,
+                                    styles.wizardPickTile,
+                                    styles.wizardPickCardComfortable,
+                                    styles.wizardPickCardGlass,
+                                    pickWizardGlassTintClass(category.id),
+                                    selectedCategory?.id === category.id && styles.wizardPickCardActive,
+                                  )}
+                                >
+                                  {category.icon ? (
+                                    <span className={styles.wizardPickIconWrap}>
+                                      <Image
+                                        className={clsx('d-block', styles.wizardPickThumb)}
+                                        src={category.icon}
+                                        alt={category.name}
+                                        width={40}
+                                        height={40}
+                                        unoptimized
+                                      />
+                                    </span>
+                                  ) : null}
+                                  <h6 className="mb-0">{category.name}</h6>
+                                </div>
+                              </motion.div>
                             ))}
                           </div>
                         </>
@@ -1632,6 +1847,7 @@ const [step, setStep] = useState(1)
                           type="button"
                           className={styles.wizardBtnSecondary}
                           onClick={() => {
+                            playWizardStepChime()
                             setSelectedCategory(null)
                             setValue('category_id', undefined)
                             setStep(step - 1)
@@ -1647,6 +1863,7 @@ const [step, setStep] = useState(1)
                             type="button"
                             className={styles.wizardBtnPrimary}
                             onClick={async () => {
+                              playWizardStepChime()
                               if (isEdit) {
                                 setStep(5)
                                 return
@@ -1789,6 +2006,7 @@ const [step, setStep] = useState(1)
                                 type="button"
                                 className={styles.wizardBtnSecondary}
                                 onClick={() => {
+                                  playWizardStepChime()
                                   // إعادة تعيين subStep إلى آخر substep
                                   const maxSubStep = Math.ceil(fields.length / FIELDS_PER_SUBSTEP)
                                   setSubStep(maxSubStep > 0 ? maxSubStep : 1)
@@ -1806,6 +2024,7 @@ const [step, setStep] = useState(1)
                                 className={styles.wizardBtnPrimary}
                                 disabled={isSubmitting}
                                 onClick={async () => {
+                                  playWizardStepChime()
                                   const cityValid = await trigger('city')
                                   await trigger('price')
                                   if (cityValid) {
@@ -1893,6 +2112,7 @@ const [step, setStep] = useState(1)
                                     type="button"
                                     className={styles.wizardBtnSecondary}
                                     onClick={() => {
+                                      playWizardStepChime()
                                       if (subStep > 1) {
                                         // إذا لم تكن substep الأولى، ارجع substep
                                         setSubStep(subStep - 1)
@@ -1918,6 +2138,7 @@ const [step, setStep] = useState(1)
                                       type="button"
                                       className={styles.wizardBtnPrimary}
                                       onClick={async () => {
+                                        playWizardStepChime()
                                         // التحقق من الحقول في الـ sub-step الحالي فقط
                                         const currentFields = fields
                                           .sort((a, b) => a.sort - b.sort)
@@ -1959,6 +2180,7 @@ const [step, setStep] = useState(1)
                                       type="button"
                                       className={styles.wizardBtnPrimary}
                                       onClick={async () => {
+                                        playWizardStepChime()
                                         // التحقق من جميع الحقول الديناميكية فقط (بدون city و price)
                                         const allFieldKeys = fields.map((f) => f.key_name)
                                         // إضافة الحقول المتداخلة
@@ -2000,6 +2222,8 @@ const [step, setStep] = useState(1)
         </div>
 
         </div>
+            </div>
+          )}
         </ComposerCardAtmosphere>
 
       </Card>

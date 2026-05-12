@@ -182,3 +182,18 @@ main {
 }body {
   background: #f3edef;
 }
+
+
+@media (max-width: 991.98px) {
+
+  body {
+    background: #ffffff;
+}
+main {
+  background-color: #ffffff;
+}
+header {
+  height: auto;
+}
+}
+

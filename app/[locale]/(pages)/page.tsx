@@ -19,7 +19,9 @@ import MarketPulseCard from './home/components/MarketPulseCard'
 import TrendingAdsCard from './home/components/TrendingAdsCard'
 import FutureRoadmapCard from './home/components/FutureRoadmapCard'
 import MobileSectionsSwiper from './home/components/MobileSectionsSwiper'
+import MobileAiPromoGrid from './home/components/MobileAiPromoGrid'
 import MobileAIDashboard from './home/components/MobileAIDashboard'
+import MobileLatestAdsSection from './home/components/MobileLatestAdsSection'
 import HomeInsightsSkeleton from './home/components/HomeInsightsSkeleton'
 import CreatePostCardLazyClient from './home/components/CreatePostCardLazyClient'
 import homeDiscoveryStyles from './homeDiscovery.module.css'
@@ -74,7 +76,7 @@ const Home = async ({
     getServerSession(authOptions),
     fetchSections(locale, { revalidateSeconds: 300 }),
   ])
-  const showMobileAiDashboard = session?.user?.id === MOBILE_AI_PREVIEW_USER_ID
+  const showMobileAiDashboard = true ||  session?.user?.id === MOBILE_AI_PREVIEW_USER_ID
   const sp = (await searchParams) ?? {}
   const pageRaw = sp.page ? (Array.isArray(sp.page) ? sp.page[0] : sp.page) : undefined
   const page = pageRaw ? Number(pageRaw) : undefined
@@ -90,6 +92,9 @@ const Home = async ({
           </h1>
           <HomeBanner locale={uiLocale} />
 
+          {/* CreatePostCard before discovery row; mobile order: Banner, CreatePost, discovery, latest ads, feeds */}
+          <CreatePostCardLazyClient />
+
           <Row className={`g-3 ${homeDiscoveryStyles.discoveryRow} d-md-none`}>
             {showMobileAiDashboard ? (
               <Col md={12} lg={5} className={homeDiscoveryStyles.discoveryAi}>
@@ -98,9 +103,12 @@ const Home = async ({
             ) : null}
             <Col md={12} lg={showMobileAiDashboard ? 7 : 12} className={homeDiscoveryStyles.discoverySections}>
               <MobileSectionsSwiper sections={sections} locale={uiLocale} />
+              {showMobileAiDashboard ? <MobileAiPromoGrid locale={uiLocale} /> : null}
             </Col>
           </Row>
-          <CreatePostCardLazyClient />
+
+          <MobileLatestAdsSection locale={uiLocale} />
+
           <div className="vstack mt-3 gap-4">
             <Feeds
               filters={{

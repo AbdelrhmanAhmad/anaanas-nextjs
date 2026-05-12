@@ -7,6 +7,7 @@ import { BsGlobe2, BsChevronDown, BsCheck2 } from 'react-icons/bs'
 import { useAppData } from '@/context/AppDataContext'
 import { parseHost, buildCountryHost } from '@/lib/domain'
 import type { Country } from '@/lib/api/countries'
+import { persistPreferredCountryIso2 } from '@/lib/geo/persistPreferredCountry.client'
 import type { SupportedLocale } from '@/lib/localization'
 
 type Props = {
@@ -138,6 +139,9 @@ const CountryDropdown = ({ locale = 'ar', compact = false }: Props) => {
               href={href}
               active={isActive}
               className="countryDropdown__item"
+              onMouseDown={() =>
+                persistPreferredCountryIso2(country.iso2 || country.iso_code || '')
+              }
             >
               <span className="countryDropdown__itemFlag">
                 {flag ? (

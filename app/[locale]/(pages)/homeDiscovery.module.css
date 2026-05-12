@@ -3,9 +3,8 @@
   margin-bottom: 0.5rem;
 }
 
-.discoveryAi {
-  display: flex;
-  align-items: stretch;
+.discoveryAi section {
+  padding: 0 !important;
 }
 
 .discoveryAi :global(.card) {

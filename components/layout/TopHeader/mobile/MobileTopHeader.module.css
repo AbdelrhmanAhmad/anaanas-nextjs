@@ -1,0 +1,215 @@
+/* Bootstrap's `.navbar { display:flex; flex-wrap:wrap }` lets inner `.container`
+   shrink to its children's intrinsic width. We force full-width here so the
+   start cluster pins to the leading edge and the end cluster to the trailing
+   edge, with the brand always perfectly centred between them. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-block: 10px;
+  padding-inline: 14px;
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 100%;
+  transition: gap 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shellSearchCollapsed {
+  gap: 4px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.start {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.brand {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+}
+
+.end {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* ---------- Hamburger (re-uses `MobileSectionsDrawer`'s trigger) ---------- */
+/* We can't touch that component's markup (must preserve its design), so we
+   tag the wrapper and reach the bootstrap `<button>` via `:global()`. */
+.hamburgerSlot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hamburgerSlot :global(button) {
+  width: 34px !important;
+  height: 34px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: #1f1f1f !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hamburgerSlot :global(button:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.hamburgerSlot :global(button svg) {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- Brand logo ----------
+   The global `<style jsx>` in the desktop TopHeader hard-sets the brand image
+   to 45px and there's an additional `<= 991.98px` rule there as well. We use
+   high-specificity selectors + `!important` so the mobile header keeps an
+   exact footprint (matches browser-tuned preview: 80×34). */
+.brand :global(.navbar-brand) {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.brand :global(.navbar-brand-item),
+.brand :global(img.navbar-brand-item) {
+  width: 80px !important;
+  height: 34px !important;
+  max-width: 80px !important;
+  max-height: 34px !important;
+  object-fit: contain !important;
+}
+
+.searchRow {
+  display: grid;
+  grid-template-rows: 1fr;
+  width: 100%;
+  margin-top: 0;
+  transition: grid-template-rows 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.searchRowInner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.35s ease;
+}
+
+.searchRowCollapsed {
+  grid-template-rows: 0fr;
+  pointer-events: none;
+}
+
+.searchRowCollapsed .searchRowInner {
+  opacity: 0;
+  transform: translate3d(0, -14px, 0) scale(0.96);
+  filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell {
+    transition-duration: 0.01ms !important;
+  }
+
+  .searchRow {
+    transition-duration: 0.01ms !important;
+  }
+
+  .searchRowInner {
+    transition-duration: 0.01ms !important;
+  }
+
+  .searchRowCollapsed .searchRowInner {
+    filter: none;
+    transform: none;
+  }
+}
+
+/* ---------- Inherited Country / Locale dropdown polish ---------- */
+.end :global(.countryDropdown__toggle),
+.end :global(.localeDropdown__toggle) {
+  height: 34px;
+  padding: 3px 8px;
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.end :global(.countryDropdown__flag) {
+  width: 22px;
+  height: 22px;
+}
+
+.end :global(.countryDropdown__chevron),
+.end :global(.localeDropdown__chevron) {
+  display: none;
+}
+
+.end :global(.localeDropdown__badge) {
+  width: 22px;
+  height: 22px;
+}
+
+/* Neutralise the legacy Bootstrap padding the desktop `<TopHeader>` applies to
+   `.topNav` so the mobile header owns its vertical rhythm. */
+.shell :global(.topNav) {
+  padding: 0;
+}
+
+/* ---------- Mid-small screens ---------- */
+@media (max-width: 420px) {
+  .shell {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  .row {
+    gap: 6px;
+  }
+  .start,
+  .end {
+    gap: 4px;
+  }
+}
+
+/* ---------- Extra-small screens ---------- */
+@media (max-width: 360px) {
+  .shell {
+    padding-inline: 10px;
+  }
+  .hamburgerSlot :global(button) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .end :global(.countryDropdown__toggle),
+  .end :global(.localeDropdown__toggle) {
+    height: 32px;
+    padding: 2px 6px;
+  }
+  .end :global(.countryDropdown__flag),
+  .end :global(.localeDropdown__badge) {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { headers } from "next/headers";
 import { getBaseDomainForCountryLinks, parseHost } from "@/lib/domain";
 import {
@@ -11,6 +12,7 @@ import { getSiteOrigin } from "@/lib/seo/origin";
 import { t } from "@/lib/translations";
 import { resolveCountryFlagUrl } from "@/lib/flags/resolveCountryFlagUrl";
 import styles from "./select-country.module.css";
+import { SelectCountryLink } from "./SelectCountryLink";
 
 function buildCountryHost(
   isoCode: string,
@@ -230,22 +232,22 @@ export default async function SelectCountryPage({
               className={styles.langSwitch}
               aria-label={t("selectCountry.langSwitchAria", initialLocale)}
             >
-              <a
+              <Link
                 href="/ar/select-country"
                 className={`${styles.langLink} ${initialLocale === "ar" ? styles.langLinkActive : ""}`}
                 hrefLang="ar"
                 lang="ar"
               >
                 {t("selectCountry.switchToAr", initialLocale)}
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/en/select-country"
                 className={`${styles.langLink} ${initialLocale === "en" ? styles.langLinkActive : ""}`}
                 hrefLang="en"
                 lang="en"
               >
                 {t("selectCountry.switchToEn", initialLocale)}
-              </a>
+              </Link>
             </nav>
           </header>
 
@@ -262,7 +264,7 @@ export default async function SelectCountryPage({
             <nav aria-label={t("selectCountry.breadcrumbCurrent", initialLocale)}>
               <ol className={styles.breadcrumb}>
                 <li>
-                  <a href={`/${initialLocale}`}>{t("selectCountry.breadcrumbHome", initialLocale)}</a>
+                  <Link href={`/${initialLocale}`}>{t("selectCountry.breadcrumbHome", initialLocale)}</Link>
                 </li>
                 <li className={styles.breadcrumbSep} aria-hidden>
                   /
@@ -307,14 +309,14 @@ export default async function SelectCountryPage({
 
                       return (
                         <li key={String(country.id)}>
-                          <a
+                          <SelectCountryLink
                             href={countryUrl}
+                            iso2={isoCode}
                             className={styles.countryCard}
                             hrefLang={initialLocale}
                           >
                             <div className={styles.flagWrap}>
                               {flagSrc ? (
-                                // eslint-disable-next-line @next/next/no-img-element -- API + static /public flags; 128×128 intrinsic
                                 <img
                                   src={flagSrc}
                                   alt={flagAlt}
@@ -343,7 +345,7 @@ export default async function SelectCountryPage({
                                 {t("selectCountry.cardHint", initialLocale)}
                               </p>
                             </div>
-                          </a>
+                          </SelectCountryLink>
                         </li>
                       );
                     })}

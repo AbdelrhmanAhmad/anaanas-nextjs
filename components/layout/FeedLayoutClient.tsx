@@ -49,7 +49,7 @@ const FeedLayoutClient = ({ children, sidebar, locale }: FeedLayoutClientProps) 
     <>
       <main>
         <Container>
-          <Row className="g-4">
+          <Row className="g-md-4">
             <Col lg={3}>
               <nav className="navbar navbar-expand-lg mx-0">
                 {width >= 992 ? (

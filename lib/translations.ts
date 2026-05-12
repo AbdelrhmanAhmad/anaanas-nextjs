@@ -26,6 +26,9 @@ type TranslationKey =
   | 'home.electronics'
   | 'home.jobs'
   | 'home.topPerformingAds'
+  | 'home.latestAds'
+  | 'home.latestAdsEmpty'
+  | 'home.newBadge'
   | 'home.ad.zamzam'
   | 'home.ad.movingHouse'
   | 'home.ad.othman'
@@ -291,6 +294,14 @@ type TranslationKey =
   | 'filter.sortPriceLowToHigh'
   | 'filter.sortPriceHighToLow'
   | 'createPost.smartTitle'
+  | 'createPost.heroTitle'
+  | 'createPost.heroSubtitle'
+  | 'createPost.heroAddAd'
+  | 'createPost.heroPlaceholder'
+  | 'createPost.heroTagTitle'
+  | 'createPost.heroTagDesc'
+  | 'createPost.heroTagPrice'
+  | 'createPost.heroTagPhotos'
   | 'createPost.launch'
   | 'createPost.placeholder'
   | 'createPost.chipDemand'
@@ -544,6 +555,12 @@ type TranslationKey =
   | 'messaging.sending'
   | 'messaging.failed'
   | 'messaging.retry'
+  // Global 404 (not-found)
+  | 'notFound.badge'
+  | 'notFound.title'
+  | 'notFound.lead'
+  | 'notFound.backHome'
+  | 'notFound.siteName'
   // Select country (public / SEO)
   | 'selectCountry.metaTitle'
   | 'selectCountry.metaDescription'
@@ -591,6 +608,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.electronics': 'إلكترونيات',
     'home.jobs': 'وظائف',
     'home.topPerformingAds': 'أفضل الإعلانات اليوم',
+    'home.latestAds': 'آخر الإعلانات',
+    'home.latestAdsEmpty': 'لا توجد إعلانات جديدة حالياً.',
+    'home.newBadge': 'جديد',
     'home.ad.zamzam': 'زمزم زمان',
     'home.ad.movingHouse': 'شركة نقل أثاث',
     'home.ad.othman': 'عثمان للعقارات',
@@ -856,6 +876,14 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.sortPriceLowToHigh': 'السعر من الأقل إلى الأعلى',
     'filter.sortPriceHighToLow': 'السعر من الأعلى إلى الأقل',
     'createPost.smartTitle': 'أنشئ إعلانك الذكي',
+    'createPost.heroTitle': 'ابدأ إعلانك الذكي',
+    'createPost.heroSubtitle': 'اكتب فكرتك، وسنقوم بتحويلها إعلان احترافي يجذب العملاء',
+    'createPost.heroAddAd': 'أضف إعلان',
+    'createPost.heroPlaceholder': '…اكتب هنا ما تريد بيعه',
+    'createPost.heroTagTitle': 'عنوان جذاب',
+    'createPost.heroTagDesc': 'وصف قوي',
+    'createPost.heroTagPrice': 'سعر مناسب',
+    'createPost.heroTagPhotos': 'صور مميزة',
     'createPost.launch': 'انطلق بإعلانك الذكي',
     'createPost.placeholder': 'ماذا تريد أن تبيع اليوم؟',
     'createPost.chipDemand': '🔥 طلب مرتفع في عمّان',
@@ -1112,6 +1140,12 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'messaging.sending': 'جارٍ الإرسال...',
     'messaging.failed': 'فشل الإرسال',
     'messaging.retry': 'إعادة المحاولة',
+    'notFound.badge': 'تنبيه: الصفحة غير موجودة',
+    'notFound.title': 'هذه الصفحة غير موجودة',
+    'notFound.lead':
+      'قد يكون الرابط معطلاً أو أُزيلت الصفحة. يمكننا إعادتك إلى الصفحة الرئيسية.',
+    'notFound.backHome': 'العودة للصفحة الرئيسية',
+    'notFound.siteName': 'اناناس',
     'selectCountry.metaTitle': 'اختر دولتك | أناناس — إعلانات وتسويق ورقمية في الوطن العربي',
     'selectCountry.metaDescription':
       'اختر بلدك للانتقال إلى نسخة أناناس المحلية: إعلانات مبوبة، منشورات، ورسائل بأمانة السوق واللغة المناسبة. تصفح الأردن، مصر، السعودية، الإمارات والدول المتاحة.',
@@ -1160,6 +1194,9 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.electronics': 'Electronics',
     'home.jobs': 'Jobs',
     'home.topPerformingAds': 'Top Performing Ads Today',
+    'home.latestAds': 'Latest ads',
+    'home.latestAdsEmpty': 'No new listings yet.',
+    'home.newBadge': 'New',
     'home.ad.zamzam': 'Zamzam Zaman',
     'home.ad.movingHouse': 'Moving House Company',
     'home.ad.othman': 'Othman Real Estate',
@@ -1425,6 +1462,14 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'filter.sortPriceLowToHigh': 'Price: low to high',
     'filter.sortPriceHighToLow': 'Price: high to low',
     'createPost.smartTitle': 'Create Your Smart Ad',
+    'createPost.heroTitle': 'Start your smart ad',
+    'createPost.heroSubtitle': "Write your idea—we'll turn it into a polished ad that attracts buyers.",
+    'createPost.heroAddAd': 'Add ad',
+    'createPost.heroPlaceholder': 'Write what you want to sell…',
+    'createPost.heroTagTitle': 'Catchy title',
+    'createPost.heroTagDesc': 'Strong description',
+    'createPost.heroTagPrice': 'Fair price',
+    'createPost.heroTagPhotos': 'Great photos',
     'createPost.launch': 'Launch Smart Ad',
     'createPost.placeholder': 'What are you selling today?',
     'createPost.chipDemand': '🔥 High Demand in Amman',
@@ -1681,6 +1726,12 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'messaging.sending': 'Sending...',
     'messaging.failed': 'Failed',
     'messaging.retry': 'Retry',
+    'notFound.badge': 'Alert: page not found',
+    'notFound.title': 'This page does not exist',
+    'notFound.lead':
+      'The link may be broken or the page was removed. We can take you back to the home page.',
+    'notFound.backHome': 'Back to home',
+    'notFound.siteName': 'Ananas',
     'selectCountry.metaTitle': 'Choose your country | ANANAS — classifieds & digital marketplace',
     'selectCountry.metaDescription':
       'Pick your country to open the right ANANAS experience: local listings, posts, and messaging in your market and language. Available for Jordan, Egypt, Saudi Arabia, UAE, and more.',

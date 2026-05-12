@@ -9,6 +9,12 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./lib/localization";
 import { detectVisitorCountryIso2 } from "./lib/geo/detectVisitorCountry";
 import { fetchSupportedCountryIso2Set } from "./lib/geo/supportedIsoCodes";
 import { shouldSkipCountryGeoRouting } from "./lib/geo/shouldSkipGeoRouting";
+import {
+  PREFERRED_COUNTRY_COOKIE,
+  PREFERRED_COUNTRY_MAX_AGE,
+  normalizePreferredCountryIso2,
+  readPreferredCountryIsoFromRequest,
+} from "./lib/geo/preferredCountryCookie";
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -40,6 +46,30 @@ function apexSelectCountryRedirect(req: NextRequest, locale: string) {
   const host = hostCtx.port ? `${base}:${hostCtx.port}` : base;
   const next = new URL(`${proto}://${host}/${locale}/select-country`);
   return NextResponse.redirect(next);
+}
+
+function applyPreferredCountryCookie(
+  res: NextResponse,
+  req: NextRequest,
+  iso: string,
+) {
+  const code = normalizePreferredCountryIso2(iso);
+  if (!code) return res;
+
+  const baseRaw = getBaseDomainFromEnv() ?? "";
+  const base = baseRaw.split(":")[0]?.toLowerCase() ?? "";
+  const secure = requestProto(req) === "https";
+
+  res.cookies.set({
+    name: PREFERRED_COUNTRY_COOKIE,
+    value: code,
+    path: "/",
+    maxAge: PREFERRED_COUNTRY_MAX_AGE,
+    sameSite: "lax",
+    secure,
+    ...(base && !base.includes("localhost") ? { domain: base } : {}),
+  });
+  return res;
 }
 
 export async function middleware(req: NextRequest) {
@@ -79,36 +109,61 @@ export async function middleware(req: NextRequest) {
   const locale = maybeLocale as (typeof SUPPORTED_LOCALES)[number];
   const isSelectCountry = segments[2] === "select-country";
   const skipGeo = shouldSkipCountryGeoRouting(req);
+  const preferredIso = readPreferredCountryIsoFromRequest(req);
 
-  if (!skipGeo && hasCountrySubdomain && countrySubdomain) {
-    const [{ code: detected }, supported] = await Promise.all([
+  let supported = new Set<string>();
+  let detected: string | null = null;
+
+  if (!skipGeo) {
+    const [{ code }, s] = await Promise.all([
       detectVisitorCountryIso2(req),
       fetchSupportedCountryIso2Set(),
     ]);
+    supported = s;
+    detected = code;
+  }
 
+  const subNorm = countrySubdomain?.toLowerCase() ?? "";
+
+  // Tenant host lists a plausible ISO label, but API has no such country → picker on apex.
+  if (
+    !skipGeo &&
+    hasCountrySubdomain &&
+    subNorm &&
+    supported.size > 0 &&
+    !supported.has(subNorm)
+  ) {
+    return apexSelectCountryRedirect(req, locale);
+  }
+
+  // Mismatch geo vs subdomain: allow browsing if user explicitly chose this tenant (cookie).
+  if (!skipGeo && hasCountrySubdomain && subNorm) {
     if (
       detected &&
       supported.size > 0 &&
       supported.has(detected) &&
-      supported.has(countrySubdomain.toLowerCase()) &&
-      detected !== countrySubdomain.toLowerCase()
+      supported.has(subNorm) &&
+      detected !== subNorm
     ) {
-      return apexSelectCountryRedirect(req, locale);
+      if (preferredIso !== subNorm) {
+        return apexSelectCountryRedirect(req, locale);
+      }
     }
   }
 
   if (!hasCountrySubdomain) {
     if (!skipGeo) {
-      const [{ code: detected }, supported] = await Promise.all([
-        detectVisitorCountryIso2(req),
-        fetchSupportedCountryIso2Set(),
-      ]);
-
       if (detected && supported.has(detected)) {
         if (!isSelectCountry) {
           return tenantRedirect(req, detected, pathname, search);
         }
         return tenantRedirect(req, detected, `/${locale}`, search);
+      }
+      if (preferredIso && supported.has(preferredIso)) {
+        if (!isSelectCountry) {
+          return tenantRedirect(req, preferredIso, pathname, search);
+        }
+        return tenantRedirect(req, preferredIso, `/${locale}`, search);
       }
     }
 
@@ -128,11 +183,22 @@ export async function middleware(req: NextRequest) {
     requestHeaders.delete("x-country");
   }
 
-  return NextResponse.next({
+  let res = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // Align preference with the active tenant (apex can read it if geo detection fails later).
+  const syncSubCookie =
+    Boolean(subNorm) &&
+    normalizePreferredCountryIso2(subNorm) === subNorm &&
+    (supported.size === 0 || supported.has(subNorm));
+  if (syncSubCookie) {
+    res = applyPreferredCountryCookie(res, req, subNorm);
+  }
+
+  return res;
 }
 
 export const config = {

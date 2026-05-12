@@ -1,0 +1,738 @@
+/*
+ * MobileAiPromoGrid — compact, lively dashboard tiles.
+ *
+ * Typography (top pills): ~11px/600 titles, ~9px/500 subs — Cairo.
+ *
+ * Animations are all infinite, GPU-friendly transforms, and respect
+ * `prefers-reduced-motion`.
+ */
+
+.root {
+  --pad: 11px;
+  --radius: 14px;
+  --ink: #111827;
+  --ink-dim: #94a3b8;
+
+  margin-top: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 !important;
+}
+
+/* ===========================================================================
+ * Top row — three info pills
+ * =========================================================================== */
+.topRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.topCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 7px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7f8fa 0%, #eef0f3 100%);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  text-decoration: none;
+  color: var(--ink);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Slow shimmer that sweeps across each pill */
+.topCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  transform: translateX(-110%);
+  animation: pillShine 9s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.topCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.topCard:hover,
+.topCard:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.topCard:focus-visible {
+  outline: 2px solid #feca01;
+  outline-offset: 2px;
+}
+
+.topHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.topEmoji {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  display: inline-block;
+  transform-origin: 50% 60%;
+  animation: emojiWobble 4.2s ease-in-out infinite;
+}
+
+.topEmojiFire {
+  animation: emojiFire 1.6s ease-in-out infinite;
+}
+
+.topEmojiTarget {
+  animation: emojiTarget 3.2s ease-in-out infinite;
+}
+
+.topEmojiBolt {
+  animation: emojiBolt 2.2s ease-in-out infinite;
+}
+
+.topTitle {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.topSub {
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink-dim);
+}
+
+/* ===========================================================================
+ * Bottom block — 2 equal cards on top, 1 full-width banner below.
+ * =========================================================================== */
+.bottomStack {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.bottomPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  align-items: stretch;
+}
+
+/* Stagger card-float between hot / auction / wide smart strip */
+.bottomPair .fCard:first-child {
+  animation-delay: 0s;
+}
+
+.bottomPair .fCard:last-child {
+  animation-delay: -2s;
+}
+
+.fSmartWide {
+  animation-delay: -4s;
+}
+
+.fCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 138px;
+  padding: var(--pad);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--ink);
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  isolation: isolate;
+  transition: transform 0.18s ease, box-shadow 0.22s ease;
+}
+
+.fCard:hover,
+.fCard:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+}
+
+.fCard:focus-visible {
+  outline: 2px solid #feca01;
+  outline-offset: 2px;
+}
+
+/* Idle (infinite) micro float — delays scoped per layout slot above */
+.fCard {
+  animation: cardFloat 6s ease-in-out infinite;
+}
+
+/* Soft radial "aurora" behind the card surface; tinted per-variant. */
+.fCard::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(closest-side, var(--aurora) 0%, transparent 70%);
+  opacity: 0.55;
+  animation: cardAurora 9s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.fCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pastel backgrounds */
+.fHot {
+  --aurora: rgba(255, 168, 184, 0.6);
+  background: linear-gradient(160deg, #fde6ea 0%, #fcd0d8 100%);
+}
+.fAuction {
+  --aurora: rgba(255, 213, 128, 0.5);
+  background: linear-gradient(160deg, #fff5dc 0%, #ffe7a6 100%);
+}
+.fSmart {
+  --aurora: rgba(102, 220, 140, 0.45);
+  background: linear-gradient(160deg, #e2faea 0%, #c8f1d3 100%);
+}
+
+.fHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.fHeadIcon {
+  font-size: 12px;
+  line-height: 1;
+  display: inline-block;
+  transform-origin: 50% 60%;
+}
+
+.fHeadIconFire {
+  animation: emojiFire 1.7s ease-in-out infinite;
+}
+
+.fHeadIconHammer {
+  animation: hammerHeadTap 2.6s ease-in-out infinite;
+}
+
+.fHeadTitle {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fSub {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(17, 24, 39, 0.62);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ----- Hot deals ------------------------------------------------------ */
+.fGift {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 8px;
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.18));
+  z-index: 2;
+  animation: giftBounce 2.8s cubic-bezier(0.36, 0, 0.66, 1) infinite;
+  transform-origin: 50% 100%;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: auto;
+  flex-wrap: nowrap;
+}
+
+.timerCell {
+  min-width: 22px;
+  padding: 3px 5px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.18);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+.timerCell:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.timerCell:nth-child(5) {
+  animation-delay: 0.3s;
+}
+
+.timerSep {
+  color: #b91c1c;
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.8;
+  animation: blink 1s steps(2, end) infinite;
+}
+
+/* ----- Auctions ------------------------------------------------------- */
+.fHammerBig {
+  position: absolute;
+  bottom: 38px;
+  inset-inline-end: 6px;
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(180, 83, 9, 0.22));
+  z-index: 2;
+  transform-origin: 80% 80%;
+  animation: hammerSwing 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.auctionCta {
+  display: block;
+  position: relative;
+  margin-top: auto;
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%);
+  color: #1a1a1a;
+  box-shadow: 0 2px 6px rgba(245, 124, 0, 0.32);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: ctaPulse 2.4s ease-in-out infinite;
+}
+
+.auctionCta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 75%
+  );
+  transform: translateX(-130%);
+  animation: ctaShine 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Pair tiles — a bit more breathing room now that each is half-width */
+.bottomPair .fCard {
+  min-height: 132px;
+}
+
+/* Wide smart-ads banner */
+.fSmartWide {
+  min-height: 0;
+  padding-block: 10px;
+  padding-inline: 12px;
+}
+
+.smartWideInner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.smartWideCopy {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: start;
+}
+
+.fSmartWide .fSub {
+  -webkit-line-clamp: 2;
+}
+
+/* Vector AI chip — no raster image */
+.fSmartWide .smartIconWrap {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.smartIconWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  color: #059669;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(5, 150, 105, 0.22);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
+  pointer-events: none;
+  animation: smartIconBob 4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.smartSvg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Subtle sparkle drifting over the green card */
+.fSmart::after {
+  content: '✨';
+  position: absolute;
+  top: 38px;
+  inset-inline-start: 10px;
+  font-size: 11px;
+  opacity: 0;
+  animation: sparkleDrift 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ===========================================================================
+ * Responsive — keep 3-up at all widths; trim down at the smallest phones.
+ * =========================================================================== */
+@media (max-width: 380px) {
+  .topRow,
+  .bottomStack {
+    gap: 5px;
+  }
+  .bottomPair {
+    gap: 5px;
+  }
+  .topCard {
+    padding: 5px 6px;
+  }
+  .topTitle {
+    font-size: 10px;
+  }
+  .topSub {
+    font-size: 8px;
+  }
+  .fCard {
+    padding: 9px;
+    min-height: 128px;
+  }
+  .bottomPair .fCard {
+    min-height: 124px;
+  }
+  .fHeadTitle {
+    font-size: 12px;
+  }
+  .fSub {
+    font-size: 10px;
+  }
+  .fHammerBig {
+    font-size: 22px;
+    bottom: 32px;
+  }
+  .fSmartWide .smartIconWrap {
+    width: 44px;
+    height: 44px;
+  }
+  .fSmartWide .smartSvg {
+    width: 26px;
+    height: 26px;
+  }
+  .fGift {
+    font-size: 16px;
+  }
+  .timerCell {
+    min-width: 18px;
+    padding: 2px 4px;
+    font-size: 9px;
+  }
+  .auctionCta {
+    font-size: 9px;
+    padding: 5px 6px;
+  }
+}
+
+/* ===========================================================================
+ * Keyframes
+ * =========================================================================== */
+
+/* Whole-card slow vertical breath */
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+/* Slow tinted radial drift behind each card */
+@keyframes cardAurora {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, 4%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+/* Diagonal shine sweep over top pills */
+@keyframes pillShine {
+  0% {
+    transform: translateX(-130%);
+  }
+  48%, 100% {
+    transform: translateX(130%);
+  }
+}
+
+/* Generic gentle emoji wobble */
+@keyframes emojiWobble {
+  0%, 60%, 100% {
+    transform: rotate(0deg);
+  }
+  70% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(6deg);
+  }
+  90% {
+    transform: rotate(-3deg);
+  }
+}
+
+/* Fire flicker (used by 🔥 in headers) */
+@keyframes emojiFire {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 0 0 rgba(255, 0, 0, 0));
+  }
+  30% {
+    transform: scale(1.1) translateY(-0.5px);
+    filter: drop-shadow(0 0 4px rgba(255, 90, 0, 0.38));
+  }
+  60% {
+    transform: scale(0.98) translateY(0);
+  }
+  80% {
+    transform: scale(1.05) translateY(-0.5px);
+  }
+}
+
+/* Target locks-in / rotates */
+@keyframes emojiTarget {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  40% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(12deg) scale(1.08);
+  }
+  80% {
+    transform: rotate(-4deg) scale(1);
+  }
+}
+
+/* Bolt flash */
+@keyframes emojiBolt {
+  0%, 100% {
+    transform: scale(1) rotate(0);
+    filter: drop-shadow(0 0 0 rgba(255, 200, 0, 0));
+  }
+  20% {
+    transform: scale(1.18) rotate(-8deg);
+    filter: drop-shadow(0 0 6px rgba(255, 200, 0, 0.6));
+  }
+  40% {
+    transform: scale(0.95) rotate(0);
+  }
+}
+
+/* Hammer head tap (small icon) */
+@keyframes hammerHeadTap {
+  0%, 60%, 100% {
+    transform: rotate(0deg);
+  }
+  70% {
+    transform: rotate(-22deg);
+  }
+  80% {
+    transform: rotate(8deg);
+  }
+}
+
+/* Auctions decorative big hammer — slow swing */
+@keyframes hammerSwing {
+  0%, 100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Gift bouncing happily */
+@keyframes giftBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  35% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+  55% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  75% {
+    transform: translateY(-1px) rotate(2deg);
+  }
+}
+
+/* Timer cells tick subtly */
+@keyframes timerPulse {
+  0%, 100% {
+    transform: scale(1);
+    background: rgba(220, 38, 38, 0.12);
+  }
+  50% {
+    transform: scale(1.02);
+    background: rgba(220, 38, 38, 0.16);
+  }
+}
+
+/* Timer colon blink */
+@keyframes blink {
+  0%, 55% {
+    opacity: 0.75;
+  }
+  56%, 100% {
+    opacity: 0.35;
+  }
+}
+
+/* CTA pill subtle scale */
+@keyframes ctaPulse {
+  0%, 100% {
+    box-shadow: 0 2px 6px rgba(245, 124, 0, 0.32);
+  }
+  50% {
+    box-shadow: 0 4px 14px rgba(245, 124, 0, 0.55);
+  }
+}
+
+/* CTA pill shine sweep */
+@keyframes ctaShine {
+  0% {
+    transform: translateX(-130%);
+  }
+  60%, 100% {
+    transform: translateX(130%);
+  }
+}
+
+/* Soft idle motion on the vector icon */
+@keyframes smartIconBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Sparkle drift on green card */
+@keyframes sparkleDrift {
+  0% {
+    transform: translate(0, 4px) scale(0.75);
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.85;
+  }
+  65% {
+    transform: translate(6px, -4px) scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(12px, -14px) scale(0.55);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topCard,
+  .fCard,
+  .topEmoji,
+  .topEmojiFire,
+  .topEmojiTarget,
+  .topEmojiBolt,
+  .fHeadIcon,
+  .fHeadIconFire,
+  .fHeadIconHammer,
+  .fGift,
+  .fHammerBig,
+  .timerCell,
+  .timerSep,
+  .auctionCta,
+  .smartIconWrap,
+  .fSmart,
+  .fSmart::after,
+  .topCard::before,
+  .fCard::before,
+  .auctionCta::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

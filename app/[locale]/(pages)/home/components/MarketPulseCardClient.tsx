@@ -64,7 +64,7 @@ export default function MarketPulseCardClient({
                     )}
                   </div>
                   <div className={styles.textBlock}>
-                    <Link href={`/${locale}/${item.slug}`} className={styles.name}>
+                    <Link href={`/${locale}/sections/${item.slug}`} className={styles.name}>
                       {item.name}
                     </Link>
                     <div className={styles.meta}>

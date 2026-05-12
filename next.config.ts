@@ -3,7 +3,14 @@ import type {NextConfig} from "next";
 const nextConfig: NextConfig = {
     /* config options here */
     compress: true,
-    allowedDevOrigins: ['demo.anaanas.com', 'demo.localhost', 'localhost:3000', '127.0.0.1:3000'],
+    allowedDevOrigins: [
+        'demo.anaanas.com',
+        'demo.localhost',
+        'localhost:3000',
+        '127.0.0.1:3000',
+        'jo.localhost',
+        'jo.localhost:3000',
+    ],
     images: {
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 60 * 60 * 24 * 7,

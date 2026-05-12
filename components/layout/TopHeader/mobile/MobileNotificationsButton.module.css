@@ -1,0 +1,58 @@
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid rgba(255, 193, 7, 0.55);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrap svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 0.5;
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  inset-inline-end: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff3b5c;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(255, 59, 92, 0.4);
+}

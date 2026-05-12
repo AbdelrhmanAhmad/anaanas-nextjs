@@ -665,6 +665,214 @@
   }
 }
 
+/* شبكة أقسام/فئات — 3 بطاقات في الصف على الموبايل، شبكة مرنة على الشاشات الأكبر */
+.wizardPickGridShowcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-bottom: 0.35rem;
+}
+
+@media (max-width: 767.98px) {
+  .wizardPickGridShowcase {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.38rem;
+  }
+
+  .wizardPickGridShowcase .wizardPickTile {
+    min-width: 0;
+    max-width: none;
+    width: auto;
+    flex: none;
+  }
+}
+
+.wizardPickCardMotion {
+  min-width: 0;
+}
+
+.wizardPickThumb {
+  width: 30px !important;
+  height: 30px !important;
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .wizardPickThumb {
+    width: 38px !important;
+    height: 38px !important;
+  }
+}
+
+.wizardPickIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 0.4rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 4px 14px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+@media (max-width: 767.98px) {
+  .wizardPickIconWrap {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 0.28rem;
+    border-radius: 11px;
+  }
+}
+
+/* بطاقة زجاجية — لُطَف لون عبر .wizardGlassTint* حسب المعرف */
+.wizardPickCardGlass {
+  border-radius: 16px !important;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 6px 26px rgba(15, 23, 42, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.28s ease,
+    background 0.28s ease;
+}
+
+.wizardPickCardGlass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    110% 85% at 25% -5%,
+    rgba(255, 255, 255, 0.55) 0%,
+    transparent 55%
+  );
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.28s ease;
+}
+
+.wizardPickCardGlass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    transparent 42%,
+    transparent 58%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wizardPickCardGlass:hover {
+  border-color: rgba(254, 203, 1, 0.55) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.88) inset,
+    0 10px 34px rgba(15, 23, 42, 0.1),
+    0 0 0 1px rgba(254, 203, 1, 0.22);
+}
+
+.wizardPickCardGlass:hover::before {
+  opacity: 1;
+}
+
+.wizardPickCardGlass:hover .wizardPickIconWrap {
+  transform: translateY(-2px) scale(1.03);
+  border-color: rgba(254, 203, 1, 0.42);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 8px 18px rgba(254, 203, 1, 0.14);
+}
+
+.wizardPickCardGlass h6 {
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  font-size: clamp(0.62rem, 2.4vw, 0.84rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: rgba(15, 23, 42, 0.92);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.wizardGlassTint0 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(99, 102, 241, 0.24) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint1 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(14, 165, 233, 0.22) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint2 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(16, 185, 129, 0.22) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint3 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(245, 158, 11, 0.28) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint4 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(244, 63, 94, 0.2) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint5 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(139, 92, 246, 0.22) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint6 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(6, 182, 212, 0.2) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardGlassTint7 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.42) 0%, rgba(249, 115, 22, 0.22) 48%, rgba(255, 255, 255, 0.38) 100%) !important;
+}
+
+.wizardPickCardGlass.wizardPickCardActive {
+  animation: wizardPickSelectPop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes wizardPickSelectPop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizardPickCardGlass.wizardPickCardActive {
+    animation: none;
+  }
+
+  .wizardPickCardGlass:hover .wizardPickIconWrap {
+    transform: none;
+  }
+}
+
 .wizardPickCardComfortable {
   min-height: 4.85rem;
   display: flex !important;
@@ -672,6 +880,13 @@
   align-items: center;
   justify-content: center;
   padding: 0.85rem 0.75rem !important;
+}
+
+@media (max-width: 767.98px) {
+  .wizardPickGridShowcase .wizardPickCardComfortable {
+    min-height: 3.15rem;
+    padding: 0.38rem 0.18rem !important;
+  }
 }
 
 .wizardBadgeSoft {
@@ -794,19 +1009,22 @@
   padding-top: 1rem;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 767.98px) {
   .wizardNavRow,
   .wizardNavRowTight {
-    flex-direction: column-reverse;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: stretch;
-    gap: 0.65rem;
+    gap: 0.55rem;
   }
 
   .wizardNavRow .wizardBtnPrimary,
   .wizardNavRow .wizardBtnSecondary,
   .wizardNavRowTight .wizardBtnPrimary,
   .wizardNavRowTight .wizardBtnSecondary {
-    width: 100%;
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
     min-height: 48px;
     justify-content: center;
   }
@@ -864,53 +1082,84 @@
   opacity: 0.92;
 }
 
+.wizardBtnPrimary .wizardBtnIcon {
+  color: inherit;
+  opacity: 0.95;
+}
+
 .wizardBtnSecondary {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(254, 203, 1, 0.42);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-color: rgba(51, 65, 85, 0.2);
   border-style: solid;
-  color: rgba(21, 21, 21, 0.68);
+  color: #334155;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 4px 16px rgba(15, 23, 42, 0.07);
 }
 
 .wizardBtnSecondary:hover {
-  background: rgba(254, 203, 1, 0.14);
-  border-color: rgba(254, 203, 1, 0.62);
-  color: #151515;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(254, 203, 1, 0.18);
+  background: #ffffff;
+  border-color: rgba(59, 130, 246, 0.38);
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 0 0 1px rgba(59, 130, 246, 0.12),
+    0 8px 22px rgba(30, 58, 138, 0.1);
+}
+
+.wizardBtnSecondary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 0 0 3px rgba(59, 130, 246, 0.28),
+    0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 .wizardBtnPrimary {
-  background: linear-gradient(145deg, #fecb01 0%, #e8a317 100%);
-  border-color: rgba(21, 21, 21, 0.14);
-  color: #151515;
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 46%, #172554 100%);
+  border-color: rgba(253, 224, 71, 0.38);
+  color: #fefce8;
   box-shadow:
-    0 3px 0 rgba(21, 21, 21, 0.15),
-    0 14px 32px rgba(254, 203, 1, 0.32);
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 2px 0 rgba(2, 6, 23, 0.45),
+    0 10px 28px rgba(30, 41, 59, 0.38),
+    0 0 0 1px rgba(250, 204, 21, 0.12);
 }
 
 .wizardBtnPrimary:hover:not(:disabled) {
-  background: linear-gradient(145deg, #ffd32a 0%, #fecb01 100%);
-  color: #151515;
-  transform: translateY(-2px);
+  background: linear-gradient(145deg, #1e293b 0%, #334155 52%, #1e3a5f 100%);
+  color: #fef08a;
+  transform: translateY(-1px);
   box-shadow:
-    0 3px 0 rgba(21, 21, 21, 0.17),
-    0 18px 38px rgba(254, 203, 1, 0.42);
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 2px 0 rgba(2, 6, 23, 0.28),
+    0 12px 34px rgba(30, 64, 175, 0.32),
+    0 0 0 2px rgba(253, 224, 71, 0.28);
+}
+
+.wizardBtnPrimary:focus-visible:not(:disabled) {
+  outline: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 0 0 3px rgba(253, 224, 71, 0.35),
+    0 10px 28px rgba(30, 41, 59, 0.35);
 }
 
 .wizardBtnPrimary:disabled {
-  opacity: 0.55;
+  opacity: 0.48;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-  color: rgba(21, 21, 21, 0.45);
+  color: rgba(254, 252, 232, 0.48);
 }
 
 .wizardBtnPrimary:active:not(:disabled),
 .wizardBtnSecondary:active {
   transform: translateY(1px);
   box-shadow:
-    0 2px 0 rgba(21, 21, 21, 0.12),
-    0 8px 20px rgba(254, 203, 1, 0.28);
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 4px 14px rgba(15, 23, 42, 0.12);
 }
 
 .wizardPickTile {
@@ -937,22 +1186,33 @@
   border: 2px solid rgba(21, 21, 21, 0.08) !important;
 }
 
+.wizardPickCardGlass.wizardPickCard {
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+}
+
 .wizardPickCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 14px 32px rgba(21, 21, 21, 0.1);
   border-color: rgba(21, 21, 21, 0.18) !important;
 }
 
+.wizardPickCardGlass.wizardPickCard:hover {
+  transform: none;
+}
+
 .wizardPickCardActive {
-  border-color: #fecb01 !important;
-  box-shadow: 0 12px 28px rgba(254, 203, 1, 0.38);
-  background: linear-gradient(180deg, rgba(254, 203, 1, 0.12) 0%, #fff 100%) !important;
+  border-color: rgba(250, 204, 21, 0.82) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 0 0 2px rgba(254, 203, 1, 0.5),
+    0 12px 32px rgba(254, 203, 1, 0.22) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wizardBtnPrimary,
   .wizardBtnSecondary,
   .wizardPickCard,
+  .wizardPickCardGlass,
   .wizardRadioChip,
   .wizardInput,
   .wizardTextarea {
@@ -970,3 +1230,204 @@
   }
 }
 
+/* —— Smart composer hero (default: guest / empty title, create mode) —— */
+.composerHeroShell {
+  width: 100%;
+  border-radius: 22px;
+  padding: clamp(0.85rem, 2.2vw, 1.25rem) clamp(0.9rem, 2.4vw, 1.35rem) clamp(0.75rem, 2vw, 1.05rem);
+  background: linear-gradient(180deg, #faf4e8 0%, #f6f0e4 45%, #f3ecdf 100%);
+  border: 1px solid rgba(21, 21, 21, 0.06);
+  box-shadow:
+    0 12px 32px rgba(21, 21, 21, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.composerHeroDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 0.55rem;
+}
+
+.composerHeroDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(21, 21, 21, 0.12);
+}
+
+.composerHeroDotActive {
+  background: #fecb01;
+  box-shadow: 0 0 0 2px rgba(254, 203, 1, 0.35);
+}
+
+.composerHeroTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(0.65rem, 2vw, 1.25rem);
+  align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .composerHeroTop {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.composerHeroCopy {
+  min-width: 0;
+}
+
+.composerHeroHeading {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  font-weight: 800;
+  color: #151515;
+  line-height: 1.25;
+}
+
+.composerHeroSub {
+  margin: 0;
+  font-size: clamp(0.8rem, 2vw, 0.92rem);
+  line-height: 1.45;
+  color: rgba(21, 21, 21, 0.62);
+  font-weight: 500;
+}
+
+.composerHeroFieldCol {
+  min-width: 0;
+  width: 100%;
+}
+
+.composerHeroInlineShell {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 48px;
+  background: #fff;
+  border: 1.5px solid rgba(21, 21, 21, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.composerHeroInlineShell:focus-within {
+  border-color: rgba(254, 203, 1, 0.78);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.95),
+    0 0 0 3px rgba(254, 203, 1, 0.18);
+}
+
+.composerHeroInlineShellInvalid {
+  border-color: #e8a0a0 !important;
+}
+
+.composerHeroInlineField {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none !important;
+  background: transparent !important;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #1f1f1f;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.composerHeroInlineField::placeholder {
+  color: rgba(21, 21, 21, 0.38);
+}
+
+/* لاحقة داخل حقل العنوان — نفس لغة لون/ظل غلاف البطل (#composerHeroShell) */
+.composerHeroInlineAffix {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32rem;
+  padding: 0 0.8rem;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-inline-start: 1px solid rgba(21, 21, 21, 0.07);
+  font-weight: 800;
+  font-size: 0.76rem;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  color: #292524;
+  background: linear-gradient(180deg, #faf4e8 0%, #f6f0e4 45%, #f0e9dc 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.composerHeroInlineAffix:hover {
+  background: linear-gradient(180deg, #fff7e8 0%, #faf0dc 48%, #f3e6d0 100%);
+  color: #1c1917;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(254, 203, 1, 0.22);
+}
+
+.composerHeroInlineAffix:active {
+  background: linear-gradient(180deg, #f5ead8 0%, #ede4d6 100%);
+  box-shadow: inset 0 2px 4px rgba(21, 21, 21, 0.06);
+}
+
+.composerHeroInlineAffix:focus {
+  outline: none;
+}
+
+.composerHeroInlineAffix:focus-visible {
+  outline: 2px solid rgba(254, 203, 1, 0.65);
+  outline-offset: -2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.composerHeroTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding-top: 0.15rem;
+}
+
+.composerHeroTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #2a2a2a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(21, 21, 21, 0.06);
+  box-shadow: 0 1px 3px rgba(21, 21, 21, 0.04);
+}
+
+.composerHeroTagIcon {
+  display: inline-flex;
+  color: #b45309;
+  opacity: 0.9;
+}
+
+.composerWizardDock {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.composerHeroAvatarHidden {
+  display: none !important;
+}
