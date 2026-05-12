@@ -76,7 +76,7 @@ const Home = async ({
     getServerSession(authOptions),
     fetchSections(locale, { revalidateSeconds: 300 }),
   ])
-  const showMobileAiDashboard = true ||  session?.user?.id === MOBILE_AI_PREVIEW_USER_ID
+  const showMobileAiDashboard =   session?.user?.id === MOBILE_AI_PREVIEW_USER_ID
   const sp = (await searchParams) ?? {}
   const pageRaw = sp.page ? (Array.isArray(sp.page) ? sp.page[0] : sp.page) : undefined
   const page = pageRaw ? Number(pageRaw) : undefined
