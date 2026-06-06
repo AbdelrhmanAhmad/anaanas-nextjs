@@ -1,5 +1,6 @@
 import { callLaravel } from '@/lib/laravelClient'
 import { NextRequest, NextResponse } from 'next/server'
+import { respondWithLaravelError } from '@/lib/api/respondWithLaravelError'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ chatId: string }> }) {
   try {
@@ -24,9 +25,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
-    console.error('Error fetching messages:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch messages'
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 })
+    return respondWithLaravelError(error)
   }
 }
 
@@ -42,9 +41,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
-    console.error('Error sending message:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 })
+    return respondWithLaravelError(error)
   }
 }
-

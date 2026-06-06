@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { getApiUrl } from './api/config'
+import { LaravelApiError } from './api/laravelApiError'
 
 export async function callLaravel(path: string, options?: RequestInit) {
   // Get session - getServerSession automatically reads cookies in App Router
@@ -32,14 +33,19 @@ export async function callLaravel(path: string, options?: RequestInit) {
   })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    
-    // If we get a 401 and don't have a session, provide a clearer error
+    const errorData = (await res.json().catch(() => ({}))) as Record<string, unknown>
+
     if (res.status === 401 && !accessToken) {
-      throw new Error('Unauthenticated. Please sign in to continue.')
+      throw new LaravelApiError(401, 'Unauthenticated. Please sign in to continue.', 'unauthenticated', errorData)
     }
-    
-    throw new Error(errorData.message || `Failed to fetch: ${res.status} ${res.statusText}`)
+
+    throw new LaravelApiError(
+      res.status,
+      (typeof errorData.message === 'string' && errorData.message) ||
+        `Failed to fetch: ${res.status} ${res.statusText}`,
+      typeof errorData.error_code === 'string' ? errorData.error_code : undefined,
+      errorData,
+    )
   }
 
   return res.json()

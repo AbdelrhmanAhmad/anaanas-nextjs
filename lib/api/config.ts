@@ -6,7 +6,8 @@ function resolveApiBaseUrl(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
     process.env.API_BASE_URL?.trim()
   if (fromEnv) {
-    return fromEnv.replace(/\/$/, '')
+    const normalized = fromEnv.replace(/\/$/, '')
+    if (normalized) return normalized
   }
   return DEFAULT_API_BASE_URL
 }
@@ -19,5 +20,5 @@ export const API_BASE_URL = resolveApiBaseUrl()
 
 export const getApiUrl = (path: string) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  return `${API_BASE_URL}${normalizedPath}`
+  return `${resolveApiBaseUrl()}${normalizedPath}`
 }

@@ -64,6 +64,9 @@ import { CreatePostWizardStepper, wizardStepMotion } from './CreatePostWizardUI'
 import styles from './CreatePostCard.module.css'
 import { toast } from 'react-toastify'
 import { playWizardStepChime } from '@/lib/ui/wizardStepChime'
+import { usePostCreationLimit } from '@/hooks/usePostCreationLimit'
+import PostCreationLimitOverlay from './PostCreationLimitOverlay'
+import { useEmailVerificationGate } from '@/context/EmailVerificationProvider'
 
 type CreatePostCardProps = {
   mode?: 'create' | 'edit'
@@ -137,6 +140,7 @@ type CreatePostHeroShellProps = {
   errorText?: string | null
   showTags: boolean
   onAddAdClick: () => void
+  limitOverlay?: ReactNode
 }
 
 /** واجهة البطل الافتراضية (ضيف / عنوان فارغ) — تصميم موحّد للموبايل والشاشات العريضة */
@@ -150,6 +154,7 @@ function CreatePostHeroShell({
   errorText,
   showTags,
   onAddAdClick,
+  limitOverlay,
 }: CreatePostHeroShellProps) {
   const shellDir = isWizardRtl ? 'rtl' : 'ltr'
   const rowDir = isWizardRtl ? 'rtl' : 'ltr'
@@ -235,6 +240,7 @@ function CreatePostHeroShell({
           ))}
         </div>
       ) : null}
+      {limitOverlay}
     </div>
   )
 }
@@ -281,18 +287,59 @@ function buildWizardSelectStyles(hasError: boolean) {
 const CreatePostCard = ({ mode = 'create', initialPost, postId, locale: localeProp }: CreatePostCardProps) => {
   // الحصول على الجلسة أولاً
   const { data: session, status } = useSession()
+  const { ensureEmailVerified } = useEmailVerificationGate()
+  const emailVerifiedForComposerRef = useRef(false)
   const [showLoginAlert, setShowLoginAlert] = useState(false)
   // Current user avatar comes from the shared CurrentUserProvider — one fetch, global state.
   const { user: _currentUser, avatarUrl: _resolvedAvatarUrl } = useCurrentUser()
   const currentUserAvatar = _currentUser ? _resolvedAvatarUrl : null
   const [postSuccessOpen, setPostSuccessOpen] = useState(false)
-  const [postSuccessMeta, setPostSuccessMeta] = useState<{ id?: number | string; title?: string } | null>(null)
+  const [postSuccessMeta, setPostSuccessMeta] = useState<{
+    id?: number | string
+    title?: string
+    variant?: 'published' | 'pending_review'
+  } | null>(null)
   const router = useRouter()
   const params = useParams<{ locale?: string }>()
   const isEdit = mode === 'edit'
   
   // Get locale from prop, params, or default to 'ar'
   const locale = localeProp || (Array.isArray(params?.locale) ? params.locale[0] : params?.locale) || 'ar'
+
+  const limitCheckReady = status === 'authenticated' && Boolean(session?.accessToken)
+  const creationLimit = usePostCreationLimit(!isEdit && limitCheckReady, locale, session?.accessToken)
+
+  const isSessionPending = !isEdit && status === 'loading'
+  const isAwaitingAccessToken = !isEdit && status === 'authenticated' && !session?.accessToken
+  const isRateLimitActive =
+    !isEdit &&
+    creationLimit.hasChecked &&
+    !creationLimit.canCreate &&
+    !creationLimit.isAccountVerified
+
+  const showHeroRateLimitOverlay =
+    !isEdit &&
+    !creationLimit.isAccountVerified &&
+    (isSessionPending ||
+      isAwaitingAccessToken ||
+      creationLimit.loading ||
+      isRateLimitActive)
+
+  const overlayLoading =
+    isSessionPending || isAwaitingAccessToken || creationLimit.loading
+
+  const isCreationBlocked = !isEdit && (showHeroRateLimitOverlay || isRateLimitActive)
+
+  const guardComposerEmailVerification = useCallback(async () => {
+    if (status !== 'authenticated') {
+      setShowLoginAlert(true)
+      return false
+    }
+    if (emailVerifiedForComposerRef.current) return true
+    const ok = await ensureEmailVerified()
+    if (ok) emailVerifiedForComposerRef.current = true
+    return ok
+  }, [status, ensureEmailVerified])
 
   const initialSectionId = Number(initialPost?.section_id ?? initialPost?.section?.id ?? 0) || null
   const initialCategoryId = Number(initialPost?.category_id ?? initialPost?.category?.id ?? 0) || null
@@ -394,15 +441,17 @@ const [step, setStep] = useState(1)
   const fieldChunkTotal = Math.max(1, Math.ceil(fields.length / FIELDS_PER_SUBSTEP))
 
   const showWizardStepper =
-    step > 1 ||
-    (typeof title === 'string' && title.trim().length > 0) ||
-    (typeof description === 'string' && description.trim().length > 0)
+    !isCreationBlocked &&
+    (step > 1 ||
+      (typeof title === 'string' && title.trim().length > 0) ||
+      (typeof description === 'string' && description.trim().length > 0))
 
   /** صف المعالج أسفل البطل: عند وجود عنوان أو تجاوز الخطوة 1، أو وضع التعديل */
-  const showComposerDock = isEdit || title.trim().length > 0 || step > 1
+  const showComposerDock =
+    isEdit || (!isCreationBlocked && (title.trim().length > 0 || step > 1))
 
   /** شارات المميزات أسفل البطل — فقط إنشاء جديد والخطوة 1 والعنوان فارغ */
-  const showHeroFeatureTags = !isEdit && step === 1 && title.trim() === ''
+  const showHeroFeatureTags = !isEdit && step === 1 && title.trim() === '' && !isCreationBlocked
 
   const isWizardRtl = locale === 'ar'
 
@@ -432,6 +481,17 @@ const [step, setStep] = useState(1)
   )
 
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
+
+  const handleRequestVerification = useCallback(async () => {
+    try {
+      const message = await creationLimit.requestVerification()
+      if (message) {
+        toast.success(message)
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('createPost.rateLimit.requestVerificationFailed', locale as any))
+    }
+  }, [creationLimit, locale])
 
   const handleDeleteExistingImage = useCallback(
     async (img: { id: number | string; url: string }) => {
@@ -638,6 +698,26 @@ const [step, setStep] = useState(1)
     clearErrors()
     void trigger('title')
   }, [step, clearErrors, trigger])
+
+  useEffect(() => {
+    if (!isRateLimitActive || isEdit) return
+    if (step > 1 || title.trim() || description.trim()) {
+      setStep(1)
+      setSubStep(1)
+      setTitle('')
+      setDescription('')
+      setValue('title', '', { shouldValidate: false })
+      clearErrors('title')
+    }
+  }, [
+    isRateLimitActive,
+    isEdit,
+    step,
+    title,
+    description,
+    setValue,
+    clearErrors,
+  ])
 
   // عمل scroll to top عند تغيير step
   useEffect(() => {
@@ -908,6 +988,15 @@ const [step, setStep] = useState(1)
 
   // دالة لإرسال البيانات
   const onSubmit = async (data: any) => {
+    if (!isEdit && !creationLimit.canCreate) {
+      setSubmitError(creationLimit.message || t('createPost.rateLimit.title', locale as any))
+      return
+    }
+
+    if (!(await guardComposerEmailVerification())) {
+      return
+    }
+
     if (!selectedSection || !selectedCategory) {
       setSubmitError('يرجى اختيار القسم والفئة')
       return
@@ -1039,7 +1128,10 @@ const [step, setStep] = useState(1)
         }
 
         const created = response.data as PostRecord | undefined
-        if (created && created.id != null) {
+        const isPendingReview =
+          created?.status === 'pending_review' ||
+          (response as { moderation_status?: string }).moderation_status === 'pending_review'
+        if (created && created.id != null && !isPendingReview) {
           dispatchPostCreated(created)
         }
         startTransition(() => {
@@ -1062,14 +1154,19 @@ const [step, setStep] = useState(1)
         setPostSuccessMeta({
           id: created?.id,
           title: (created?.title as string | undefined) || title || undefined,
+          variant: isPendingReview ? 'pending_review' : 'published',
         })
         setPostSuccessOpen(true)
+        void creationLimit.refresh()
       } else {
         setSubmitError(response.message || 'حدث خطأ أثناء حفظ البيانات')
       }
     } catch (error) {
       console.error('Error submitting form:', error)
       setSubmitError(error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال البيانات')
+      if (!isEdit) {
+        void creationLimit.refresh()
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -1352,24 +1449,56 @@ const [step, setStep] = useState(1)
       >
         <ComposerCardAtmosphere>
           {!isEdit && step === 1 && (
-            <CreatePostHeroShell
-              locale={locale}
-              isWizardRtl={isWizardRtl}
-              title={title}
-              onChange={(e) => {
-                setTitle(e.target.value)
-                setValue('title', e.target.value, { shouldValidate: true })
-              }}
-              inputRef={titleInputRef}
-              inputProps={{
-                id: 'create-post-title',
-                name: 'title',
-                autoComplete: 'off',
-              }}
-              errorText={(errors.title?.message as string | undefined) || null}
-              showTags={showHeroFeatureTags}
-              onAddAdClick={() => titleInputRef.current?.focus()}
-            />
+              <CreatePostHeroShell
+                locale={locale}
+                isWizardRtl={isWizardRtl}
+                title={title}
+                onChange={(e) => {
+                  if (isCreationBlocked) return
+                  setTitle(e.target.value)
+                  setValue('title', e.target.value, { shouldValidate: true })
+                }}
+                inputRef={titleInputRef}
+                inputProps={{
+                  id: 'create-post-title',
+                  name: 'title',
+                  autoComplete: 'off',
+                  readOnly: isCreationBlocked,
+                  tabIndex: isCreationBlocked ? -1 : undefined,
+                  onFocus: async (e) => {
+                    if (isCreationBlocked) return
+                    if (!(await guardComposerEmailVerification())) {
+                      e.target.blur()
+                    }
+                  },
+                }}
+                errorText={(errors.title?.message as string | undefined) || null}
+                showTags={showHeroFeatureTags}
+                onAddAdClick={async () => {
+                  if (isCreationBlocked) return
+                  if (!(await guardComposerEmailVerification())) return
+                  titleInputRef.current?.focus()
+                }}
+                limitOverlay={
+                  <PostCreationLimitOverlay
+                    visible={showHeroRateLimitOverlay}
+                    loading={overlayLoading}
+                    locale={locale}
+                    reason={creationLimit.reason}
+                    remainingSeconds={Math.max(
+                      creationLimit.remainingSeconds,
+                      creationLimit.retryAfterSeconds,
+                    )}
+                    postsInLastHour={creationLimit.postsInLastHour}
+                    hourlyLimit={creationLimit.hourlyLimit}
+                    intervalMinutes={creationLimit.intervalMinutes}
+                    message={creationLimit.message}
+                    verificationRequestStatus={creationLimit.verificationRequestStatus}
+                    submittingVerification={creationLimit.submittingVerification}
+                    onRequestVerification={handleRequestVerification}
+                  />
+                }
+              />
           )}
           {(isEdit || showComposerDock) && (
             <div className={clsx(!isEdit && styles.composerWizardDock)}>
@@ -2234,6 +2363,7 @@ const [step, setStep] = useState(1)
         locale={locale}
         postId={postSuccessMeta?.id}
         postTitle={postSuccessMeta?.title}
+        variant={postSuccessMeta?.variant ?? 'published'}
       />
     </>
   )

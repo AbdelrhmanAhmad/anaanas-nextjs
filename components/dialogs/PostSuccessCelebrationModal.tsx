@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
-import { BsCheckLg, BsX } from 'react-icons/bs'
+import { BsCheckLg, BsClockHistory, BsX } from 'react-icons/bs'
 import { t, type SupportedLocale } from '@/lib/translations'
 import { playPostSuccessSound } from '@/lib/playPostSuccessSound'
 import styles from './PostSuccessCelebrationModal.module.css'
@@ -17,10 +17,20 @@ type Props = {
   locale: string
   postId?: number | string
   postTitle?: string
+  /** published = live immediately; pending_review = awaiting admin approval */
+  variant?: 'published' | 'pending_review'
 }
 
-export default function PostSuccessCelebrationModal({ show, onHide, locale, postId, postTitle }: Props) {
+export default function PostSuccessCelebrationModal({
+  show,
+  onHide,
+  locale,
+  postId,
+  postTitle,
+  variant = 'published',
+}: Props) {
   const loc = (locale === 'en' ? 'en' : 'ar') as SupportedLocale
+  const isPending = variant === 'pending_review'
 
   const confetti = useMemo(() => {
     return Array.from({ length: 22 }, (_, i) => ({
@@ -33,13 +43,14 @@ export default function PostSuccessCelebrationModal({ show, onHide, locale, post
   }, [])
 
   useEffect(() => {
-    if (!show) return
+    if (!show || isPending) return
     playPostSuccessSound()
-  }, [show])
+  }, [show, isPending])
 
   const locSegment = locale || 'ar'
   const postHref =
     postId != null && postId !== '' ? `/${locSegment}/post/${postId}` : null
+  const myAdsHref = `/${locSegment}/profile/my-posts`
 
   if (typeof document === 'undefined') return null
 
@@ -71,37 +82,43 @@ export default function PostSuccessCelebrationModal({ show, onHide, locale, post
               <BsX size={22} aria-hidden />
             </button>
 
-            <div className={styles.celebrateTop}>
-              <div className={styles.confettiLayer} aria-hidden>
-                {confetti.map((c) => (
-                  <span
-                    key={c.key}
-                    className={styles.confetti}
-                    style={{
-                      left: c.left,
-                      background: c.color,
-                      animationDelay: c.delay,
-                      animationDuration: c.duration,
-                    }}
-                  />
-                ))}
+            {!isPending ? (
+              <div className={styles.celebrateTop}>
+                <div className={styles.confettiLayer} aria-hidden>
+                  {confetti.map((c) => (
+                    <span
+                      key={c.key}
+                      className={styles.confetti}
+                      style={{
+                        left: c.left,
+                        background: c.color,
+                        animationDelay: c.delay,
+                        animationDuration: c.duration,
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className={`${styles.balloon} ${styles.b1}`} aria-hidden />
+                <div className={`${styles.balloon} ${styles.b2}`} aria-hidden />
+                <div className={`${styles.balloon} ${styles.b3}`} aria-hidden />
+                <div className={`${styles.balloon} ${styles.b4}`} aria-hidden />
+                <div className={`${styles.balloon} ${styles.b5}`} aria-hidden />
               </div>
-              <div className={`${styles.balloon} ${styles.b1}`} aria-hidden />
-              <div className={`${styles.balloon} ${styles.b2}`} aria-hidden />
-              <div className={`${styles.balloon} ${styles.b3}`} aria-hidden />
-              <div className={`${styles.balloon} ${styles.b4}`} aria-hidden />
-              <div className={`${styles.balloon} ${styles.b5}`} aria-hidden />
-            </div>
+            ) : null}
 
             <div className={styles.body}>
               <div className={styles.iconWrap} aria-hidden>
-                <BsCheckLg size={30} className="text-dark" />
+                {isPending ? (
+                  <BsClockHistory size={30} className="text-dark" />
+                ) : (
+                  <BsCheckLg size={30} className="text-dark" />
+                )}
               </div>
               <h2 id="post-success-title" className={styles.title}>
-                {t('createPost.success.celebrationTitle', loc)}
+                {t(isPending ? 'createPost.success.pendingTitle' : 'createPost.success.celebrationTitle', loc)}
               </h2>
               <p className={styles.subtitle}>
-                {t('createPost.success.celebrationSubtitle', loc)}
+                {t(isPending ? 'createPost.success.pendingSubtitle' : 'createPost.success.celebrationSubtitle', loc)}
                 {postTitle ? (
                   <>
                     <br />
@@ -115,9 +132,15 @@ export default function PostSuccessCelebrationModal({ show, onHide, locale, post
                     {t('createPost.success.viewPost', loc)}
                   </Link>
                 ) : null}
-                <Link href={`/${locSegment}#home-feed-posts`} className={styles.btnGhost} onClick={onHide}>
-                  {t('createPost.success.viewHomeFeed', loc)}
-                </Link>
+                {isPending ? (
+                  <Link href={myAdsHref} className={styles.btnGhost} onClick={onHide}>
+                    {t('createPost.success.viewMyAds', loc)}
+                  </Link>
+                ) : (
+                  <Link href={`/${locSegment}#home-feed-posts`} className={styles.btnGhost} onClick={onHide}>
+                    {t('createPost.success.viewHomeFeed', loc)}
+                  </Link>
+                )}
                 <button type="button" className={styles.btnGhost} onClick={onHide}>
                   {t('createPost.success.close', loc)}
                 </button>

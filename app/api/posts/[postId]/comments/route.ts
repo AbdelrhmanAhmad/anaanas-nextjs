@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { callLaravel } from '@/lib/laravelClient'
+import { respondWithLaravelError } from '@/lib/api/respondWithLaravelError'
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ postId: string }> }) {
   const { postId } = await context.params
@@ -30,13 +31,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ po
 
     return NextResponse.json(response, { status: 201 })
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال التعليق',
-      },
-      { status: 500 }
-    )
+    return respondWithLaravelError(error)
   }
 }
 

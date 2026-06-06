@@ -1232,6 +1232,7 @@
 
 /* —— Smart composer hero (default: guest / empty title, create mode) —— */
 .composerHeroShell {
+  position: relative;
   width: 100%;
   border-radius: 22px;
   padding: clamp(0.85rem, 2.2vw, 1.25rem) clamp(0.9rem, 2.4vw, 1.35rem) clamp(0.75rem, 2vw, 1.05rem);
@@ -1430,4 +1431,134 @@
 
 .composerHeroAvatarHidden {
   display: none !important;
+}
+
+/* —— Post creation rate limit overlay (inside hero shell) —— */
+.composerLimitOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  border-radius: inherit;
+  background: rgba(250, 244, 232, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: all;
+  cursor: not-allowed;
+  box-sizing: border-box;
+}
+
+.composerLimitPanel {
+  width: min(100%, 22rem);
+  text-align: center;
+  padding: clamp(1rem, 3vw, 1.35rem) clamp(0.85rem, 2.5vw, 1.15rem);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(21, 21, 21, 0.08);
+  box-shadow:
+    0 16px 40px rgba(21, 21, 21, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.composerLimitIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.65rem;
+  border-radius: 999px;
+  color: #151515;
+  background: linear-gradient(145deg, rgba(254, 203, 1, 0.35), rgba(254, 203, 1, 0.12));
+}
+
+.composerLimitTitle {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1rem, 2.4vw, 1.12rem);
+  font-weight: 700;
+  color: #151515;
+}
+
+.composerLimitHint {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(21, 21, 21, 0.72);
+}
+
+.composerLimitCountdownWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.composerLimitCountdownLabel {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(21, 21, 21, 0.55);
+}
+
+.composerLimitCountdown {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #151515;
+}
+
+.composerLimitCountdownSoon {
+  color: #b45309;
+}
+
+.composerLimitVerifyBlock {
+  margin-top: 0.95rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(21, 21, 21, 0.08);
+  width: 100%;
+}
+
+.composerLimitVerifyHint {
+  margin: 0 0 0.65rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(21, 21, 21, 0.62);
+}
+
+.composerLimitVerifyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid rgba(21, 21, 21, 0.12);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #151515 0%, #2a2a2a 100%);
+  color: #fecb01;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.composerLimitVerifyBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(21, 21, 21, 0.18);
+}
+
+.composerLimitVerifyBtn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.composerLimitVerifyBtnPending {
+  background: rgba(21, 21, 21, 0.08);
+  color: rgba(21, 21, 21, 0.72);
+  border-color: rgba(21, 21, 21, 0.1);
 }

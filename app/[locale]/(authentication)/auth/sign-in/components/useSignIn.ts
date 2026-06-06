@@ -12,6 +12,10 @@ import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 
+async function redirectAfterAuth(locale: SupportedLocale, push: (path: string) => void, fallback?: string) {
+  push(fallback ?? `/${locale}`)
+}
+
 const useSignIn = (locale?: SupportedLocale) => {
   const [loading, setLoading] = useState(false)
   const { push } = useRouter()
@@ -69,7 +73,7 @@ const useSignIn = (locale?: SupportedLocale) => {
 
       if (result?.ok) {
         const redirectTo = queryParams['redirectTo'] ?? `/${resolvedLocale}`
-        push(redirectTo)
+        await redirectAfterAuth(resolvedLocale, push, redirectTo)
         showNotification({ 
           message: resolvedLocale === 'ar' 
             ? 'تم تسجيل الدخول بنجاح. جاري إعادة التوجيه....' 

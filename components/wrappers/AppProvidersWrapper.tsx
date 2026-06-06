@@ -11,6 +11,7 @@ import {ChatProvider} from '@/context/useChatContext'
 import {AppDataProvider} from '@/context/AppDataContext'
 import {CurrentUserProvider} from '@/context/useCurrentUser'
 import AutoLoginWrapper from './AutoLoginWrapper'
+import { EmailVerificationProvider } from '@/context/EmailVerificationProvider'
 import DirectionSync from '@/components/DirectionSync'
 import ScrollToTopOnRoute from '@/components/ScrollToTopOnRoute'
 
@@ -53,6 +54,7 @@ const AppProvidersWrapper = ({children}: ChildrenType) => {
             <DirectionSync />
             <ScrollToTopOnRoute />
             <AutoLoginWrapper>
+                <EmailVerificationProvider>
                 <CurrentUserProvider>
                 <AppDataProvider>
             <LayoutProvider>
@@ -65,6 +67,7 @@ const AppProvidersWrapper = ({children}: ChildrenType) => {
             </LayoutProvider>
                 </AppDataProvider>
                 </CurrentUserProvider>
+                </EmailVerificationProvider>
             </AutoLoginWrapper>
         </SessionProvider>
     )

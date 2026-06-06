@@ -1,5 +1,6 @@
 import { callLaravel } from '@/lib/laravelClient'
 import { NextRequest, NextResponse } from 'next/server'
+import { respondWithLaravelError } from '@/lib/api/respondWithLaravelError'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ postId: string }> }) {
   try {
@@ -10,9 +11,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
-    console.error('Error fetching chat:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch chat'
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 })
+    return respondWithLaravelError(error)
   }
 }
-

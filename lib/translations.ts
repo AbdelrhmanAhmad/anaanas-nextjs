@@ -90,6 +90,42 @@ type TranslationKey =
   | 'sidebar.feedback'
   | 'sidebar.help'
   | 'sidebar.privacyTerms'
+  | 'sidebar.contactUs'
+  | 'contact.title'
+  | 'contact.subtitle'
+  | 'contact.name'
+  | 'contact.email'
+  | 'contact.subject'
+  | 'contact.message'
+  | 'contact.submit'
+  | 'contact.submitting'
+  | 'contact.success'
+  | 'contact.error'
+  | 'contact.nameRequired'
+  | 'contact.emailRequired'
+  | 'contact.emailInvalid'
+  | 'contact.subjectRequired'
+  | 'contact.messageRequired'
+  | 'contact.rateLimited'
+  | 'emailVerify.title'
+  | 'emailVerify.subtitle'
+  | 'emailVerify.sentTo'
+  | 'emailVerify.codeLabel'
+  | 'emailVerify.codePlaceholder'
+  | 'emailVerify.verify'
+  | 'emailVerify.verifying'
+  | 'emailVerify.resend'
+  | 'emailVerify.resending'
+  | 'emailVerify.changeEmail'
+  | 'emailVerify.newEmail'
+  | 'emailVerify.updateEmail'
+  | 'emailVerify.success'
+  | 'emailVerify.error'
+  | 'emailVerify.codeRequired'
+  | 'emailVerify.emailRequired'
+  | 'emailVerify.emailInvalid'
+  | 'emailVerify.signOut'
+  | 'emailVerify.hint'
   | 'auth.welcome'
   | 'auth.signIn'
   | 'auth.signUp'
@@ -184,6 +220,15 @@ type TranslationKey =
   | 'post.statistics'
   | 'post.detailsTitle'
   | 'post.similarTitle'
+  | 'post.notFound.title'
+  | 'post.notFound.lead'
+  | 'post.notFound.leadWithId'
+  | 'post.notFound.mightInterestYou'
+  | 'post.notFound.noSuggestions'
+  | 'post.statusBanner.pendingReview.title'
+  | 'post.statusBanner.pendingReview.message'
+  | 'post.statusBanner.rejected.title'
+  | 'post.statusBanner.rejected.message'
   | 'post.moreFromSection'
   | 'post.noSimilar'
   | 'post.noAttributes'
@@ -271,6 +316,10 @@ type TranslationKey =
   | 'dialog.loginRequired.message'
   | 'dialog.loginRequired.loginButton'
   | 'dialog.loginRequired.cancelButton'
+  | 'dialog.emailVerify.title'
+  | 'dialog.emailVerify.message'
+  | 'dialog.emailVerify.verifyButton'
+  | 'dialog.emailVerify.cancelButton'
   | 'filter.filterResults'
   | 'filter.filterDescription'
   | 'filter.close'
@@ -341,11 +390,25 @@ type TranslationKey =
   | 'createPost.photos.errSomeSkipped'
   | 'createPost.success.celebrationTitle'
   | 'createPost.success.celebrationSubtitle'
+  | 'createPost.success.pendingTitle'
+  | 'createPost.success.pendingSubtitle'
+  | 'createPost.success.viewMyAds'
   | 'createPost.success.viewPost'
   | 'createPost.success.viewFeed'
   | 'createPost.success.viewHomeFeed'
   | 'createPost.success.close'
   | 'createPost.success.updated'
+  | 'createPost.rateLimit.title'
+  | 'createPost.rateLimit.checking'
+  | 'createPost.rateLimit.intervalHint'
+  | 'createPost.rateLimit.hourlyHint'
+  | 'createPost.rateLimit.countdownLabel'
+  | 'createPost.rateLimit.verificationHint'
+  | 'createPost.rateLimit.requestVerification'
+  | 'createPost.rateLimit.requestVerificationSubmitting'
+  | 'createPost.rateLimit.requestVerificationPending'
+  | 'createPost.rateLimit.requestVerificationRetry'
+  | 'createPost.rateLimit.requestVerificationFailed'
   | 'auction.searchPlaceholder'
   | 'auction.postAd'
   | 'auction.boost'
@@ -672,6 +735,42 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'sidebar.feedback': 'الملاحظات',
     'sidebar.help': 'المساعدة',
     'sidebar.privacyTerms': 'الخصوصية والشروط',
+    'sidebar.contactUs': 'تواصل معنا',
+    'contact.title': 'تواصل معنا',
+    'contact.subtitle': 'أرسل رسالتك وسنرد عليك في أقرب وقت ممكن.',
+    'contact.name': 'الاسم',
+    'contact.email': 'البريد الإلكتروني',
+    'contact.subject': 'الموضوع',
+    'contact.message': 'الرسالة',
+    'contact.submit': 'إرسال',
+    'contact.submitting': 'جاري الإرسال...',
+    'contact.success': 'تم إرسال رسالتك بنجاح. شكراً لتواصلك معنا.',
+    'contact.error': 'تعذّر إرسال الرسالة. حاول مرة أخرى.',
+    'contact.nameRequired': 'يرجى إدخال الاسم',
+    'contact.emailRequired': 'يرجى إدخال البريد الإلكتروني',
+    'contact.emailInvalid': 'البريد الإلكتروني غير صحيح',
+    'contact.subjectRequired': 'يرجى إدخال الموضوع',
+    'contact.messageRequired': 'يرجى كتابة الرسالة',
+    'contact.rateLimited': 'محاولات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.',
+    'emailVerify.title': 'تأكيد البريد الإلكتروني',
+    'emailVerify.subtitle': 'يجب تأكيد بريدك قبل النشر أو التفاعل على الإعلانات.',
+    'emailVerify.sentTo': 'أرسلنا رمز التحقق إلى:',
+    'emailVerify.codeLabel': 'رمز التحقق',
+    'emailVerify.codePlaceholder': '000000',
+    'emailVerify.verify': 'تأكيد',
+    'emailVerify.verifying': 'جاري التحقق...',
+    'emailVerify.resend': 'إعادة إرسال الرمز',
+    'emailVerify.resending': 'جاري الإرسال...',
+    'emailVerify.changeEmail': 'تغيير البريد الإلكتروني',
+    'emailVerify.newEmail': 'البريد الجديد',
+    'emailVerify.updateEmail': 'تحديث وإرسال رمز جديد',
+    'emailVerify.success': 'تم تأكيد بريدك بنجاح!',
+    'emailVerify.error': 'تعذّر إتمام العملية. حاول مرة أخرى.',
+    'emailVerify.codeRequired': 'يرجى إدخال رمز التحقق',
+    'emailVerify.emailRequired': 'يرجى إدخال البريد الإلكتروني',
+    'emailVerify.emailInvalid': 'البريد الإلكتروني غير صحيح',
+    'emailVerify.signOut': 'تسجيل الخروج',
+    'emailVerify.hint': 'تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.',
     'auth.welcome': 'اهلا بك في منصه اناناس الاعلانيه',
     'auth.signIn': 'تسجيل الدخول',
     'auth.signUp': 'انشئ حساب جديد الآن',
@@ -766,6 +865,17 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.statistics': 'إحصائيات الإعلان',
     'post.detailsTitle': 'تفاصيل الإعلان',
     'post.similarTitle': 'إعلانات مشابهة',
+    'post.notFound.title': 'هذا الإعلان غير متاح',
+    'post.notFound.lead': 'ربما حُذف الإعلان أو لم يُنشر بعد، أو أن الرابط غير صحيح.',
+    'post.notFound.leadWithId': 'الإعلان رقم {id} غير متاح. ربما حُذف أو لم يُقبل بعد، أو أن الرابط غير صحيح.',
+    'post.notFound.mightInterestYou': 'قد يهمك',
+    'post.notFound.noSuggestions': 'لا توجد إعلانات مقترحة في بلدك حالياً.',
+    'post.statusBanner.pendingReview.title': 'قيد المراجعة',
+    'post.statusBanner.pendingReview.message':
+      'إعلانك بانتظار موافقة الإدارة. يظهر لك فقط حتى يُقبل ويُنشر للجميع.',
+    'post.statusBanner.rejected.title': 'مرفوض',
+    'post.statusBanner.rejected.message':
+      'لم يُقبل هذا الإعلان. يمكنك تعديله وإعادة الإرسال، ويظهر لك فقط.',
     'post.moreFromSection': 'المزيد من القسم',
     'post.noSimilar': 'لا توجد إعلانات مشابهة حالياً.',
     'post.noAttributes': 'لا توجد خصائص متاحة لهذا الإعلان.',
@@ -853,6 +963,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'dialog.loginRequired.message': 'يجب عليك تسجيل الدخول أولاً للوصول إلى هذه الميزة',
     'dialog.loginRequired.loginButton': 'تسجيل الدخول',
     'dialog.loginRequired.cancelButton': 'إلغاء',
+    'dialog.emailVerify.title': 'تأكيد البريد الإلكتروني',
+    'dialog.emailVerify.message': 'يجب تأكيد بريدك الإلكتروني قبل النشر أو التفاعل على الإعلانات.',
+    'dialog.emailVerify.verifyButton': 'تأكيد البريد',
+    'dialog.emailVerify.cancelButton': 'لاحقاً',
     'filter.filterResults': 'فلترة النتائج',
     'filter.filterDescription': 'المدينة، السعر، وخصائص الإعلان',
     'filter.close': 'إغلاق',
@@ -925,11 +1039,25 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'createPost.photos.errSomeSkipped': 'بعض الملفات لم تُضف لأن العدد بلغ الحد الأقصى.',
     'createPost.success.celebrationTitle': '🎉 نشر ناجح!',
     'createPost.success.celebrationSubtitle': 'أصبح إعلانك متاحاً. يمكنك مشاهدته أو العثور عليه في قائمة إعلاناتك.',
+    'createPost.success.pendingTitle': 'تم إرسال إعلانك للمراجعة',
+    'createPost.success.pendingSubtitle': 'سيظهر إعلانك للجميع بعد موافقة الإدارة. يمكنك متابعته من قائمة إعلاناتك.',
+    'createPost.success.viewMyAds': 'قائمة إعلاناتي',
     'createPost.success.viewPost': 'مشاهدة الإعلان',
     'createPost.success.viewFeed': 'الانتقال لقائمة إعلاناتي',
     'createPost.success.viewHomeFeed': 'الانتقال لتغذية الرئيسية',
     'createPost.success.close': 'متابعة التصفح',
     'createPost.success.updated': 'تم تحديث الإعلان بنجاح',
+    'createPost.rateLimit.title': 'يرجى الانتظار قبل نشر إعلان جديد',
+    'createPost.rateLimit.checking': 'جاري التحقق من إمكانية النشر…',
+    'createPost.rateLimit.intervalHint': 'يمكنك نشر إعلان واحد كل {minutes} دقائق.',
+    'createPost.rateLimit.hourlyHint': 'نشرت {count} من {max} إعلانات مسموحة خلال الساعة الأخيرة.',
+    'createPost.rateLimit.countdownLabel': 'يمكنك النشر بعد',
+    'createPost.rateLimit.verificationHint': 'وثّق حسابك للنشر بدون قيود انتظار.',
+    'createPost.rateLimit.requestVerification': 'طلب توثيق الحساب',
+    'createPost.rateLimit.requestVerificationSubmitting': 'جاري إرسال الطلب…',
+    'createPost.rateLimit.requestVerificationPending': 'طلبك قيد المراجعة',
+    'createPost.rateLimit.requestVerificationRetry': 'إعادة طلب التوثيق',
+    'createPost.rateLimit.requestVerificationFailed': 'تعذّر إرسال طلب التوثيق',
     'auction.searchPlaceholder': 'ابحث عن أي شيء...',
     'auction.postAd': 'أضف إعلان',
     'auction.boost': 'تعزيز',
@@ -1258,6 +1386,42 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'sidebar.feedback': 'Feedback',
     'sidebar.help': 'Help',
     'sidebar.privacyTerms': 'Privacy & Terms',
+    'sidebar.contactUs': 'Contact Us',
+    'contact.title': 'Contact Us',
+    'contact.subtitle': 'Send us your message and we will get back to you as soon as possible.',
+    'contact.name': 'Name',
+    'contact.email': 'Email',
+    'contact.subject': 'Subject',
+    'contact.message': 'Message',
+    'contact.submit': 'Send',
+    'contact.submitting': 'Sending...',
+    'contact.success': 'Your message was sent successfully. Thank you for reaching out.',
+    'contact.error': 'Could not send your message. Please try again.',
+    'contact.nameRequired': 'Please enter your name',
+    'contact.emailRequired': 'Please enter your email',
+    'contact.emailInvalid': 'Please enter a valid email address',
+    'contact.subjectRequired': 'Please enter a subject',
+    'contact.messageRequired': 'Please enter your message',
+    'contact.rateLimited': 'Too many attempts. Please wait a moment and try again.',
+    'emailVerify.title': 'Verify your email',
+    'emailVerify.subtitle': 'You must verify your email before posting or interacting with listings.',
+    'emailVerify.sentTo': 'We sent a verification code to:',
+    'emailVerify.codeLabel': 'Verification code',
+    'emailVerify.codePlaceholder': '000000',
+    'emailVerify.verify': 'Verify',
+    'emailVerify.verifying': 'Verifying...',
+    'emailVerify.resend': 'Resend code',
+    'emailVerify.resending': 'Sending...',
+    'emailVerify.changeEmail': 'Change email address',
+    'emailVerify.newEmail': 'New email',
+    'emailVerify.updateEmail': 'Update & send new code',
+    'emailVerify.success': 'Your email has been verified!',
+    'emailVerify.error': 'Could not complete the action. Please try again.',
+    'emailVerify.codeRequired': 'Please enter the verification code',
+    'emailVerify.emailRequired': 'Please enter your email',
+    'emailVerify.emailInvalid': 'Please enter a valid email address',
+    'emailVerify.signOut': 'Sign out',
+    'emailVerify.hint': 'Check your inbox or spam folder for the code.',
     'auth.welcome': 'Welcome to Ananas Advertising Platform',
     'auth.signIn': 'Sign In',
     'auth.signUp': 'Create a new account now',
@@ -1352,6 +1516,17 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'post.statistics': 'Ad Statistics',
     'post.detailsTitle': 'Ad Details',
     'post.similarTitle': 'Similar listings',
+    'post.notFound.title': 'This ad is unavailable',
+    'post.notFound.lead': 'It may have been removed, is still under review, or the link is incorrect.',
+    'post.notFound.leadWithId': 'Ad #{id} is unavailable. It may have been removed, is pending approval, or the link is wrong.',
+    'post.notFound.mightInterestYou': 'You might like',
+    'post.notFound.noSuggestions': 'No suggested ads in your country right now.',
+    'post.statusBanner.pendingReview.title': 'Under review',
+    'post.statusBanner.pendingReview.message':
+      'Your ad is awaiting admin approval. Only you can see it until it is published.',
+    'post.statusBanner.rejected.title': 'Rejected',
+    'post.statusBanner.rejected.message':
+      'This ad was not approved. You can edit and resubmit. Only you can see it.',
     'post.moreFromSection': 'More from this section',
     'post.noSimilar': 'No similar listings right now.',
     'post.noAttributes': 'No attributes are available for this ad.',
@@ -1439,6 +1614,10 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'dialog.loginRequired.message': 'You must sign in first to access this feature',
     'dialog.loginRequired.loginButton': 'Sign In',
     'dialog.loginRequired.cancelButton': 'Cancel',
+    'dialog.emailVerify.title': 'Verify your email',
+    'dialog.emailVerify.message': 'You must verify your email before posting or interacting with listings.',
+    'dialog.emailVerify.verifyButton': 'Verify email',
+    'dialog.emailVerify.cancelButton': 'Later',
     'filter.filterResults': 'Filter Results',
     'filter.filterDescription': 'City, Price, and Post Attributes',
     'filter.close': 'Close',
@@ -1511,11 +1690,25 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'createPost.photos.errSomeSkipped': 'Some files were not added because the limit was reached.',
     'createPost.success.celebrationTitle': '🎉 Published successfully!',
     'createPost.success.celebrationSubtitle': 'Your ad is live. Open it or find it in your ads list.',
+    'createPost.success.pendingTitle': 'Your ad was submitted for review',
+    'createPost.success.pendingSubtitle': 'It will appear publicly after admin approval. You can track it in your ads list.',
+    'createPost.success.viewMyAds': 'My ads',
     'createPost.success.viewPost': 'View ad',
     'createPost.success.viewFeed': 'Go to my ads',
     'createPost.success.viewHomeFeed': 'Go to home feed',
     'createPost.success.close': 'Keep browsing',
     'createPost.success.updated': 'Ad updated successfully',
+    'createPost.rateLimit.title': 'Please wait before posting another ad',
+    'createPost.rateLimit.checking': 'Checking if you can post…',
+    'createPost.rateLimit.intervalHint': 'You can post one ad every {minutes} minutes.',
+    'createPost.rateLimit.hourlyHint': 'You have posted {count} of {max} allowed ads in the last hour.',
+    'createPost.rateLimit.countdownLabel': 'You can post in',
+    'createPost.rateLimit.verificationHint': 'Verify your account to post without waiting limits.',
+    'createPost.rateLimit.requestVerification': 'Request account verification',
+    'createPost.rateLimit.requestVerificationSubmitting': 'Submitting request…',
+    'createPost.rateLimit.requestVerificationPending': 'Your request is under review',
+    'createPost.rateLimit.requestVerificationRetry': 'Request verification again',
+    'createPost.rateLimit.requestVerificationFailed': 'Could not submit verification request',
     'auction.searchPlaceholder': 'Search for anything...',
     'auction.postAd': 'Post Ad',
     'auction.boost': 'Boost',
@@ -1754,6 +1947,120 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
   },
 }
 
-export function t(key: TranslationKey, locale: SupportedLocale = 'ar'): string {
-  return translations[locale]?.[key] ?? translations.ar[key] ?? key
+export type ContactPageCopy = {
+  title: string
+  subtitle: string
+  name: string
+  email: string
+  subject: string
+  message: string
+  submit: string
+  submitting: string
+  success: string
+  error: string
+  rateLimited: string
+  nameRequired: string
+  emailRequired: string
+  emailInvalid: string
+  subjectRequired: string
+  messageRequired: string
+}
+
+function normalizeLocale(locale: SupportedLocale | string | null | undefined): SupportedLocale {
+  if (locale === 'en' || locale === 'ar') {
+    return locale
+  }
+  if (typeof locale === 'string') {
+    const base = locale.toLowerCase().split('-')[0]
+    if (base === 'en') return 'en'
+    if (base === 'ar') return 'ar'
+  }
+  return 'ar'
+}
+
+export type EmailVerifyPageCopy = {
+  title: string
+  subtitle: string
+  sentTo: string
+  codeLabel: string
+  codePlaceholder: string
+  verify: string
+  verifying: string
+  resend: string
+  resending: string
+  changeEmail: string
+  newEmail: string
+  updateEmail: string
+  success: string
+  error: string
+  codeRequired: string
+  emailRequired: string
+  emailInvalid: string
+  signOut: string
+  hint: string
+}
+
+export function getEmailVerifyPageCopy(locale: SupportedLocale | string): EmailVerifyPageCopy {
+  const loc = normalizeLocale(locale)
+
+  return {
+    title: t('emailVerify.title', loc),
+    subtitle: t('emailVerify.subtitle', loc),
+    sentTo: t('emailVerify.sentTo', loc),
+    codeLabel: t('emailVerify.codeLabel', loc),
+    codePlaceholder: t('emailVerify.codePlaceholder', loc),
+    verify: t('emailVerify.verify', loc),
+    verifying: t('emailVerify.verifying', loc),
+    resend: t('emailVerify.resend', loc),
+    resending: t('emailVerify.resending', loc),
+    changeEmail: t('emailVerify.changeEmail', loc),
+    newEmail: t('emailVerify.newEmail', loc),
+    updateEmail: t('emailVerify.updateEmail', loc),
+    success: t('emailVerify.success', loc),
+    error: t('emailVerify.error', loc),
+    codeRequired: t('emailVerify.codeRequired', loc),
+    emailRequired: t('emailVerify.emailRequired', loc),
+    emailInvalid: t('emailVerify.emailInvalid', loc),
+    signOut: t('emailVerify.signOut', loc),
+    hint: t('emailVerify.hint', loc),
+  }
+}
+
+export function getContactPageCopy(locale: SupportedLocale | string): ContactPageCopy {
+  const loc = normalizeLocale(locale)
+
+  return {
+    title: t('contact.title', loc),
+    subtitle: t('contact.subtitle', loc),
+    name: t('contact.name', loc),
+    email: t('contact.email', loc),
+    subject: t('contact.subject', loc),
+    message: t('contact.message', loc),
+    submit: t('contact.submit', loc),
+    submitting: t('contact.submitting', loc),
+    success: t('contact.success', loc),
+    error: t('contact.error', loc),
+    rateLimited: t('contact.rateLimited', loc),
+    nameRequired: t('contact.nameRequired', loc),
+    emailRequired: t('contact.emailRequired', loc),
+    emailInvalid: t('contact.emailInvalid', loc),
+    subjectRequired: t('contact.subjectRequired', loc),
+    messageRequired: t('contact.messageRequired', loc),
+  }
+}
+
+export function t(
+  key: TranslationKey,
+  locale: SupportedLocale | string = 'ar',
+  params?: Record<string, string | number>,
+): string {
+  const loc = normalizeLocale(locale)
+  let text = translations[loc][key] ?? translations.ar[key] ?? key
+  if (params) {
+    for (const [paramKey, paramValue] of Object.entries(params)) {
+      text = text.replace(new RegExp(`\\{\\{${paramKey}\\}\\}`, 'g'), String(paramValue))
+      text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue))
+    }
+  }
+  return text
 }

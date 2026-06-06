@@ -1,47 +1,74 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Card, Col, Container, Row, Table } from 'react-bootstrap'
 import Link from 'next/link'
 import PostCard from '@/components/cards/PostCard'
-import { callLaravel } from '@/lib/laravelClient'
 import PostImagesGallery from './PostImagesGallery'
 import PostViewTracker from './PostViewTracker'
 import { t } from '@/lib/translations'
-import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@/lib/localization'
 import SimpleListingCard from './SimpleListingCard'
+import PostNotFoundBlock from './PostNotFoundBlock'
+import PostStatusBanner from './PostStatusBanner'
 import styles from './postDetails.module.css'
 import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 import FeedLayoutClient from '@/components/layout/FeedLayoutClient'
 import SideBar from '@/components/layout/SideBar'
 import { fetchSections } from '@/lib/api/sections'
+import { buildPostStructuredData } from '@/lib/seo/buildPostStructuredData'
 import { getPublicSiteOrigin } from '@/lib/seo/siteUrl'
+import { getSiteOrigin } from '@/lib/seo/origin'
 import { toAbsoluteUrl } from '@/lib/seo/absoluteUrl'
+import { resolveCountryIdFromHeaders } from '@/lib/server/resolveCountryIdFromHeaders'
+import { resolveListingCountryId } from '@/lib/server/resolveListingCountryId'
+import {
+  fetchPostDetailsSafe,
+  fetchSuggestedPostsForMissingPost,
+} from '@/lib/server/postSuggestions'
+import { isPubliclyPublishedStatus } from '@/lib/postStatus'
+import { getApiUrl } from '@/lib/api/config'
 
 /** تحسين الأداء: إعادة توليد الصفحة كل 60ث مع بقاءها ثابتة قدر الإمكان */
 export const revalidate = 60
 
-type ApiPostDetailsResponse = {
-  success?: boolean
-  data?: any
-  message?: string
-}
-
-async function fetchSimilarPosts(postId: string, locale: string): Promise<any[]> {
+async function fetchSimilarPosts(
+  postId: string,
+  locale: string,
+  countryId?: number,
+): Promise<any[]> {
   try {
-    const json = (await callLaravel(`/api/posts/${postId}/similar?land=${encodeURIComponent(locale)}&limit=6`, {
-      method: 'GET',
-    })) as { success?: boolean; data?: any[] }
+    const countryQs =
+      countryId != null && countryId > 0 ? `&country_id=${encodeURIComponent(String(countryId))}` : ''
+    const res = await fetch(
+      getApiUrl(
+        `/api/posts/${encodeURIComponent(postId)}/similar?land=${encodeURIComponent(locale)}&limit=6${countryQs}`,
+      ),
+      { method: 'GET', cache: 'no-store', headers: { Accept: 'application/json' } },
+    )
+    if (!res.ok) return []
+    const json = (await res.json()) as { success?: boolean; data?: any[] }
     return json?.success && Array.isArray(json.data) ? json.data : []
   } catch {
     return []
   }
 }
 
-async function fetchMoreFromSection(postId: string, locale: string): Promise<any[]> {
+async function fetchMoreFromSection(
+  postId: string,
+  locale: string,
+  countryId?: number,
+): Promise<any[]> {
   try {
-    const json = (await callLaravel(
-      `/api/posts/${postId}/more-from-section?land=${encodeURIComponent(locale)}&limit=8`,
-      { method: 'GET' },
-    )) as { success?: boolean; data?: any[] }
+    const countryQs =
+      countryId != null && countryId > 0 ? `&country_id=${encodeURIComponent(String(countryId))}` : ''
+    const res = await fetch(
+      getApiUrl(
+        `/api/posts/${encodeURIComponent(postId)}/more-from-section?land=${encodeURIComponent(locale)}&limit=8${countryQs}`,
+      ),
+      { method: 'GET', cache: 'no-store', headers: { Accept: 'application/json' } },
+    )
+    if (!res.ok) return []
+    const json = (await res.json()) as { success?: boolean; data?: any[] }
     return json?.success && Array.isArray(json.data) ? json.data : []
   } catch {
     return []
@@ -85,20 +112,39 @@ export async function generateMetadata({
   const origin = getPublicSiteOrigin()
   const canonicalPath = `/${locale}/post/${id}`
 
+  const post = await fetchPostDetailsSafe(id, locale)
+  if (!post) {
+    const fallbackTitle = locale === 'ar' ? `إعلان غير متاح #${id} | ANANAS` : `Unavailable ad #${id} | ANANAS`
+    const fallbackDescription =
+      locale === 'ar'
+        ? `الإعلان رقم ${id} غير متاح على أناناس.`
+        : `Ad #${id} is not available on ANANAS.`
+    return {
+      title: fallbackTitle,
+      description: fallbackDescription,
+      alternates: { canonical: canonicalPath },
+      robots: { index: false, follow: true },
+    }
+  }
+
+  const publiclyVisible = isPubliclyPublishedStatus((post as any)?.status)
+
   try {
-    const json = (await callLaravel(`/api/posts/${id}?land=${locale}`, { method: 'GET' })) as ApiPostDetailsResponse
-    const post = json?.data ?? {}
-    const rawImg = post?.post_images?.[0]?.image_full_url || post?.post_images?.[0]?.image || post?.image || ''
+    const rawImg =
+      (post as any)?.post_images?.[0]?.image_full_url ||
+      (post as any)?.post_images?.[0]?.image ||
+      (post as any)?.image ||
+      ''
     const firstImage = resolveMediaUrl(rawImg)
     const ogImageUrl = firstImage ? toAbsoluteUrl(firstImage, origin) : undefined
-    const price = post?.price != null && post?.price !== '' ? ` — ${post.price}` : ''
-    const baseTitle = json?.data?.title
-      ? `${json.data.title}${price}`
+    const price = (post as any)?.price != null && (post as any)?.price !== '' ? ` — ${(post as any).price}` : ''
+    const baseTitle = (post as any)?.title
+      ? `${(post as any).title}${price}`
       : locale === 'ar'
         ? `إعلان #${id}`
         : `Listing #${id}`
     const title = `${baseTitle} | ANANAS`
-    const descSource = json?.data?.description ? String(json.data.description) : ''
+    const descSource = (post as any)?.description ? String((post as any).description) : ''
     const description =
       descSource.length > 0
         ? descSource.slice(0, 165) + (descSource.length > 165 ? '…' : '')
@@ -106,15 +152,15 @@ export async function generateMetadata({
           ? `إعلان رقم ${id} على أناناس — تفاصيل، صور، وتواصل مع المعلن.`
           : `Listing #${id} on ANANAS — details, photos, and contact.`
     const keywords = buildKeywords(post, locale)
-    const sectionName = pickLocalizedName(post?.section?.name, locale)
-    const published = post?.created_at ? String(post.created_at) : undefined
-    const modified = post?.updated_at ? String(post.updated_at) : published
+    const sectionName = pickLocalizedName((post as any)?.section?.name, locale)
+    const published = (post as any)?.created_at ? String((post as any).created_at) : undefined
+    const modified = (post as any)?.updated_at ? String((post as any).updated_at) : published
 
     return {
       title,
       description,
       keywords,
-      authors: post?.user?.name ? [{ name: String(post.user.name) }] : undefined,
+      authors: (post as any)?.user?.name ? [{ name: String((post as any).user.name) }] : undefined,
       alternates: {
         canonical: canonicalPath,
         languages: {
@@ -138,7 +184,7 @@ export async function generateMetadata({
                 url: ogImageUrl,
                 width: 1200,
                 height: 630,
-                alt: post?.title ? String(post.title) : `ANANAS ${id}`,
+                alt: (post as any)?.title ? String((post as any).title) : `ANANAS ${id}`,
               },
             ]
           : undefined,
@@ -149,76 +195,114 @@ export async function generateMetadata({
         description,
         images: ogImageUrl ? [ogImageUrl] : undefined,
       },
-      robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+      robots: publiclyVisible
+        ? { index: true, follow: true, googleBot: { index: true, follow: true } }
+        : { index: false, follow: true },
     }
   } catch {
     const fallbackTitle = locale === 'ar' ? `إعلان #${id} | ANANAS` : `Listing #${id} | ANANAS`
-    const fallbackDescription =
-      locale === 'ar'
-        ? `صفحة إعلان على منصة أناناس (رقم ${id}).`
-        : `Classified listing on ANANAS (#${id}).`
     return {
       title: fallbackTitle,
-      description: fallbackDescription,
       alternates: { canonical: canonicalPath },
-      robots: { index: true, follow: true },
+      robots: { index: false, follow: true },
     }
   }
 }
 
-export default async function PostDetailsPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
-  const { locale, id } = await params
-
-  const json = (await callLaravel(`/api/posts/${id}?land=${locale}`, { method: 'GET' })) as ApiPostDetailsResponse
-  if (!json?.success || !json?.data) {
-    return (
-      <main className={styles.pageMain}>
-        <Container>
-          <Row>
-            <Col lg={8} className="mx-auto">
-              <div className="alert alert-danger mb-0">Failed to load post details</div>
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    )
-  }
-
-  const [similarPosts, morePosts, sections] = await Promise.all([
-    fetchSimilarPosts(id, locale),
-    fetchMoreFromSection(id, locale),
+async function PostNotFoundPage({
+  locale,
+  id,
+  safeLocale,
+}: {
+  locale: string
+  id: string
+  safeLocale: SupportedLocale
+}) {
+  const countryId = await resolveCountryIdFromHeaders()
+  const [suggestedPosts, sections] = await Promise.all([
+    fetchSuggestedPostsForMissingPost({
+      postId: id,
+      locale,
+      countryId,
+      limit: 8,
+    }),
     fetchSections(locale),
   ])
 
-  const post = json.data
-  const postImages: Array<{ url: string; alt?: string }> = Array.isArray(post?.post_images)
-    ? post.post_images
+  const isRtl = safeLocale === 'ar'
+
+  return (
+    <div className={styles.pageMain} lang={safeLocale} dir={isRtl ? 'rtl' : 'ltr'}>
+      <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
+        <Col lg={9} className={styles.feedCol}>
+          <Container fluid className={styles.shell}>
+            <PostNotFoundBlock locale={safeLocale} postId={id} />
+
+            <section className={styles.moreSection} aria-label={t('post.notFound.mightInterestYou', safeLocale)}>
+              <h2 className={styles.moreTitle}>{t('post.notFound.mightInterestYou', safeLocale)}</h2>
+              {suggestedPosts.length === 0 ? (
+                <p className={`${styles.emptyRelated} mb-0`}>{t('post.notFound.noSuggestions', safeLocale)}</p>
+              ) : (
+                <div className={styles.moreGrid}>
+                  {suggestedPosts.map((p: any) => (
+                    <SimpleListingCard key={p.id} post={p} locale={safeLocale} />
+                  ))}
+                </div>
+              )}
+            </section>
+          </Container>
+        </Col>
+      </FeedLayoutClient>
+    </div>
+  )
+}
+
+export default async function PostDetailsPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  const { locale, id } = await params
+  const safeLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE
+
+  const post = await fetchPostDetailsSafe(id, locale)
+  if (!post) {
+    return <PostNotFoundPage locale={locale} id={id} safeLocale={safeLocale} />
+  }
+
+  const portalCountryId = await resolveCountryIdFromHeaders()
+  const filterCountryId = resolveListingCountryId(post, portalCountryId)
+
+  const [similarPosts, morePosts, sections] = await Promise.all([
+    fetchSimilarPosts(id, locale, filterCountryId),
+    fetchMoreFromSection(id, locale, filterCountryId),
+    fetchSections(locale),
+  ])
+
+  const postImages: Array<{ url: string; alt?: string }> = Array.isArray((post as any)?.post_images)
+    ? (post as any).post_images
         .map((img: any) => ({
           url: img?.image_full_url || img?.image,
-          alt: post?.title,
+          alt: (post as any)?.title,
         }))
         .filter((x: any) => Boolean(x.url))
     : []
 
-  const postData = post?.post_data
+  const postData = (post as any)?.post_data
   const attributesAndOptions = Array.isArray(postData?.attributes_and_options) ? postData.attributes_and_options : []
 
   /** منع تكرار صورة الغلاف داخل PostCard بعد عرض المعرض */
   const postForCard = { ...post, post_images: [], image: undefined }
 
-  const safeLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE
   const isRtl = safeLocale === 'ar'
-  const cityName = pickLocalizedName(post?.city?.name, safeLocale)
-  const sectionName = pickLocalizedName(post?.section?.name, safeLocale)
-  const categoryName = pickLocalizedName(post?.category?.name, safeLocale)
-  const sectionSlug = post?.section?.slug ? String(post.section.slug) : ''
-  const categorySlug = post?.category?.slug ? String(post.category.slug) : ''
-  const userName = post?.user?.name || (safeLocale === 'ar' ? 'صاحب الإعلان' : 'Publisher')
-  const userPhone = post?.user?.mobile ? String(post.user.mobile) : ''
-  const userEmail = post?.user?.email ? String(post.user.email) : ''
-  const hasPrice = post?.price != null && post?.price !== ''
+  const cityName = pickLocalizedName((post as any)?.city?.name, safeLocale)
+  const sectionName = pickLocalizedName((post as any)?.section?.name, safeLocale)
+  const categoryName = pickLocalizedName((post as any)?.category?.name, safeLocale)
+  const sectionSlug = (post as any)?.section?.slug ? String((post as any).section.slug) : ''
+  const categorySlug = (post as any)?.category?.slug ? String((post as any).category.slug) : ''
+  const userName = (post as any)?.user?.name || (safeLocale === 'ar' ? 'صاحب الإعلان' : 'Publisher')
+  const userPhone = (post as any)?.user?.mobile ? String((post as any).user.mobile) : ''
+  const userEmail = (post as any)?.user?.email ? String((post as any).user.email) : ''
+  const hasPrice = (post as any)?.price != null && (post as any)?.price !== ''
 
-  const origin = getPublicSiteOrigin()
+  const headersList = await headers()
+  const origin = getSiteOrigin(headersList)
   const homePath = `/${safeLocale}`
   const sectionPath = sectionSlug ? `/${safeLocale}/sections/${sectionSlug}` : homePath
   const categoryPath =
@@ -236,46 +320,29 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
     crumbItems.push({ name: categoryName, item: `${origin}${categoryPath}` })
   }
   crumbItems.push({
-    name: post?.title ? String(post.title) : breadcrumbLabelAd,
+    name: (post as any)?.title ? String((post as any).title) : breadcrumbLabelAd,
     item: postUrl,
   })
-
-  const jsonLdBreadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: crumbItems.map((c, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: c.name,
-      item: c.item,
-    })),
-  }
 
   const firstImageAbs = postImages[0]?.url
     ? toAbsoluteUrl(resolveMediaUrl(String(postImages[0].url)), origin)
     : undefined
 
-  const jsonLdProduct: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: post?.title ? String(post.title) : `Listing ${id}`,
-    description: post?.description ? String(post.description).slice(0, 5000) : undefined,
-    sku: String(id),
-    url: postUrl,
-    image: firstImageAbs ? [firstImageAbs] : undefined,
-    category: categoryName || sectionName || undefined,
-  }
-  if (hasPrice) {
-    jsonLdProduct.offers = {
-      '@type': 'Offer',
-      price: String(post.price),
-      priceCurrency: 'JOD',
-      availability: 'https://schema.org/InStock',
-      url: postUrl,
-    }
-  }
+  const structuredDataGraph = buildPostStructuredData({
+    postId: id,
+    title: (post as any)?.title ? String((post as any).title) : safeLocale === 'ar' ? `إعلان ${id}` : `Listing ${id}`,
+    description: (post as any)?.description ? String((post as any).description) : undefined,
+    postUrl,
+    locale: safeLocale,
+    imageUrl: firstImageAbs,
+    price: hasPrice ? (post as any).price : null,
+    categoryName: categoryName || undefined,
+    sectionName: sectionName || undefined,
+    sellerName: userName || undefined,
+    breadcrumbItems: crumbItems,
+  })
 
-  const structuredData = JSON.stringify([jsonLdBreadcrumb, jsonLdProduct])
+  const structuredData = JSON.stringify(structuredDataGraph)
 
   return (
     <div className={styles.pageMain} lang={safeLocale} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -283,7 +350,7 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
 
       <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
         <Col lg={9} className={styles.feedCol}>
-          <PostViewTracker postId={id} postUserId={post?.user_id} />
+          <PostViewTracker postId={id} postUserId={(post as any)?.user_id} />
 
           <Container fluid className={styles.shell}>
             <nav className={styles.breadcrumbNav} aria-label={safeLocale === 'ar' ? 'مسار التنقل' : 'Breadcrumb'}>
@@ -322,6 +389,8 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
               </ol>
             </nav>
 
+            <PostStatusBanner locale={safeLocale} status={(post as any)?.status} />
+
             <div className={styles.listingTopBar}>
               <span className={styles.adIdBadge}>
                 {safeLocale === 'ar' ? `إعلان رقم ${id}` : `Ad #${id}`}
@@ -329,20 +398,18 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
               {hasPrice ? (
                 <div className={styles.pricePill}>
                   <span className={styles.pricePillLabel}>{safeLocale === 'ar' ? 'السعر' : 'Price'}</span>
-                  <span className={styles.pricePillValue}>{String(post.price)}</span>
+                  <span className={styles.pricePillValue}>{String((post as any).price)}</span>
                 </div>
               ) : null}
             </div>
 
-            <article itemScope itemType="https://schema.org/Product" className={styles.article}>
-              <meta itemProp="sku" content={String(id)} />
-
+            <article className={styles.article}>
               <Row className={`g-3 g-lg-4 ${styles.contentRow}`}>
                 <Col lg={8} xl={8} className={styles.primaryCol}>
                   <div className={styles.listingStack}>
                     {postImages.length > 0 ? (
                       <Card className={styles.galleryCard}>
-                        <PostImagesGallery images={postImages} title={post?.title} isRtl={isRtl} />
+                        <PostImagesGallery images={postImages} title={(post as any)?.title} isRtl={isRtl} />
                       </Card>
                     ) : null}
 
@@ -419,7 +486,7 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
                           </div>
                           <div className={styles.contactItem}>
                             <span className={styles.contactItemLabel}>{safeLocale === 'ar' ? 'السعر' : 'Price'}</span>
-                            <span className={styles.contactItemValue}>{hasPrice ? String(post.price) : '—'}</span>
+                            <span className={styles.contactItemValue}>{hasPrice ? String((post as any).price) : '—'}</span>
                           </div>
                         </div>
                       </div>

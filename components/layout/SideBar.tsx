@@ -311,6 +311,10 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
         </nav>
 
         <div className={styles.footer}>
+          <Link href={`/${currentLocale}/contact`} className={styles.profileLink}>
+            {t('sidebar.contactUs', currentLocale)}
+          </Link>
+
           <Link href={profileHref} className={styles.profileLink}>
             {t('sidebar.viewProfile', currentLocale)}
           </Link>

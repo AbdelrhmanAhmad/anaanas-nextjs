@@ -1,4 +1,5 @@
 import { getApiUrl } from './config'
+import { handleEmailVerificationBlock, resolveLocaleFromPathname } from '@/lib/auth/emailVerification'
 
 export type CreatePostData = {
   section_id: number
@@ -127,7 +128,12 @@ export async function createPost(data: CreatePostData, accessToken?: string, ima
   console.log('res', res)
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
+    const errorData = (await res.json().catch(() => ({}))) as {
+      message?: string
+      error_code?: string
+      retry_after_seconds?: number
+    }
+    handleEmailVerificationBlock(errorData, resolveLocaleFromPathname())
     throw new Error(errorData.message || `Failed to create post: ${res.status} ${res.statusText}`)
   }
 
@@ -151,6 +157,7 @@ export async function createPostViaServer(data: CreatePostData): Promise<CreateP
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}))
+    handleEmailVerificationBlock(errorData, resolveLocaleFromPathname())
     throw new Error(errorData.message || `Failed to create post: ${res.status} ${res.statusText}`)
   }
 
@@ -328,17 +335,21 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<PostsLi
   }
 
   const query = searchParams.toString()
-  const url = getApiUrl(`/api/posts${query ? `?${query}` : ''}`)
+  const path = `/api/posts${query ? `?${query}` : ''}`
 
-  const res = await fetch(url, {
-    cache: 'no-store',
-  })
+  let json: PostsListResponse
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch posts: ${res.status} ${res.statusText}`)
+  if (typeof window === 'undefined') {
+    const { callLaravel } = await import('@/lib/laravelClient')
+    json = (await callLaravel(path, { method: 'GET' })) as PostsListResponse
+  } else {
+    const res = await fetch(path, { cache: 'no-store' })
+    if (!res.ok) {
+      throw new Error(`Failed to fetch posts: ${res.status} ${res.statusText}`)
+    }
+    json = (await res.json()) as PostsListResponse
   }
 
-  const json = (await res.json()) as PostsListResponse
   const posts = Array.isArray(json?.data) ? json.data : []
 
   return {

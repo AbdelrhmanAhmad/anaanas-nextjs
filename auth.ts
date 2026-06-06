@@ -10,6 +10,7 @@ declare module 'next-auth' {
       name?: string | null
       email?: string | null
       mobile?: string | null
+      emailVerified?: boolean
     } & DefaultSession['user']
     accessToken?: string
   }
@@ -20,6 +21,7 @@ declare module 'next-auth' {
     email?: string | null
     mobile?: string | null
     accessToken?: string
+    emailVerified?: boolean
   }
 }
 
@@ -30,6 +32,7 @@ declare module 'next-auth/jwt' {
     email?: string | null
     mobile?: string | null
     accessToken?: string
+    emailVerified?: boolean
   }
 }
 
@@ -98,6 +101,7 @@ const authOptions: NextAuthOptions = {
               email: user.email || null,
               mobile: user.mobile || user.phone || null,
               accessToken: token,
+              emailVerified: Boolean(user.email_verified ?? user.email_verified_at != null),
             }
           }
 
@@ -110,14 +114,25 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
         token.name = user.name
         token.email = user.email
         token.mobile = user.mobile
         token.accessToken = user.accessToken
+        token.emailVerified = Boolean(user.emailVerified)
       }
+
+      if (trigger === 'update' && session) {
+        if (typeof (session as { emailVerified?: boolean }).emailVerified === 'boolean') {
+          token.emailVerified = (session as { emailVerified?: boolean }).emailVerified
+        }
+        if ((session as { email?: string }).email) {
+          token.email = (session as { email?: string }).email
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
@@ -126,6 +141,7 @@ const authOptions: NextAuthOptions = {
         session.user.name = token.name as string | null
         session.user.email = token.email as string | null
         session.user.mobile = token.mobile as string | null
+        session.user.emailVerified = Boolean(token.emailVerified)
       }
       session.accessToken = token.accessToken as string | undefined
       return session

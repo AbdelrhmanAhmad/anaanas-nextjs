@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { callLaravel } from '@/lib/laravelClient'
+import { respondWithLaravelError } from '@/lib/api/respondWithLaravelError'
 import type { CreatePostData } from '@/lib/api/posts'
 
 export async function POST(request: NextRequest) {
@@ -22,14 +23,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Error creating post:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الإعلان',
-      },
-      { status: 500 }
-    )
+    return respondWithLaravelError(error)
   }
 }
 

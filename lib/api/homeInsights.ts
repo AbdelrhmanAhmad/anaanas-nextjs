@@ -53,7 +53,7 @@ export async function fetchTrendingPosts(params: {
   limit?: number
 }): Promise<TrendingPostItem[]> {
   const sp = new URLSearchParams()
-  if (params.countryId != null) sp.set('country_id', String(params.countryId))
+  if (params.countryId != null && params.countryId > 0) sp.set('country_id', String(params.countryId))
   if (params.land) sp.set('land', params.land)
   if (params.limit != null) sp.set('limit', String(params.limit))
   const qs = sp.toString()

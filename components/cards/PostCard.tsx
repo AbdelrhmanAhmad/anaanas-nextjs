@@ -8,6 +8,7 @@ import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 import { ensureAnalyticsSocket, sendAnalyticsEvent } from '@/lib/analytics/socket'
+import { handleEmailVerificationBlock } from '@/lib/auth/emailVerification'
 import {
   Card,
   CardBody,
@@ -624,6 +625,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       })
 
       const json = (await res.json().catch(() => ({}))) as CreateCommentResponse
+      if (handleEmailVerificationBlock(json, locale)) return
       if (!res.ok || !json?.success || !json?.data) {
         throw new Error(json?.message || 'Failed to create comment')
       }
@@ -712,6 +714,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         body: JSON.stringify({ type: reactionType ?? (prevReactionType ?? 'like') }),
       })
       const json = (await res.json().catch(() => ({}))) as PostReactionToggleResponse
+      if (handleEmailVerificationBlock(json, locale)) return
       if (!res.ok || !json?.success) throw new Error(json?.message || 'Failed to like post')
 
       setPostLikesCount(Number(json.data?.likes_count ?? 0))
@@ -768,7 +771,9 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
       })
 
       const json = await res.json()
-      
+
+      if (handleEmailVerificationBlock(json, locale)) return
+
       if (!res.ok) {
         const errorMsg = json?.message || `HTTP ${res.status}: ${res.statusText}`
         console.error('Chat API error:', { status: res.status, json })
@@ -818,6 +823,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         body: JSON.stringify({ type: 'like' }),
       })
       const json = (await res.json().catch(() => ({}))) as ReactionToggleResponse
+      if (handleEmailVerificationBlock(json, locale)) return
       if (!res.ok || !json?.success) throw new Error(json?.message || 'Failed to react')
 
       const likesCount = json.data?.likes_count ?? 0
@@ -935,6 +941,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         body: JSON.stringify({ body: value, parent_id: Number(parentId) }),
       })
       const json = (await res.json().catch(() => ({}))) as CreateCommentResponse
+      if (handleEmailVerificationBlock(json, locale)) return
       if (!res.ok || !json?.success || !json?.data) throw new Error(json?.message || 'Failed to reply')
 
       const c = json.data
@@ -1080,7 +1087,7 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         {isDetailsPage && (
           <div className={styles.detailsPageIntro}>
             <div className={styles.detailsPageIntroTop}>
-              <h1 className={styles.detailH1} itemProp="name">
+              <h1 className={styles.detailH1}>
                 {title || (locale === 'ar' ? `إعلان ${post?.id}` : `Listing ${post?.id}`)}
               </h1>
               {(canEdit || canDelete) && (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { callLaravel } from '@/lib/laravelClient'
+import { respondWithLaravelError } from '@/lib/api/respondWithLaravelError'
 
 export async function GET(request: NextRequest, context: { params: Promise<{ commentId: string }> }) {
   const { commentId } = await context.params
@@ -17,13 +18,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ co
     })
     return NextResponse.json(response, { status: 200 })
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to react',
-      },
-      { status: 500 }
-    )
+    return respondWithLaravelError(error)
   }
 }
 

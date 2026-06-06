@@ -45,6 +45,7 @@ const AuthProtectionWrapper = ({ children }: ChildrenType) => {
     return (
       pathname.includes('/auth/sign-in') ||
       pathname.includes('/auth/sign-up') ||
+      pathname.includes('/auth/verify-email') ||
       pathname.includes('/auth/forgot-pass') ||
       pathname.includes('/auth/reset-password')
     )

@@ -17,6 +17,10 @@ import { t } from '@/lib/translations'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 
+async function redirectAfterAuth(locale: SupportedLocale, push: (path: string) => void, fallback?: string) {
+  push(fallback ?? `/${locale}`)
+}
+
 const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
   const params = useParams<{ locale?: string }>()
   
@@ -93,7 +97,7 @@ const SignUpForm = ({ locale: localeProp }: { locale?: SupportedLocale }) => {
         })
 
         if (loginResult?.ok) {
-          push(`/${locale}`)
+          await redirectAfterAuth(locale, push)
         } else {
           push(`/${locale}/auth/sign-in`)
         }

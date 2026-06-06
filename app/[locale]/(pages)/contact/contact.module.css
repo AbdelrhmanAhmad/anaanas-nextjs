@@ -1,0 +1,59 @@
+.hpField {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page {
+  min-height: 100%;
+}
+
+.shell {
+  padding-top: 4.5rem;
+}
+
+.card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.header {
+  padding: 1.75rem 1.75rem 0;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #151515;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(71, 85, 105, 0.9);
+  line-height: 1.6;
+}
+
+.body {
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .shell {
+    padding-top: 4rem;
+  }
+
+  .header,
+  .body {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
