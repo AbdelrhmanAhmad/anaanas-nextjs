@@ -103,7 +103,7 @@ export function handleEmailVerificationBlock(
   payload: ApiErrorPayload | null | undefined,
   locale?: SupportedLocale | string,
 ): boolean {
-  if (!isEmailNotVerifiedError(payload)) {
+  if (!payload || !isEmailNotVerifiedError(payload)) {
     return false
   }
 

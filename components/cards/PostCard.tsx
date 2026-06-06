@@ -791,8 +791,6 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
         throw new Error('No chat ID received')
       }
 
-      const locale = localeFromParams || 'ar'
-
       router.push(`/${locale}/messaging?chat=${encodeURIComponent(String(chatId))}`)
     } catch (error) {
       console.error('Failed to open chat:', error)
