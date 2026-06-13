@@ -41,6 +41,10 @@
 // Hidden for bots (not rendered) and no-JS users (CSS default + noscript).
 // =========================================================================
 
+html {
+  scrollbar-gutter: stable;
+}
+
 #splash-screen {
   position: fixed;
   inset: 0;

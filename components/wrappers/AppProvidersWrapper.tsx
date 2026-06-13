@@ -14,6 +14,7 @@ import AutoLoginWrapper from './AutoLoginWrapper'
 import { EmailVerificationProvider } from '@/context/EmailVerificationProvider'
 import DirectionSync from '@/components/DirectionSync'
 import ScrollToTopOnRoute from '@/components/ScrollToTopOnRoute'
+import { SPLASH_MAX_VISIBLE_MS } from '@/lib/perf/week1HomePerf'
 
 const AppProvidersWrapper = ({ children }: ChildrenType) => {
   useEffect(() => {
@@ -22,21 +23,26 @@ const AppProvidersWrapper = ({ children }: ChildrenType) => {
 
     if (!splashElement || !splashScreen) return
 
+    const hideSplash = () => splashScreen.classList.add('remove')
+
     const handleMutations = (mutationsList: MutationRecord[]) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList' && splashElement.hasChildNodes()) {
-          splashScreen.classList.add('remove')
+          hideSplash()
         }
       }
     }
     const observer = new MutationObserver(handleMutations)
     observer.observe(splashElement, { childList: true, subtree: true })
     if (splashElement.hasChildNodes()) {
-      splashScreen.classList.add('remove')
+      hideSplash()
     }
+
+    const maxVisibleTimer = window.setTimeout(hideSplash, SPLASH_MAX_VISIBLE_MS)
 
     return () => {
       observer.disconnect()
+      window.clearTimeout(maxVisibleTimer)
     }
   }, [])
 

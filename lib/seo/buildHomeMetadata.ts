@@ -68,7 +68,14 @@ export function buildHomeMetadata({
   return {
     title: { absolute: absoluteTitle },
     description,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        ar: `${origin}/ar`,
+        en: `${origin}/en`,
+        'x-default': `${origin}/ar`,
+      },
+    },
     openGraph: {
       title,
       description,

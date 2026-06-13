@@ -1,5 +1,5 @@
 import ResponsiveTopHeader from '@/components/layout/TopHeader/ResponsiveTopHeader'
-import AnnouncementModal from '@/components/layout/AnnouncementModal'
+import AnnouncementModalLazy from '@/components/layout/AnnouncementModalLazy'
 import ResponsiveDailyUpdatesBanner from '@/components/layout/ResponsiveDailyUpdatesBanner'
 import NewPostRealtime from '@/components/realtime/NewPostRealtime'
 import type { ChildrenType } from '@/types/component'
@@ -10,7 +10,7 @@ const SocialLayout = ({ children }: ChildrenType) => {
       <ResponsiveTopHeader />
       <ResponsiveDailyUpdatesBanner />
       {children}
-      <AnnouncementModal />
+      <AnnouncementModalLazy />
       <NewPostRealtime />
     </>
   )

@@ -16,10 +16,10 @@ import {
 
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
+import { ANNOUNCEMENT_SHOW_DELAY_MS } from '@/lib/perf/week1HomePerf'
 
 const STORAGE_KEY = 'ananas:announcement:daily-v2'
 const LEGACY_STORAGE_KEY = 'ananas:announcement:daily-v1'
-const SHOW_DELAY_MS = 1200
 
 type Props = {
   /** Override the locale (defaults to reading from URL params). */
@@ -138,11 +138,31 @@ const AnnouncementModal = ({ locale: localeOverride }: Props) => {
       const shownThisSession = sessionStorage.getItem(STORAGE_KEY) === '1'
       if (shownThisSession) return
 
-      const timer = window.setTimeout(() => {
+      const openModal = () => {
         setShow(true)
         sessionStorage.setItem(STORAGE_KEY, '1')
-      }, SHOW_DELAY_MS)
-      return () => window.clearTimeout(timer)
+      }
+
+      let timer: number | undefined
+
+      const armTimer = () => {
+        timer = window.setTimeout(openModal, ANNOUNCEMENT_SHOW_DELAY_MS)
+      }
+
+      if (document.readyState === 'complete') {
+        armTimer()
+      } else {
+        const onLoad = () => armTimer()
+        window.addEventListener('load', onLoad, { once: true })
+        return () => {
+          window.removeEventListener('load', onLoad)
+          if (timer !== undefined) window.clearTimeout(timer)
+        }
+      }
+
+      return () => {
+        if (timer !== undefined) window.clearTimeout(timer)
+      }
     } catch {
       /* localStorage unavailable → silently skip */
     }

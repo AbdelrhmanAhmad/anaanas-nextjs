@@ -10,6 +10,7 @@ import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/localization'
 import type { SupportedLocale } from '@/lib/localization'
 import { isIndexingBotUserAgent } from '@/lib/seo/indexingBot'
 import { getPublicSiteOrigin } from '@/lib/seo/siteUrl'
+import { SPLASH_ENABLE_DELAY_MS } from '@/lib/perf/week1HomePerf'
 
 import logo from '@/assets/images/logo/logo500.png'
 
@@ -135,11 +136,11 @@ function SplashScreen() {
         <div className="splash-logoWrap">
           <div className="splash-logoHalo" />
           <img
-            alt="ANANAS"
+            alt=""
             src={typeof logo === 'string' ? logo : (logo as { src: string }).src}
             className="splash-logo"
             decoding="async"
-            fetchPriority="high"
+            fetchPriority="low"
           />
         </div>
       </div>
@@ -177,10 +178,10 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
       suppressHydrationWarning
     >
       <head suppressHydrationWarning>
-        {/* Splash only when JS runs; bots and no-JS users see content immediately. */}
+        {/* Splash delayed so LCP can target real page content, not the logo overlay. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: 'document.documentElement.classList.add("js-splash")',
+            __html: `setTimeout(function(){document.documentElement.classList.add("js-splash")},${SPLASH_ENABLE_DELAY_MS})`,
           }}
         />
         <noscript>
