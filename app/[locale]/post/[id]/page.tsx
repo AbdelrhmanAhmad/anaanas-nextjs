@@ -16,7 +16,6 @@ import FeedLayoutClient from '@/components/layout/FeedLayoutClient'
 import SideBar from '@/components/layout/SideBar'
 import { fetchSections } from '@/lib/api/sections'
 import { buildPostStructuredData } from '@/lib/seo/buildPostStructuredData'
-import { getPublicSiteOrigin } from '@/lib/seo/siteUrl'
 import { getSiteOrigin } from '@/lib/seo/origin'
 import { toAbsoluteUrl } from '@/lib/seo/absoluteUrl'
 import { resolveCountryIdFromHeaders } from '@/lib/server/resolveCountryIdFromHeaders'
@@ -109,7 +108,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string; id: string }>
 }): Promise<Metadata> {
   const { locale, id } = await params
-  const origin = getPublicSiteOrigin()
+  const headersList = await headers()
+  const origin = getSiteOrigin(headersList)
   const canonicalPath = `/${locale}/post/${id}`
 
   const post = await fetchPostDetailsSafe(id, locale)
@@ -162,7 +162,7 @@ export async function generateMetadata({
       keywords,
       authors: (post as any)?.user?.name ? [{ name: String((post as any).user.name) }] : undefined,
       alternates: {
-        canonical: canonicalPath,
+        canonical: `${origin}${canonicalPath}`,
         languages: {
           ar: `${origin}/ar/post/${id}`,
           en: `${origin}/en/post/${id}`,
@@ -172,7 +172,7 @@ export async function generateMetadata({
         title,
         description,
         type: 'article',
-        url: canonicalPath,
+        url: `${origin}${canonicalPath}`,
         siteName: 'ANANAS',
         locale: locale === 'ar' ? 'ar_AR' : 'en_US',
         publishedTime: published,
@@ -300,6 +300,10 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
   const userPhone = (post as any)?.user?.mobile ? String((post as any).user.mobile) : ''
   const userEmail = (post as any)?.user?.email ? String((post as any).user.email) : ''
   const hasPrice = (post as any)?.price != null && (post as any)?.price !== ''
+  const countryIso2 = String(
+    (post as any)?.country?.iso2 || (post as any)?.country?.iso_code || '',
+  ).toLowerCase()
+  const countryName = pickLocalizedName((post as any)?.country?.name, safeLocale)
 
   const headersList = await headers()
   const origin = getSiteOrigin(headersList)
@@ -329,6 +333,7 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
     : undefined
 
   const structuredDataGraph = buildPostStructuredData({
+    post: post as Record<string, unknown>,
     postId: id,
     title: (post as any)?.title ? String((post as any).title) : safeLocale === 'ar' ? `إعلان ${id}` : `Listing ${id}`,
     description: (post as any)?.description ? String((post as any).description) : undefined,
@@ -339,6 +344,14 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
     categoryName: categoryName || undefined,
     sectionName: sectionName || undefined,
     sellerName: userName || undefined,
+    cityName: cityName || undefined,
+    countryName: countryName || undefined,
+    countryIso2: countryIso2 || null,
+    datePosted: (post as any)?.publish_date
+      ? String((post as any).publish_date)
+      : (post as any)?.created_at
+        ? String((post as any).created_at)
+        : null,
     breadcrumbItems: crumbItems,
   })
 

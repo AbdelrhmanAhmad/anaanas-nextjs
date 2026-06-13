@@ -187,7 +187,27 @@ export function hasSectionSeoFilterNoise(
   record: Record<string, string | string[] | undefined>,
 ): boolean {
   const sp = recordToSearchParams(record)
-  const parts = buildSectionFilterParts(locale, sp)
   const pageNum = parseNumber(firstFromRecord(record, 'page'))
-  return parts.length > 0 || (pageNum != null && pageNum > 1)
+  if (pageNum != null && pageNum > 1) return true
+
+  const q = (sp.get('q') ?? '').trim()
+  const priceMin = parseNumber(sp.get('price_min') ?? undefined)
+  const priceMax = parseNumber(sp.get('price_max') ?? undefined)
+  const hasImages = parseHasImages(sp.get('has_images') ?? undefined)
+  const sort = parseSort(sp.get('sort') ?? undefined)
+  const cityId = parseNumber(sp.get('city_id') ?? undefined)
+
+  // City-only landing URLs (in sitemap-cities.xml) stay indexable on page 1.
+  const cityOnlyLanding =
+    cityId != null &&
+    !q &&
+    priceMin == null &&
+    priceMax == null &&
+    hasImages == null &&
+    sort === 'newest'
+
+  if (cityOnlyLanding) return false
+
+  const parts = buildSectionFilterParts(locale, sp)
+  return parts.length > 0
 }
