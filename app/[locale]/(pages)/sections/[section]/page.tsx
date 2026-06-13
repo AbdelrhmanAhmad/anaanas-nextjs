@@ -9,7 +9,7 @@ import { Suspense } from 'react'
 import { Col, Row } from 'react-bootstrap'
 
 import Hero from './Hero'
-import CreatePostCard from '@/components/cards/CreatePostCard'
+import CreatePostCardLazyClient from '../../home/components/CreatePostCardLazyClient'
 import { fetchSectionBySlug } from '@/lib/api/sections'
 import { getCountryByCodeCached } from '@/lib/server/getCountryByCodeCached'
 import { fetchCitiesByCountryId } from '@/lib/api/cities'
@@ -146,16 +146,17 @@ const Section = async ({
 
         <ActiveFilterChips locale={uiLocale} cities={cities} />
 
-        <ResultsSummaryBar locale={uiLocale} heading={section.name} />
+        <ResultsSummaryBar locale={uiLocale} />
 
         <Row className="g-4">
           <Col md={12} lg={8} className="vstack gap-4">
-            <CreatePostCard />
+            <CreatePostCardLazyClient />
             <Suspense fallback={<SectionsResultsSkeleton />}>
               <SectionRouteFeeds
                 searchParams={searchParams ?? Promise.resolve({})}
                 sectionSlug={sectionSlug}
                 uiLocale={uiLocale}
+                sectionName={section.name}
               />
             </Suspense>
           </Col>

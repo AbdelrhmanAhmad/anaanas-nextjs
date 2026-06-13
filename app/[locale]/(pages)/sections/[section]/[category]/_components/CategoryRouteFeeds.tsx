@@ -1,4 +1,5 @@
 import Feeds from '../../../../home/components/Feeds'
+import { t } from '@/lib/translations'
 import { parseAttrFiltersFromRecord, parseHasImages, parseNumber, parseSort } from '@/lib/sections/filterSummary'
 
 type PageSearchParams = Record<string, string | string[] | undefined>
@@ -13,11 +14,13 @@ export default async function CategoryRouteFeeds({
   sectionSlug,
   categorySlug,
   uiLocale,
+  categoryName,
 }: {
   searchParams: Promise<PageSearchParams | undefined>
   sectionSlug: string
   categorySlug: string
   uiLocale: 'ar' | 'en'
+  categoryName: string
 }) {
   const sp = (await searchParams) ?? {}
   const cityId = parseNumber(firstValue(sp.city_id))
@@ -30,6 +33,7 @@ export default async function CategoryRouteFeeds({
 
   return (
     <Feeds
+      listingsHeading={t('seo.category.listings', uiLocale).replace('{{name}}', categoryName)}
       filters={{
         sectionSlug,
         categorySlug,

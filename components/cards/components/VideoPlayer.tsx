@@ -1,6 +1,6 @@
 'use client'
 import dynamic from 'next/dynamic'
-const Plyr = dynamic(() => import('plyr-react'))
+const Plyr = dynamic(() => import('plyr-react'), { ssr: false })
 
 import 'plyr-react/plyr.css'
 

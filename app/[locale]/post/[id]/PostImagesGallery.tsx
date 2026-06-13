@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import glightbox from 'glightbox'
 import { useEffect, useId } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Keyboard } from 'swiper/modules'
@@ -25,16 +24,20 @@ export default function PostImagesGallery({
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    let instance: any = null
-    try {
-      instance = glightbox({
-        selector: `[data-glightbox-gallery="${galleryId}"]`,
-        openEffect: 'fade',
-        closeEffect: 'fade',
-      })
-    } catch (e) {
-      console.error('Failed to init glightbox', e)
-    }
+    let instance: { destroy?: () => void } | null = null
+
+    void import('glightbox').then(({ default: glightbox }) => {
+      try {
+        instance = glightbox({
+          selector: `[data-glightbox-gallery="${galleryId}"]`,
+          openEffect: 'fade',
+          closeEffect: 'fade',
+        })
+      } catch (e) {
+        console.error('Failed to init glightbox', e)
+      }
+    })
+
     return () => {
       try {
         instance?.destroy?.()

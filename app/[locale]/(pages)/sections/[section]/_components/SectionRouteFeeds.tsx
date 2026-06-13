@@ -1,4 +1,5 @@
 import Feeds from '../../../home/components/Feeds'
+import { t } from '@/lib/translations'
 import { parseHasImages, parseNumber, parseSort } from '@/lib/sections/filterSummary'
 
 type PageSearchParams = Record<string, string | string[] | undefined>
@@ -12,10 +13,12 @@ export default async function SectionRouteFeeds({
   searchParams,
   sectionSlug,
   uiLocale,
+  sectionName,
 }: {
   searchParams: Promise<PageSearchParams | undefined>
   sectionSlug: string
   uiLocale: 'ar' | 'en'
+  sectionName: string
 }) {
   const sp = (await searchParams) ?? {}
   const pageNum = parseNumber(firstValue(sp.page))
@@ -28,6 +31,7 @@ export default async function SectionRouteFeeds({
 
   return (
     <Feeds
+      listingsHeading={t('seo.section.listings', uiLocale).replace('{{name}}', sectionName)}
       filters={{
         sectionSlug,
         q: q || undefined,

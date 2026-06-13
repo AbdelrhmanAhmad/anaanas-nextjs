@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import dynamic from 'next/dynamic'
 import { headers } from 'next/headers'
 import { Cairo, Inter } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
@@ -16,7 +15,7 @@ import logo from '@/assets/images/logo/logo500.png'
 
 import '@/assets/scss/style.scss'
 
-const AppProvidersWrapper = dynamic(() => import('@/components/wrappers/AppProvidersWrapper'))
+import AppProvidersWrapper from '@/components/wrappers/AppProvidersWrapper'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -178,6 +177,15 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
       suppressHydrationWarning
     >
       <head suppressHydrationWarning>
+        {/* Splash only when JS runs; bots and no-JS users see content immediately. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: 'document.documentElement.classList.add("js-splash")',
+          }}
+        />
+        <noscript>
+          <style>{`#splash-screen{display:none!important;visibility:hidden!important;pointer-events:none!important}`}</style>
+        </noscript>
         {/* Blocking load: locale CSS (RTL/LTR tweaks, container, etc.) must apply reliably — async print→all can miss onLoad when cached. */}
         <link rel="stylesheet" href={localeStylesheet} />
       </head>

@@ -50,6 +50,7 @@ type Copy = {
   loading: string
   resultsCountOne: string
   resultsCountMany: (n: number) => string
+  resultsHeading: string
   searchingFor: (q: string) => string
   allSections: string
   allCategories: string
@@ -84,6 +85,7 @@ const COPY: Record<SupportedLocale, Copy> = {
     loading: 'جاري التحميل...',
     resultsCountOne: 'نتيجة واحدة',
     resultsCountMany: (n: number) => `${n} نتيجة`,
+    resultsHeading: 'نتائج البحث',
     searchingFor: (q: string) => `نتائج البحث عن «${q}»`,
     allSections: 'كل الأقسام',
     allCategories: 'كل الفئات',
@@ -116,6 +118,7 @@ const COPY: Record<SupportedLocale, Copy> = {
     loading: 'Loading...',
     resultsCountOne: '1 result',
     resultsCountMany: (n: number) => `${n} results`,
+    resultsHeading: 'Search results',
     searchingFor: (q: string) => `Search results for “${q}”`,
     allSections: 'All sections',
     allCategories: 'All categories',
@@ -700,7 +703,10 @@ const SearchClient = ({ locale, sections }: Props) => {
         </div>
 
         {/* ---------- Results ---------- */}
-        <div className={styles.resultsStack}>
+        <section className={styles.resultsStack} aria-labelledby="search-results-heading">
+          <h2 id="search-results-heading" className="visually-hidden">
+            {searchedQuery ? copy.searchingFor(searchedQuery) : copy.resultsHeading}
+          </h2>
           {showResultsSkeleton ? (
             <>
               {Array.from({ length: 4 }).map((_, i) => (
@@ -744,7 +750,7 @@ const SearchClient = ({ locale, sections }: Props) => {
               ))}
             </AnimatePresence>
           )}
-        </div>
+        </section>
 
         {nextPageUrl && !loading && (
           <div className={styles.loadMoreWrap}>

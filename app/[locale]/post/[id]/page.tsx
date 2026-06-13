@@ -467,9 +467,9 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
                   <aside className={styles.asideSticky} aria-label={safeLocale === 'ar' ? 'الجانب' : 'Sidebar'}>
                     <Card className={styles.contactCard}>
                       <div className={`card-body ${styles.contactBody}`}>
-                        <div className={styles.contactTitle}>
+                        <h2 className={styles.contactTitle}>
                           {safeLocale === 'ar' ? 'معلومات المعلن' : 'Publisher'}
-                        </div>
+                        </h2>
                         <div className={styles.contactName}>{userName}</div>
                         <div className={styles.contactGrid}>
                           <div className={styles.contactItem}>
@@ -492,7 +492,7 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ lo
                       </div>
                     </Card>
 
-                    <div className={`${styles.sidebarTitle} d-none d-lg-block`}>{t('post.similarTitle', safeLocale)}</div>
+                    <h2 className={`${styles.sidebarTitle} d-none d-lg-block`}>{t('post.similarTitle', safeLocale)}</h2>
                     {similarPosts.length === 0 ? (
                       <p className={`${styles.emptyRelated} d-none d-lg-block mb-0`}>{t('post.noSimilar', safeLocale)}</p>
                     ) : (

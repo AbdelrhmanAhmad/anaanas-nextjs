@@ -574,6 +574,7 @@ function buildFiltersSearchParams(filters?: FeedsFilters) {
 const Feeds = async ({
   filters,
   useLoadMore,
+  listingsHeading,
 }: {
   filters?: FeedsFilters
   /**
@@ -582,6 +583,8 @@ const Feeds = async ({
    * - false: SEO pagination links (?page=2) rendered as crawlable links
    */
   useLoadMore?: boolean
+  /** Semantic h2 for the listings block (visually hidden; keeps outline for bots). */
+  listingsHeading?: string
 } = {}) => {
   const headersList = await headers()
   const locale = headersList.get('x-locale') ?? undefined
@@ -648,7 +651,12 @@ const Feeds = async ({
   })
   
   return (
-    <>
+    <section aria-labelledby={listingsHeading ? 'feed-listings-heading' : undefined}>
+      {listingsHeading ? (
+        <h2 id="feed-listings-heading" className="visually-hidden">
+          {listingsHeading}
+        </h2>
+      ) : null}
       {enableLoadMore ? (
         <PaginatedPosts
           initialPosts={posts}
@@ -770,7 +778,7 @@ const Feeds = async ({
           })()}
         </>
       )}
-    </>
+    </section>
   )
 }
 export default Feeds

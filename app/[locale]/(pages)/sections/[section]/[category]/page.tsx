@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { Col, Row } from 'react-bootstrap'
 
-import CreatePostCard from '@/components/cards/CreatePostCard'
+import CreatePostCardLazyClient from '../../../home/components/CreatePostCardLazyClient'
 import PostsFilterPanel from './PostsFilterPanel'
 import MobileFiltersModal from './MobileFiltersModal'
 import { fetchSectionBySlug } from '@/lib/api/sections'
@@ -153,7 +153,6 @@ const Section = async ({
 
       <ResultsSummaryBar
         locale={uiLocale}
-        heading={category.name}
         categoryName={category.name}
         trailing={
           <div className="d-lg-none w-100">
@@ -164,13 +163,14 @@ const Section = async ({
 
       <Row className="g-4">
         <Col md={12} lg={8} className="vstack gap-4">
-          <CreatePostCard />
+          <CreatePostCardLazyClient />
           <Suspense fallback={<SectionsResultsSkeleton />}>
             <CategoryRouteFeeds
               searchParams={searchParams}
               sectionSlug={sectionSlug}
               categorySlug={categorySlug}
               uiLocale={uiLocale}
+              categoryName={category.name}
             />
           </Suspense>
         </Col>

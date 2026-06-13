@@ -95,14 +95,14 @@ export default function CategoryHero({ locale, section, category, categoriesInSe
             )}
           </motion.div>
           <div className={styles.titleStack}>
-            <motion.span
+            <motion.h2
               className={styles.sectionKicker}
               initial={{ opacity: 0, x: locale === 'ar' ? 10 : -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1, duration: 0.3 }}
             >
               {section.name}
-            </motion.span>
+            </motion.h2>
             <motion.h1
               className={styles.title}
               initial={{ opacity: 0, y: 6 }}

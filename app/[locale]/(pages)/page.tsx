@@ -86,10 +86,11 @@ const Home = async ({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <FeedLayoutClient locale={locale} sidebar={<SideBar sections={sections} locale={locale} />}>
-        <Col md={8} lg={6} className=" gap-4" aria-label={uiLocale === 'ar' ? 'الصفحة الرئيسية' : 'Home feed'}>
+        <Col md={8} lg={6} className="gap-4">
           <h1 className="visually-hidden">
             {t('home.a11y.visuallyHiddenTitle', uiLocale).replace('{{country}}', countryLabel)}
           </h1>
+
           <HomeBanner locale={uiLocale} />
 
           {/* CreatePostCard before discovery row; mobile order: Banner, CreatePost, discovery, latest ads, feeds */}
@@ -111,6 +112,7 @@ const Home = async ({
 
           <div className="vstack mt-3 gap-4">
             <Feeds
+              listingsHeading={t('seo.home.feedListings', uiLocale)}
               filters={{
                 page: Number.isFinite(page as any) && (page as number) > 0 ? (page as number) : undefined,
                 basePath: `/${locale}`,
@@ -120,7 +122,7 @@ const Home = async ({
         </Col>
 
         <Col lg={3} md={3}>
-          <div className="vstack gap-4">
+          <aside className="vstack gap-4" aria-label={uiLocale === 'ar' ? 'رؤى السوق' : 'Market insights'}>
             <div className={sideStyles.sideStack}>
               <Suspense fallback={<HomeInsightsSkeleton />}>
                 <MarketPulseCard locale={uiLocale} />
@@ -210,7 +212,7 @@ const Home = async ({
               </CardBody>
             </Card>
           </div>
-        </div>
+        </aside>
       </Col>
     </FeedLayoutClient>
     </>

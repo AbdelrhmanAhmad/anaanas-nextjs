@@ -17,6 +17,8 @@ type Props = {
   locale: Locale
   /** Optional label above the bar (e.g. category name or filtered summary). */
   heading?: string
+  /** Semantic level for `heading` — default h2; use h1 only when no other page h1 exists. */
+  headingAs?: 'h1' | 'h2' | 'h3'
   /**
    * Subtitle next to the heading. Omit to derive from the current URL (recommended for filter navigations).
    * Pass an empty string to hide the subtitle.
@@ -30,7 +32,7 @@ type Props = {
 
 const SORTS: ReadonlyArray<SortKey> = ['newest', 'oldest', 'price_asc', 'price_desc']
 
-export default function ResultsSummaryBar({ locale, heading, subtitle, categoryName, trailing }: Props) {
+export default function ResultsSummaryBar({ locale, heading, headingAs = 'h2', subtitle, categoryName, trailing }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -77,6 +79,8 @@ export default function ResultsSummaryBar({ locale, heading, subtitle, categoryN
     [currentSort, pathname, router, searchParams],
   )
 
+  const HeadingTag = headingAs
+
   return (
     <motion.div
       className={styles.summaryBar}
@@ -85,7 +89,7 @@ export default function ResultsSummaryBar({ locale, heading, subtitle, categoryN
       transition={{ type: 'spring', stiffness: 360, damping: 28 }}
     >
       <div className={styles.summaryBarLeft}>
-        {heading && <div className={styles.summaryHeading}>{heading}</div>}
+        {heading ? <HeadingTag className={styles.summaryHeading}>{heading}</HeadingTag> : null}
         {resolvedSubtitle ? <div className={styles.summarySubtitle}>{resolvedSubtitle}</div> : null}
       </div>
       <div className={styles.summaryBarRight}>

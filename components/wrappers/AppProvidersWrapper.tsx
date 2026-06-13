@@ -1,75 +1,66 @@
 'use client'
-import {SessionProvider} from 'next-auth/react'
-import dynamic from 'next/dynamic'
-import {useEffect} from 'react'
-import {ToastContainer} from 'react-toastify'
 
-import {DEFAULT_PAGE_TITLE} from '@/context/constants'
-import {NotificationProvider} from '@/context/useNotificationContext'
-import type {ChildrenType} from '@/types/component'
-import {ChatProvider} from '@/context/useChatContext'
-import {AppDataProvider} from '@/context/AppDataContext'
-import {CurrentUserProvider} from '@/context/useCurrentUser'
+import { SessionProvider } from 'next-auth/react'
+import { useEffect } from 'react'
+import { ToastContainer } from 'react-toastify'
+
+import { NotificationProvider } from '@/context/useNotificationContext'
+import type { ChildrenType } from '@/types/component'
+import { ChatProvider } from '@/context/useChatContext'
+import { AppDataProvider } from '@/context/AppDataContext'
+import { CurrentUserProvider } from '@/context/useCurrentUser'
+import { LayoutProvider } from '@/context/useLayoutContext'
 import AutoLoginWrapper from './AutoLoginWrapper'
 import { EmailVerificationProvider } from '@/context/EmailVerificationProvider'
 import DirectionSync from '@/components/DirectionSync'
 import ScrollToTopOnRoute from '@/components/ScrollToTopOnRoute'
 
-const LayoutProvider = dynamic(() => import('@/context/useLayoutContext').then((mod) => mod.LayoutProvider), {ssr: false})
+const AppProvidersWrapper = ({ children }: ChildrenType) => {
+  useEffect(() => {
+    const splashElement = document.querySelector<HTMLDivElement>('#__next_splash')
+    const splashScreen = document.querySelector('#splash-screen')
 
-const AppProvidersWrapper = ({children}: ChildrenType) => {
-    const handleChangeTitle = () => {
-        if (document.visibilityState === 'hidden') document.title = 'اناناس بانتظار عودتك 🥺'
-        else document.title = DEFAULT_PAGE_TITLE
+    if (!splashElement || !splashScreen) return
+
+    const handleMutations = (mutationsList: MutationRecord[]) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList' && splashElement.hasChildNodes()) {
+          splashScreen.classList.add('remove')
+        }
+      }
+    }
+    const observer = new MutationObserver(handleMutations)
+    observer.observe(splashElement, { childList: true, subtree: true })
+    if (splashElement.hasChildNodes()) {
+      splashScreen.classList.add('remove')
     }
 
-    useEffect(() => {
-        const splashElement = document.querySelector<HTMLDivElement>('#__next_splash')
-        const splashScreen = document.querySelector('#splash-screen')
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
-        if (!splashElement || !splashScreen) return
-
-        const handleMutations = (mutationsList: MutationRecord[]) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'childList' && splashElement.hasChildNodes()) {
-                    splashScreen.classList.add('remove')
-                }
-            }
-        }
-        const observer = new MutationObserver(handleMutations)
-        observer.observe(splashElement, {childList: true, subtree: true})
-        if (splashElement.hasChildNodes()) {
-            splashScreen.classList.add('remove')
-        }
-
-        document.addEventListener('visibilitychange', handleChangeTitle)
-        return () => {
-            observer.disconnect()
-            document.removeEventListener('visibilitychange', handleChangeTitle)
-        }
-    }, [])
-
-    return (
-        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
-            <DirectionSync />
-            <ScrollToTopOnRoute />
-            <AutoLoginWrapper>
-                <EmailVerificationProvider>
-                <CurrentUserProvider>
-                <AppDataProvider>
-            <LayoutProvider>
+  return (
+    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
+      <DirectionSync />
+      <ScrollToTopOnRoute />
+      <AutoLoginWrapper>
+        <EmailVerificationProvider>
+          <CurrentUserProvider>
+            <AppDataProvider>
+              <LayoutProvider>
                 <ChatProvider>
-                    <NotificationProvider>
-                        {children}
-                        <ToastContainer theme="colored"/>
-                    </NotificationProvider>
+                  <NotificationProvider>
+                    {children}
+                    <ToastContainer theme="colored" />
+                  </NotificationProvider>
                 </ChatProvider>
-            </LayoutProvider>
-                </AppDataProvider>
-                </CurrentUserProvider>
-                </EmailVerificationProvider>
-            </AutoLoginWrapper>
-        </SessionProvider>
-    )
+              </LayoutProvider>
+            </AppDataProvider>
+          </CurrentUserProvider>
+        </EmailVerificationProvider>
+      </AutoLoginWrapper>
+    </SessionProvider>
+  )
 }
 export default AppProvidersWrapper

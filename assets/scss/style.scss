@@ -37,13 +37,14 @@
 @import "custom/auth";
 
 // =========================================================================
-// Splash screen — cinematic, brand-aligned, server-rendered (no JS needed)
+// Splash screen — shown only when JS is available (html.js-splash).
+// Hidden for bots (not rendered) and no-JS users (CSS default + noscript).
 // =========================================================================
 
 #splash-screen {
   position: fixed;
   inset: 0;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -51,6 +52,8 @@
   overflow: hidden;
   z-index: 9999;
   isolation: isolate;
+  pointer-events: none;
+  visibility: hidden;
 
   background:
     radial-gradient(1200px 900px at 50% -10%, #FFF3DC 0%, rgba(255, 243, 220, 0) 60%),
@@ -64,18 +67,30 @@
     transform .9s cubic-bezier(.22,.61,.36,1),
     visibility 0s linear .9s;
 
-  &.remove {
-    opacity: 0;
-    filter: blur(16px);
-    transform: scale(1.05);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     transition: opacity .3s ease;
     &.remove { filter: none; transform: none; }
   }
+}
+
+html.js-splash #splash-screen {
+  display: flex;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+html.js-splash #splash-screen.remove {
+  opacity: 0;
+  filter: blur(16px);
+  transform: scale(1.05);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-indexing-bot='1'] #splash-screen {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 // Slowly shifting aurora gradient overlay

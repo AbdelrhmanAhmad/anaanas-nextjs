@@ -1133,11 +1133,11 @@ const PostCard = ({ post, banner, attributesAndOptions, onDelete: onDeleteCallba
           </div>
         )}
         {!isDetailsPage && title && (
-          <h6 className={styles.title}>
+          <h3 className={styles.title}>
             <Link href={postDetailsHref} className="text-decoration-none text-reset">
               {title}
             </Link>
-          </h6>
+          </h3>
         )}
         {normalizedCaption && (
           <p className={clsx(styles.caption, isDetailsPage && styles.captionDetails)}>

@@ -12,6 +12,7 @@ import { resolveMediaUrl } from '@/lib/media/resolveMediaUrl'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Mousewheel } from 'swiper/modules'
 import FollowToggleButton from '@/components/follows/FollowToggleButton'
+import { t } from '@/lib/translations'
 import styles from './Hero.module.css'
 import 'swiper/css'
 import 'swiper/css/free-mode'
@@ -83,6 +84,7 @@ const Hero = () => {
         </div>
       </div>
       <div className={styles.categoriesSection}>
+        <h2 className="visually-hidden">{t('seo.section.categories', localeParam === 'en' ? 'en' : 'ar')}</h2>
         <Row className="position-relative g-0">
           <Col xs={12}>
             <div className={styles.categoriesWrapper}>

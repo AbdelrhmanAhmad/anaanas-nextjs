@@ -199,7 +199,7 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
 
         <header className={styles.panelHeader}>
           <div className={styles.header}>
-            <h2 className={styles.title}>
+            <h2 id="sidebar-sections-heading" className={styles.title}>
               <span className={styles.liveDot} aria-hidden />
               {t('sidebar.panelTitle', currentLocale)}
             </h2>
@@ -213,7 +213,7 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
           <p className={styles.panelHint}>{t('sidebar.panelHint', currentLocale)}</p>
         </header>
 
-        <nav className={styles.nav} aria-label={t('sidebar.panelTitle', currentLocale)}>
+        <nav className={styles.nav} aria-labelledby="sidebar-sections-heading">
           <Link
             href={homeHref}
             className={clsx(styles.homeLink, { [styles.homeLinkActive]: isHomeActive })}
@@ -231,6 +231,7 @@ const SideBar = ({ sections, locale: localeProp }: SideBarProps) => {
             </p>
           ) : (
             <div className={styles.menuListScroll}>
+              <h3 className="visually-hidden">{t('seo.sidebar.sectionsMap', currentLocale)}</h3>
               <ul className={styles.menuList}>
               {sections.map((section) => {
                 const active =

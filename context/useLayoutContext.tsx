@@ -1,4 +1,6 @@
-import { createContext, use, useMemo, useState } from 'react'
+'use client'
+
+import { createContext, use, useEffect, useMemo, useState } from 'react'
 
 import type { ChildrenType } from '@/types/component'
 import { toggleDocumentAttribute } from '@/utils/layout'
@@ -18,35 +20,35 @@ const storageThemeKey = 'SOCIAL_NEXTJS_THEME_KEY'
 
 const themeAttributeKey = 'data-bs-theme'
 
+const DEFAULT_THEME: ThemeType = 'light'
+
+function resolveThemeFromStorage(): ThemeType {
+  const foundTheme = localStorage.getItem(storageThemeKey)
+  const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+
+  if (foundTheme) {
+    if (foundTheme === 'auto') return preferredTheme
+    return foundTheme as ThemeType
+  }
+
+  localStorage.setItem(storageThemeKey, preferredTheme)
+  return preferredTheme
+}
+
 const LayoutProvider = ({ children }: ChildrenType) => {
-  const getSavedTheme = (): LayoutState['theme'] => {
-    const foundTheme = localStorage.getItem(storageThemeKey)
-
-    const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-
-    if (foundTheme) {
-      if (foundTheme === 'auto') {
-        toggleDocumentAttribute(themeAttributeKey, preferredTheme)
-        return preferredTheme
-      }
-      toggleDocumentAttribute(themeAttributeKey, foundTheme)
-      return foundTheme as ThemeType
-    }
-    if (!foundTheme) localStorage.setItem(storageThemeKey, preferredTheme)
-    return preferredTheme
-  }
-
-  const INIT_STATE: LayoutState = {
-    theme: getSavedTheme(),
-  }
-
-  const [settings, setSettings] = useState<LayoutState>(INIT_STATE)
+  const [settings, setSettings] = useState<LayoutState>({ theme: DEFAULT_THEME })
 
   const [offcanvasStates, setOffcanvasStates] = useState<LayoutOffcanvasStatesType>({
     showMobileMenu: false,
     showMessagingOffcanvas: false,
     showStartOffcanvas: false,
   })
+
+  useEffect(() => {
+    const theme = resolveThemeFromStorage()
+    toggleDocumentAttribute(themeAttributeKey, theme)
+    setSettings({ theme })
+  }, [])
 
   const updateSettings = (_newSettings: Partial<LayoutState>) => setSettings({ ...settings, ..._newSettings })
 

@@ -16,6 +16,12 @@ type TranslationKey =
   | 'home.seo.regionFallback'
   | 'home.seo.keywords'
   | 'home.a11y.visuallyHiddenTitle'
+  | 'seo.home.feedListings'
+  | 'seo.section.categories'
+  | 'seo.section.listings'
+  | 'seo.category.listings'
+  | 'seo.search.results'
+  | 'seo.sidebar.sectionsMap'
   | 'home.marketPulse'
   | 'home.marketPulseEmpty'
   | 'home.marketPulseGrowth'
@@ -661,6 +667,12 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.seo.keywords':
       'أناناس، إعلانات مبوبة، تسويق رقمي، تجارة إلكترونية، سوق، {{country}}، منشورات، بيع، شراء',
     'home.a11y.visuallyHiddenTitle': 'الصفحة الرئيسية — منصة أناناس في {{country}}',
+    'seo.home.feedListings': 'آخر المنشورات والإعلانات',
+    'seo.section.categories': 'فئات القسم',
+    'seo.section.listings': 'منشورات {{name}}',
+    'seo.category.listings': 'منشورات {{name}}',
+    'seo.search.results': 'نتائج البحث',
+    'seo.sidebar.sectionsMap': 'خريطة أقسام الموقع',
     'home.marketPulse': 'نبض السوق',
     'home.marketPulseEmpty': 'لا توجد أقسام بزيادة واضحة (+1٪) خلال آخر 30 يوماً مقارنة بالـ 30 يوماً السابقة.',
     'home.marketPulseGrowth': 'نمو',
@@ -1312,6 +1324,12 @@ const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
     'home.seo.keywords':
       'ANANAS, classifieds, digital ads, e-commerce, marketplace, {{country}}, listings, buy, sell',
     'home.a11y.visuallyHiddenTitle': 'Home — ANANAS in {{country}}',
+    'seo.home.feedListings': 'Latest listings and posts',
+    'seo.section.categories': 'Section categories',
+    'seo.section.listings': '{{name}} listings',
+    'seo.category.listings': '{{name}} listings',
+    'seo.search.results': 'Search results',
+    'seo.sidebar.sectionsMap': 'Site section map',
     'home.marketPulse': 'Market Pulse',
     'home.marketPulseEmpty': 'No sections with at least +1% growth in the last 30 days vs the previous 30 days.',
     'home.marketPulseGrowth': 'Growth',
