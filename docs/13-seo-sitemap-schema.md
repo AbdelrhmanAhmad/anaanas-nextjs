@@ -68,7 +68,27 @@ GET /api/sitemap/posts?country_iso2=jo&page=1
 php artisan sitemap:generate
 ```
 
-مجدول يومياً **02:30** — cache في `storage/app/sitemap-cache/{iso2}/`
+الملفات تُكتب إلى: `storage/app/sitemap-cache/{iso2}/`  
+(وليس `storage/app/` مباشرة)
+
+مجدول يومياً **02:30**.
+
+### اختبار الـ sitemaps
+
+**يجب فتح sitemaps على نطاق الدولة:**
+```
+https://jo.anaanas.com/sitemap.xml
+https://jo.anaanas.com/sitemap-posts.xml
+```
+
+وليس على apex فقط — `sitemap-posts.xml` على apex بدون subdomain يكون فارغاً عمداً.
+
+**متغيرات بيئة الفرونت (إنتاج):**
+```
+NEXT_PUBLIC_API_BASE_URL=https://api.anaanas.com
+NEXT_PUBLIC_BASE_DOMAIN=anaanas.com
+NEXT_PUBLIC_SITE_URL=https://anaanas.com
+```
 
 ---
 

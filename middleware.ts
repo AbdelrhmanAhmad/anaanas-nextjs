@@ -85,6 +85,12 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/robots") ||
     pathname.startsWith("/sitemap")
   ) {
+    const hostCtx = parseHost(req.headers.get("host"));
+    if (hostCtx.hasCountrySubdomain && hostCtx.countrySubdomain) {
+      const res = NextResponse.next();
+      res.headers.set("x-country", hostCtx.countrySubdomain);
+      return res;
+    }
     return NextResponse.next();
   }
 

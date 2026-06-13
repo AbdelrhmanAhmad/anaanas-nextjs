@@ -24,14 +24,20 @@ type SitemapPostRow = {
 }
 
 async function fetchJson<T>(path: string): Promise<T | null> {
+  const url = getApiUrl(path)
   try {
-    const res = await fetch(getApiUrl(path), {
+    const res = await fetch(url, {
       headers: { Accept: 'application/json' },
+      cache: 'no-store',
       next: { revalidate: REVALIDATE_SECONDS },
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      console.error(`[sitemap] API ${res.status} for ${url}`)
+      return null
+    }
     return (await res.json()) as T
-  } catch {
+  } catch (error) {
+    console.error(`[sitemap] fetch failed for ${url}`, error)
     return null
   }
 }

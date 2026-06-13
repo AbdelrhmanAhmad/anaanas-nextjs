@@ -25,6 +25,10 @@ export function xmlResponse(body: string): Response {
 
 export async function resolveCountryIso2FromRequest(): Promise<string | null> {
   const headersList = await headers()
+
+  const fromHeader = headersList.get('x-country')?.trim().toLowerCase()
+  if (fromHeader) return fromHeader
+
   const host = headersList.get('x-forwarded-host') || headersList.get('host')
   const hostInfo = parseHost(host)
 
@@ -144,18 +148,39 @@ export async function buildTenantSitemapIndex(origin: string): Promise<string> {
   return buildSitemapIndexXml(entries)
 }
 
+function resolveSitemapBaseDomain(): string | null {
+  const fromEnv = getBaseDomainFromEnv()
+  if (fromEnv) return fromEnv
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (!siteUrl) return null
+
+  try {
+    const host = new URL(siteUrl).hostname.toLowerCase()
+    return host.replace(/^www\./, '')
+  } catch {
+    return null
+  }
+}
+
 export async function buildCountriesSitemapIndex(origin: string): Promise<string> {
   const countries = await fetchSitemapCountries()
-  const baseDomain = getBaseDomainFromEnv()
+  const baseDomain = resolveSitemapBaseDomain()
   const entries: SitemapUrlEntry[] = []
 
   for (const country of countries) {
     const iso2 = country.iso2?.toLowerCase()
     if (!iso2) continue
 
-    const tenantOrigin = baseDomain
-      ? `${new URL(origin).protocol}//${iso2}.${baseDomain}`
-      : origin
+    let tenantOrigin = origin
+    if (baseDomain) {
+      try {
+        const proto = new URL(origin).protocol
+        tenantOrigin = `${proto}//${iso2}.${baseDomain}`
+      } catch {
+        tenantOrigin = origin
+      }
+    }
 
     entries.push({
       loc: `${tenantOrigin}/sitemap.xml`,
