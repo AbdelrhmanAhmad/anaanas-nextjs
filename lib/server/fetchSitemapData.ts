@@ -61,6 +61,36 @@ export async function fetchSitemapCities(countryIso2: string): Promise<SitemapCi
   return json?.success && Array.isArray(json.data) ? json.data : []
 }
 
+export async function fetchSitemapPostsMeta(
+  countryIso2: string,
+): Promise<{ last_page: number; total: number; per_page: number } | null> {
+  const json = await fetchJson<{
+    success?: boolean
+    meta?: { last_page?: number; total?: number; per_page?: number }
+  }>(`/api/sitemap/posts?country_iso2=${encodeURIComponent(countryIso2)}&page=1&per_page=1000`)
+
+  if (!json?.success || !json.meta) return null
+
+  return {
+    last_page: json.meta.last_page ?? 1,
+    total: json.meta.total ?? 0,
+    per_page: json.meta.per_page ?? 1000,
+  }
+}
+
+export async function fetchSitemapPostsPage(
+  countryIso2: string,
+  page: number,
+): Promise<SitemapPostRow[]> {
+  const json = await fetchJson<{
+    success?: boolean
+    data?: SitemapPostRow[]
+  }>(
+    `/api/sitemap/posts?country_iso2=${encodeURIComponent(countryIso2)}&page=${page}&per_page=1000`,
+  )
+  return json?.success && Array.isArray(json.data) ? json.data : []
+}
+
 export async function fetchAllSitemapPosts(countryIso2: string): Promise<SitemapPostRow[]> {
   const all: SitemapPostRow[] = []
   let page = 1

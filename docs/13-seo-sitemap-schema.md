@@ -43,15 +43,17 @@
 
 | URL | المحتوى |
 |-----|---------|
-| `/sitemap.xml` | فهرس → 4 sitemaps فرعية |
-| `/sitemap-static.xml` | الرئيسية، select-country، contact |
-| `/sitemap-sections.xml` | أقسام + فئات |
-| `/sitemap-cities.xml` | `?city_id=` لأقسام بها منشورات |
-| `/sitemap-posts.xml` | منشورات `active` فقط |
+| `/sitemap.xml` | فهرس → static + sections + cities + **posts-1..N** |
+| `/sitemap-posts-1.xml` … `/sitemap-posts-N.xml` | منشورات (1000/API صفحة × لغتين) |
 
-### على apex
+### على apex `anaanas.com`
 
-`/sitemap.xml` → فهرس يشير إلى `https://{iso}.anaanas.com/sitemap.xml`
+`/sitemap.xml` → فهرس يشير إلى:
+```
+https://jo.anaanas.com/sitemap.xml
+https://eg.anaanas.com/sitemap.xml
+…
+```
 
 ### Backend API
 

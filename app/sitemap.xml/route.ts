@@ -24,6 +24,10 @@ export async function GET() {
 
   const countryIso2 = await resolveCountryIso2FromRequest()
   const tenantOrigin = buildTenantOrigin(origin, countryIso2)
-  const body = await buildTenantSitemapIndex(tenantOrigin)
+  if (!countryIso2) {
+    const body = await buildTenantSitemapIndex(tenantOrigin, '')
+    return xmlResponse(body)
+  }
+  const body = await buildTenantSitemapIndex(tenantOrigin, countryIso2)
   return xmlResponse(body)
 }

@@ -4,9 +4,10 @@ import { getBaseDomainFromEnv, parseHost } from '@/lib/domain'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/localization'
 import { resolveCountryIdFromHeaders } from '@/lib/server/resolveCountryIdFromHeaders'
 import {
-  fetchAllSitemapPosts,
   fetchSitemapCities,
   fetchSitemapCountries,
+  fetchSitemapPostsMeta,
+  fetchSitemapPostsPage,
   fetchSitemapSections,
 } from '@/lib/server/fetchSitemapData'
 import { resolveSeoOrigin } from '@/lib/seo/resolveSeoOrigin'
@@ -122,8 +123,12 @@ export async function buildCitiesSitemapUrls(
   return urls
 }
 
-export async function buildPostsSitemapUrls(origin: string, countryIso2: string): Promise<SitemapUrlEntry[]> {
-  const posts = await fetchAllSitemapPosts(countryIso2)
+export async function buildPostsSitemapUrlsForPage(
+  origin: string,
+  countryIso2: string,
+  page: number,
+): Promise<SitemapUrlEntry[]> {
+  const posts = await fetchSitemapPostsPage(countryIso2, page)
   const urls: SitemapUrlEntry[] = []
 
   for (const locale of SUPPORTED_LOCALES) {
@@ -138,49 +143,85 @@ export async function buildPostsSitemapUrls(origin: string, countryIso2: string)
   return urls
 }
 
-export async function buildTenantSitemapIndex(origin: string): Promise<string> {
+/** @deprecated Use buildPostsSitemapUrlsForPage per page. */
+export async function buildPostsSitemapUrls(origin: string, countryIso2: string): Promise<SitemapUrlEntry[]> {
+  const meta = await fetchSitemapPostsMeta(countryIso2)
+  const lastPage = meta?.last_page ?? 1
+  const all: SitemapUrlEntry[] = []
+
+  for (let page = 1; page <= lastPage; page += 1) {
+    const chunk = await buildPostsSitemapUrlsForPage(origin, countryIso2, page)
+    all.push(...chunk)
+  }
+
+  return all
+}
+
+export async function buildTenantSitemapIndex(origin: string, countryIso2: string): Promise<string> {
   const entries: SitemapUrlEntry[] = [
     { loc: `${origin}/sitemap-static.xml` },
     { loc: `${origin}/sitemap-sections.xml` },
     { loc: `${origin}/sitemap-cities.xml` },
-    { loc: `${origin}/sitemap-posts.xml` },
   ]
+
+  if (!countryIso2) {
+    return buildSitemapIndexXml(entries)
+  }
+
+  const meta = await fetchSitemapPostsMeta(countryIso2)
+  const lastPage = Math.max(1, meta?.last_page ?? 1)
+
+  for (let page = 1; page <= lastPage; page += 1) {
+    entries.push({ loc: `${origin}/sitemap-posts-${page}.xml` })
+  }
+
   return buildSitemapIndexXml(entries)
 }
 
-function resolveSitemapBaseDomain(): string | null {
+function resolveSitemapBaseDomain(origin: string): string | null {
   const fromEnv = getBaseDomainFromEnv()
   if (fromEnv) return fromEnv
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (!siteUrl) return null
+  if (siteUrl) {
+    try {
+      const host = new URL(siteUrl).hostname.toLowerCase().replace(/^www\./, '')
+      return host || null
+    } catch {
+      // fall through
+    }
+  }
 
   try {
-    const host = new URL(siteUrl).hostname.toLowerCase()
-    return host.replace(/^www\./, '')
+    const host = new URL(origin).hostname.toLowerCase().replace(/^www\./, '')
+    const labels = host.split('.').filter(Boolean)
+    if (labels.length >= 2) {
+      return labels.slice(-2).join('.')
+    }
   } catch {
     return null
   }
+
+  return null
 }
 
 export async function buildCountriesSitemapIndex(origin: string): Promise<string> {
   const countries = await fetchSitemapCountries()
-  const baseDomain = resolveSitemapBaseDomain()
+  const baseDomain = resolveSitemapBaseDomain(origin)
   const entries: SitemapUrlEntry[] = []
+
+  let proto = 'https'
+  try {
+    proto = new URL(origin).protocol
+  } catch {
+    proto = 'https:'
+  }
 
   for (const country of countries) {
     const iso2 = country.iso2?.toLowerCase()
     if (!iso2) continue
 
-    let tenantOrigin = origin
-    if (baseDomain) {
-      try {
-        const proto = new URL(origin).protocol
-        tenantOrigin = `${proto}//${iso2}.${baseDomain}`
-      } catch {
-        tenantOrigin = origin
-      }
-    }
+    const tenantOrigin = baseDomain ? `${proto}//${iso2}.${baseDomain}` : origin
 
     entries.push({
       loc: `${tenantOrigin}/sitemap.xml`,

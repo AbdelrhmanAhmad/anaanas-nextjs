@@ -53,6 +53,14 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return [
+            {
+                source: '/sitemap-posts-:page(\\d+).xml',
+                destination: '/sitemap-posts-page/:page',
+            },
+        ]
+    },
     async headers() {
         return [
             {
